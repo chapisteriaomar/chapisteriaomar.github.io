@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapistería Omar Solutions | PDR y Granizo</title>
+<meta name="description" content="Chapistería Omar Solutions: desabollado sin pintura (PDR), reparación de granizo y operativos móviles para aseguradoras, flotas y concesionarias en Argentina y el exterior.">
+<meta name="theme-color" content="#0b0b0c">
+<link rel="canonical" href="https://chapisteriaomar.com/">
+<meta property="og:title" content="Chapistería Omar Solutions | PDR y Granizo">
+<meta property="og:description" content="Desabollado sin pintura y operativos de granizo a escala para compañías.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://chapisteriaomar.com/">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,500;0,700;0,800;1,700;1,800&family=Archivo:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<header class="nav" id="nav">
+  <a href="#top" class="nav-logo" aria-label="Chapistería Omar Solutions"><img src="assets/logo-chico.svg" alt="Chapistería Omar Solutions"></a>
+  <nav class="nav-links" id="navLinks">
+    <a href="#about" data-i18n="nav.about">Empresa</a>
+    <a href="#services" data-i18n="nav.services">Servicios</a>
+    <a href="#process" data-i18n="nav.process">Operativos</a>
+    <a href="#work" data-i18n="nav.work">Trabajos</a>
+    <a href="#map" data-i18n="nav.map">Mapa</a>
+    <a href="#contact" data-i18n="nav.contact">Contacto</a>
+  </nav>
+  <div class="nav-right">
+    <div class="lang" role="group" aria-label="Idioma">
+      <button data-lang="es" class="on">ES</button><button data-lang="en">EN</button>
+    </div>
+    <a href="#contact" class="btn btn-red btn-sm hide-sm" data-i18n="cta.request">Solicitar operativo</a>
+    <button class="burger" id="burger" aria-label="Menú"><span></span><span></span></button>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero" id="top">
+  <canvas id="reflect" aria-hidden="true"></canvas>
+  <div class="hero-shade"></div>
+  <div class="wrap hero-inner">
+    <p class="kicker"><span class="dot"></span><span data-i18n="hero.kicker">PDR · Granizo · Operativos móviles</span></p>
+    <h1 class="hero-title">
+      <span class="l1" data-i18n="hero.t1">Devolvemos</span>
+      <span class="l2" data-i18n="hero.t2">la forma.</span>
+      <span class="l3" data-i18n="hero.t3">Conservamos el original.</span>
+    </h1>
+    <p class="hero-sub" data-i18n="hero.sub">Reparación de abolladuras sin pintura a escala para aseguradoras, flotas y concesionarias.</p>
+    <div class="hero-ctas">
+      <a href="#contact" class="btn btn-red" data-i18n="cta.request">Solicitar operativo</a>
+      <a href="#work" class="btn btn-ghost" data-i18n="hero.cta2">Ver trabajos</a>
+    </div>
+  </div>
+  <div class="hero-stats wrap" id="heroStats"></div>
+  <img src="assets/pdr.svg" alt="PDR" class="hero-pdr">
+</section>
+
+<div class="ticker" aria-hidden="true"><div class="ticker-track" id="ticker"></div></div>
+
+<!-- ============ ABOUT ============ -->
+<section class="sec" id="about">
+  <div class="wrap about">
+    <div class="about-media reveal">
+      <div class="about-frame">
+        <img src="assets/logo-grande.svg" alt="Chapistería Omar Solutions" class="about-logo">
+      </div>
+      <div class="about-img" id="aboutImg"></div>
+    </div>
+    <div class="about-text reveal">
+      <p class="kicker" data-i18n="about.kicker">La empresa</p>
+      <h2 class="h2" data-i18n="about.title">Un taller con historia. Una división que se mueve.</h2>
+      <p data-i18n="about.p1"></p>
+      <p data-i18n="about.p2"></p>
+      <div class="feats">
+        <div class="feat"><b data-i18n="about.f1t"></b><span data-i18n="about.f1d"></span></div>
+        <div class="feat"><b data-i18n="about.f2t"></b><span data-i18n="about.f2d"></span></div>
+        <div class="feat"><b data-i18n="about.f3t"></b><span data-i18n="about.f3d"></span></div>
+        <div class="feat"><b data-i18n="about.f4t"></b><span data-i18n="about.f4d"></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SERVICES ============ -->
+<section class="sec sec-alt" id="services">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="kicker" data-i18n="svc.kicker">Servicios</p>
+      <h2 class="h2" data-i18n="svc.title">Lo que resolvemos</h2>
+    </div>
+    <div class="svc-grid">
+      <article class="svc reveal"><span class="svc-n">01</span><svg viewBox="0 0 48 48" class="ico"><circle cx="12" cy="14" r="3"/><circle cx="26" cy="10" r="3"/><circle cx="38" cy="18" r="3"/><circle cx="18" cy="26" r="3"/><circle cx="32" cy="30" r="3"/><path d="M4 42h40"/></svg><h3 data-i18n="svc.1t"></h3><p data-i18n="svc.1d"></p></article>
+      <article class="svc reveal"><span class="svc-n">02</span><svg viewBox="0 0 48 48" class="ico"><path d="M4 40L24 8l20 32z"/><path d="M18 40V28h12v12"/></svg><h3 data-i18n="svc.2t"></h3><p data-i18n="svc.2d"></p></article>
+      <article class="svc reveal"><span class="svc-n">03</span><svg viewBox="0 0 48 48" class="ico"><path d="M4 16h40M4 24c10 0 12 6 20 6s10-6 20-6M4 32h40"/></svg><h3 data-i18n="svc.3t"></h3><p data-i18n="svc.3d"></p></article>
+      <article class="svc reveal"><span class="svc-n">04</span><svg viewBox="0 0 48 48" class="ico"><rect x="4" y="20" width="18" height="12" rx="2"/><rect x="26" y="20" width="18" height="12" rx="2"/><path d="M8 32v4M18 32v4M30 32v4M40 32v4M8 20l3-6h4l3 6M30 20l3-6h4l3 6"/></svg><h3 data-i18n="svc.4t"></h3><p data-i18n="svc.4d"></p></article>
+      <article class="svc reveal"><span class="svc-n">05</span><svg viewBox="0 0 48 48" class="ico"><rect x="10" y="6" width="28" height="36" rx="2"/><path d="M16 16h16M16 24h16M16 32h9"/></svg><h3 data-i18n="svc.5t"></h3><p data-i18n="svc.5d"></p></article>
+      <article class="svc reveal"><span class="svc-n">06</span><svg viewBox="0 0 48 48" class="ico"><path d="M30 6l12 12-20 20H10V26z"/><path d="M26 10l12 12"/></svg><h3 data-i18n="svc.6t"></h3><p data-i18n="svc.6d"></p></article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PROCESS ============ -->
+<section class="sec" id="process">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="kicker" data-i18n="proc.kicker">Para compañías</p>
+      <h2 class="h2" data-i18n="proc.title">Cómo funciona un operativo</h2>
+    </div>
+    <ol class="steps">
+      <li class="reveal"><span class="step-n">1</span><h4 data-i18n="proc.1t"></h4><p data-i18n="proc.1d"></p></li>
+      <li class="reveal"><span class="step-n">2</span><h4 data-i18n="proc.2t"></h4><p data-i18n="proc.2d"></p></li>
+      <li class="reveal"><span class="step-n">3</span><h4 data-i18n="proc.3t"></h4><p data-i18n="proc.3d"></p></li>
+      <li class="reveal"><span class="step-n">4</span><h4 data-i18n="proc.4t"></h4><p data-i18n="proc.4d"></p></li>
+      <li class="reveal"><span class="step-n">5</span><h4 data-i18n="proc.5t"></h4><p data-i18n="proc.5d"></p></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============ WORK ============ -->
+<section class="sec sec-alt" id="work">
+  <div class="wrap">
+    <div class="sec-head row reveal">
+      <div>
+        <p class="kicker" data-i18n="work.kicker">Portfolio</p>
+        <h2 class="h2" data-i18n="work.title">Trabajos reales</h2>
+        <p class="muted" data-i18n="work.sub"></p>
+      </div>
+      <div class="filters" id="filters">
+        <button class="on" data-f="all" data-i18n="work.all">Todos</button>
+        <button data-f="granizo" data-i18n="work.hail">Granizo</button>
+        <button data-f="pdr" data-i18n="work.pdr">PDR</button>
+        <button data-f="ba" data-i18n="work.ba">Antes / Después</button>
+        <button data-f="taller" data-i18n="work.shop">Taller</button>
+      </div>
+    </div>
+    <div class="grid-work" id="workGrid"></div>
+    <p class="empty" id="workEmpty" data-i18n="work.empty"></p>
+  </div>
+</section>
+
+<!-- ============ MAP ============ -->
+<section class="sec" id="map">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="kicker" data-i18n="map.kicker">Presencia</p>
+      <h2 class="h2" data-i18n="map.title">Donde estuvimos</h2>
+      <p class="muted" data-i18n="map.sub"></p>
+    </div>
+    <div class="map-wrap reveal">
+      <div id="opsMap"></div>
+      <aside class="ops-list" id="opsList"><p class="empty show" data-i18n="map.empty"></p></aside>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CLIENTS + REVIEWS ============ -->
+<section class="sec sec-alt" id="clients" hidden>
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="kicker" data-i18n="clients.kicker">Confianza</p>
+      <h2 class="h2" data-i18n="clients.title">Trabajamos con</h2>
+    </div>
+    <div class="clients" id="clientsList"></div>
+  </div>
+</section>
+
+<section class="sec" id="reviews" hidden>
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="kicker" data-i18n="rev.kicker">Referencias</p>
+      <h2 class="h2" data-i18n="rev.title">Lo que dicen</h2>
+    </div>
+    <div class="reviews" id="reviewsList"></div>
+  </div>
+</section>
+
+<!-- ============ LOCATIONS ============ -->
+<section class="sec sec-alt" id="locations">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="kicker" data-i18n="loc.kicker">Ubicaciones</p>
+      <h2 class="h2" data-i18n="loc.title">Dónde encontrarnos</h2>
+    </div>
+    <div class="locs">
+      <a class="loc reveal" id="locMain" target="_blank" rel="noopener">
+        <span class="loc-tag" data-i18n="loc.main">Taller principal</span>
+        <h3 id="locMainName">Chapistería Omar</h3>
+        <p data-i18n="loc.mainD"></p>
+        <span class="loc-go"><span data-i18n="loc.go">Abrir en Google Maps</span> →</span>
+      </a>
+      <a class="loc loc-live reveal" id="locBase" target="_blank" rel="noopener">
+        <span class="loc-tag"><span class="pulse"></span><span data-i18n="loc.base">Base operativa actual</span></span>
+        <h3 id="locBaseName">Chapistería Omar Solutions</h3>
+        <p data-i18n="loc.baseD"></p>
+        <span class="loc-go"><span data-i18n="loc.go">Abrir en Google Maps</span> →</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ INSTAGRAM BAND ============ -->
+<section class="ig">
+  <div class="wrap ig-inner">
+    <div>
+      <p class="ig-handle" id="igHandle">@chapisteriaomarsrl</p>
+      <h2 class="ig-title" data-i18n="ig.title">Seguí los operativos en vivo</h2>
+    </div>
+    <a class="btn btn-light" id="igLink" target="_blank" rel="noopener" data-i18n="ig.cta">Ver Instagram</a>
+  </div>
+</section>
+
+<!-- ============ CONTACT ============ -->
+<section class="sec" id="contact">
+  <div class="wrap contact">
+    <div class="contact-text reveal">
+      <p class="kicker" data-i18n="contact.kicker">Contacto</p>
+      <h2 class="h2" data-i18n="contact.title"></h2>
+      <p class="muted" data-i18n="contact.sub"></p>
+      <div class="contact-direct">
+        <a id="waLink" class="direct" target="_blank" rel="noopener" hidden><small data-i18n="contact.wa">WhatsApp</small><b id="waText"></b></a>
+        <a id="mailLink" class="direct" hidden><small data-i18n="contact.mail">Email</small><b id="mailText"></b></a>
+      </div>
+    </div>
+    <form class="form reveal" id="leadForm" novalidate>
+      <label><span data-i18n="f.company">Empresa</span><input name="company" required></label>
+      <label><span data-i18n="f.name">Nombre</span><input name="name" required></label>
+      <label><span data-i18n="f.email">Email</span><input name="email" type="email" required></label>
+      <label><span data-i18n="f.phone">Teléfono</span><input name="phone" type="tel"></label>
+      <label><span data-i18n="f.country">País</span><input name="country"></label>
+      <label><span data-i18n="f.units">Unidades</span><input name="units" inputmode="numeric"></label>
+      <label class="full"><span data-i18n="f.type">Tipo</span>
+        <select name="type">
+          <option value="granizo" data-i18n="f.t1"></option>
+          <option value="convenio" data-i18n="f.t2"></option>
+          <option value="flota" data-i18n="f.t3"></option>
+          <option value="otro" data-i18n="f.t4"></option>
+        </select>
+      </label>
+      <label class="full"><span data-i18n="f.msg">Mensaje</span><textarea name="message" rows="4"></textarea></label>
+      <input name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <button class="btn btn-red full" type="submit" data-i18n="f.send">Enviar consulta</button>
+      <p class="form-msg full" id="formMsg" role="status"></p>
+    </form>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="foot">
+  <div class="wrap foot-inner">
+    <div class="foot-brand">
+      <img src="assets/logo-chico.svg" alt="Chapistería Omar Solutions">
+      <p class="muted" data-i18n="foot.tag"></p>
+    </div>
+    <img src="assets/pdr.svg" alt="PDR" class="foot-pdr">
+  </div>
+  <div class="wrap foot-bottom">
+    <span>© <span id="year"></span> Chapistería Omar Solutions. <span data-i18n="foot.rights"></span></span>
+    <a href="#admin" class="admin-link" aria-label="Admin">·</a>
+  </div>
+</footer>
+
+<!-- ============ LIGHTBOX ============ -->
+<div class="lb" id="lb" hidden>
+  <button class="lb-x" id="lbClose" aria-label="Cerrar">×</button>
+  <button class="lb-nav prev" id="lbPrev" aria-label="Anterior">‹</button>
+  <div class="lb-stage" id="lbStage"></div>
+  <button class="lb-nav next" id="lbNext" aria-label="Siguiente">›</button>
+  <p class="lb-cap" id="lbCap"></p>
+</div>
+
+<!-- ============ ADMIN ============ -->
+<div class="adm" id="adm" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

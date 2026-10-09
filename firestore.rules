@@ -1,0 +1,31 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Reemplazar por el/los email(s) de las cuentas admin creadas en Firebase Auth
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email in ['TU_EMAIL_ADMIN@gmail.com'];
+    }
+
+    // Contenido público del sitio
+    match /site/{doc}      { allow read: if true; allow write: if isAdmin(); }
+    match /works/{id}      { allow read: if true; allow write: if isAdmin(); }
+    match /ops/{id}        { allow read: if true; allow write: if isAdmin(); }
+    match /clients/{id}    { allow read: if true; allow write: if isAdmin(); }
+    match /reviews/{id}    { allow read: if true; allow write: if isAdmin(); }
+
+    // Consultas del formulario: cualquiera puede crear, solo admin lee/gestiona
+    match /leads/{id} {
+      allow create: if request.resource.data.keys().hasOnly(
+                        ['company','name','email','phone','country','units','type','message','lang','createdAt','read'])
+                    && request.resource.data.company is string && request.resource.data.company.size() < 200
+                    && request.resource.data.name is string && request.resource.data.name.size() < 200
+                    && request.resource.data.email is string && request.resource.data.email.size() < 200
+                    && request.resource.data.message.size() < 5000
+                    && request.resource.data.read == false
+                    && request.resource.data.createdAt == request.time;
+      allow read, update, delete: if isAdmin();
+    }
+  }
+}
