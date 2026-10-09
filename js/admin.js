@@ -25,7 +25,10 @@ const ico = n => `<svg viewBox="0 0 24 24">${I[n]}</svg>`;
 
 /* ---------------- abrir / cerrar ---------------- */
 export async function openAdmin(state, helpers) {
-  if (open) return; open = true;
+  if (open && $("#adm").innerHTML) return; open = true;
+  try { await start(state, helpers); } catch (er) { open = false; throw er; }
+}
+async function start(state, helpers) {
   S = state; H = helpers; fs = state.fb.fs; db = state.db;
   if (!$("#admCss")) document.head.insertAdjacentHTML("beforeend", '<link id="admCss" rel="stylesheet" href="css/admin.css">');
   if (!$(".toasts")) document.body.insertAdjacentHTML("beforeend", '<div class="toasts"></div>');

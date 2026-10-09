@@ -244,12 +244,15 @@ addEventListener("keydown", e => {
 
 /* ================= Firebase ================= */
 const FB = "https://www.gstatic.com/firebasejs/10.12.4/";
-async function initFirebase() {
-  if (!FIREBASE_CONFIG.apiKey) return null;
-  const [{ initializeApp }, fs] = await Promise.all([import(FB + "firebase-app.js"), import(FB + "firebase-firestore.js")]);
-  const app = initializeApp(FIREBASE_CONFIG);
-  state.fb = { app, fs }; state.db = fs.getFirestore(app);
-  return state.db;
+let fbInit = null;
+function initFirebase() {
+  if (!FIREBASE_CONFIG.apiKey) return Promise.resolve(null);
+  return fbInit ||= (async () => {
+    const [{ initializeApp, getApps, getApp }, fs] = await Promise.all([import(FB + "firebase-app.js"), import(FB + "firebase-firestore.js")]);
+    const app = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
+    state.fb = { app, fs }; state.db = fs.getFirestore(app);
+    return state.db;
+  })().catch(er => { fbInit = null; throw er; });
 }
 async function loadData() {
   const db = await initFirebase().catch(e => (console.warn("Firebase:", e), null));
@@ -302,9 +305,14 @@ $("#leadForm").addEventListener("submit", async e => {
 async function checkAdmin() {
   if (location.hash !== "#admin") return;
   if (!FIREBASE_CONFIG.apiKey) { alert("Falta completar FIREBASE_CONFIG en js/config.js"); return; }
-  if (!state.db) await initFirebase();
-  const m = await import("./admin.js");
-  m.openAdmin(state, { reload: loadData, cld, esc });
+  try {
+    await initFirebase();
+    const m = await import("./admin.js?v=6");
+    await m.openAdmin(state, { reload: loadData, cld, esc });
+  } catch (er) {
+    console.error(er);
+    alert("No se pudo abrir el panel: " + (er?.message || er));
+  }
 }
 addEventListener("hashchange", checkAdmin);
 
@@ -314,6 +322,6 @@ let saved = "es"; try { saved = localStorage.getItem("lang") || (navigator.langu
 applyLang(saved);
 renderConfig(); renderWorks(); renderClients(); renderReviews(); observeReveal();
 const editMode = new URLSearchParams(location.search).has("edit") && window.parent !== window;
-loadData().then(() => editMode
+loadData().catch(er => console.error("Carga de datos:", er)).then(() => editMode
   ? import("./editor.js").then(m => m.initEditor({ state, t, I18N, BASE, applyLang }))
   : checkAdmin());
