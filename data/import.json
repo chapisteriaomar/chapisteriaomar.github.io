@@ -1,0 +1,23 @@
+{
+  "id": "parana-2026-10",
+  "titulo": "Operativo Paraná, Entre Ríos (2 fotos)",
+  "ops": [
+    {
+      "key": "parana",
+      "name": "Paraná",
+      "province": "Entre Ríos",
+      "year": "2026",
+      "lat": -31.7773947,
+      "lng": -60.5016931,
+      "live": true,
+      "desc": "Operativo móvil en curso.",
+      "photos": ["assets/import/parana-frente.jpg"]
+    }
+  ],
+  "works": [
+    { "title": "Trabajo PDR – Paraná", "cat": "pdr", "file": "assets/import/parana-trabajo-pdr.jpg", "op": "parana", "featured": true }
+  ],
+  "bases": [
+    { "nombre": "Paraná, Entre Ríos", "maps": "https://maps.app.goo.gl/EWwpqKRX9WEoaXVS6" }
+  ]
+}

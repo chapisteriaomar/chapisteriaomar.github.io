@@ -28,7 +28,7 @@ export const DEFAULTS = {
   tallerNombre: "Chapistería Omar",
   tallerMaps: "https://share.google/7TK7TCiUOezFoH4EV",
   // Operativos móviles activos (pueden ser varios a la vez; se editan en admin → Config)
-  bases: [{ nombre: "Chapistería Omar Solutions", maps: "https://share.google/lCsnMDGQqBL9QDPB0" }],
+  bases: [{ nombre: "Paraná, Entre Ríos", maps: "https://maps.app.goo.gl/EWwpqKRX9WEoaXVS6" }],
   // Cifras del hero: se completan en admin → Config (las vacías no se muestran)
   stats: { years: "", vehicles: "", provinces: "", ops: "" },
   companias: []                 // nombres de compañías (se cargan en admin)
