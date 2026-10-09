@@ -138,11 +138,27 @@ function renderWorks() {
     return `<figure class="wk${big}" data-i="${i}">${media}${tag}<figcaption class="wk-cap">${esc(w.title || "")}</figcaption></figure>`;
   }).join("");
   $("#workEmpty").classList.toggle("show", !list.length);
+  clipWorks(list.length);
   $$("#workGrid .wk").forEach(el => el.onclick = () => openLB(list.map(workToSlide), +el.dataset.i));
 }
+let worksOpen = false;
+function clipWorks(n) {
+  const g = $("#workGrid"), wrap = $("#workMoreWrap"), btn = $("#workMore");
+  g.classList.remove("clip");
+  const cs = getComputedStyle(g), row = parseFloat(cs.gridAutoRows) || 220, gap = parseFloat(cs.rowGap) || 10;
+  const clipH = row * 2 + gap;
+  const tall = g.scrollHeight > clipH + 4;
+  wrap.hidden = !tall;
+  if (!tall) return;
+  g.style.setProperty("--clipH", clipH + "px");
+  g.classList.toggle("clip", !worksOpen);
+  btn.textContent = worksOpen ? t("work.less") : `${t("work.more")} (${n})`;
+  btn.onclick = () => { worksOpen = !worksOpen; clipWorks(n); if (!worksOpen) $("#work").scrollIntoView({ behavior: "smooth" }); };
+}
+addEventListener("resize", () => clipWorks(state.works.filter(workMatches).length));
 const workToSlide = w => ({ type: w.type, url: w.url, url2: w.url2, cap: w.title });
 $$("#filters button").forEach(b => b.onclick = () => {
-  state.filter = b.dataset.f; $$("#filters button").forEach(x => x.classList.toggle("on", x === b)); renderWorks();
+  state.filter = b.dataset.f; worksOpen = false; $$("#filters button").forEach(x => x.classList.toggle("on", x === b)); renderWorks();
 });
 
 /* ---- mapa de operativos ---- */
@@ -168,7 +184,7 @@ function renderOps() {
     const icon = L.divIcon({ className: "", html: `<div class="pin${o.live ? " live" : ""}"></div>`, iconSize: [18, 18], iconAnchor: [9, 9] });
     const m = L.marker([o.lat, o.lng], { icon }).addTo(layer);
     const units = o.units ? ` · ${esc(o.units)} ${t("map.units")}` : "";
-    m.bindPopup(`<b>${esc(o.name)}</b><small>${esc([o.province, o.year].filter(Boolean).join(" · "))}${units}</small>${o.desc ? `<p style="margin-top:6px">${esc(o.desc)}</p>` : ""}${o.photos?.length ? `<button class="pop-btn" data-op="${i}">${state.lang === "en" ? "View photos" : "Ver fotos"} (${o.photos.length}) →</button>` : ""}`);
+    m.bindPopup(`<b>${esc(o.name)}</b><small>${esc([o.province, o.year].filter(Boolean).join(" · "))}${units}</small>${o.desc ? `<p style="margin-top:6px">${esc(o.desc)}</p>` : ""}${opMedia(o).length ? `<button class="pop-btn" data-op="${i}">${state.lang === "en" ? "View photos" : "Ver fotos"} (${opMedia(o).length}) →</button>` : ""}`);
     m.on("popupopen", e => { const b = e.popup.getElement().querySelector(".pop-btn"); if (b) b.onclick = () => openOp(o); hl(i); });
     markers.push(m); o._m = m;
   });
@@ -177,7 +193,11 @@ function renderOps() {
   function hl(i) { $$(".op", list).forEach((b, j) => b.classList.toggle("on", j === i)); }
   if (markers.length) map.fitBounds(L.featureGroup(markers).getBounds().pad(.35), { maxZoom: 7 });
 }
-function openOp(o) { openLB(o.photos.map(u => ({ type: /\.(mp4|mov|webm)$/i.test(u) ? "video" : "image", url: u, cap: o.name })), 0); }
+const opMedia = o => [
+  ...(o.photos || []).map(u => ({ type: /\.(mp4|mov|webm)$/i.test(u) || u.includes("/video/upload/") ? "video" : "image", url: u, cap: o.name })),
+  ...state.works.filter(w => w.opId && w.opId === o.id).map(w => ({ type: w.type, url: w.url, url2: w.url2, cap: w.title || o.name }))
+];
+function openOp(o) { const m = opMedia(o); if (m.length) openLB(m, 0); }
 
 function renderClients() {
   $("#clients").hidden = !state.clients.length;
