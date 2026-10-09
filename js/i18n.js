@@ -2,7 +2,7 @@ export const I18N = {
   es: {
     "nav.about": "Empresa", "nav.services": "Servicios", "nav.process": "Operativos",
     "nav.work": "Trabajos", "nav.map": "Mapa", "nav.contact": "Contacto",
-    "cta.request": "Solicitar operativo",
+    "cta.request": "Solicitar presupuesto",
     "hero.kicker": "PDR · Granizo · Operativos móviles",
     "hero.t1": "Devolvemos", "hero.t2": "la forma.", "hero.t3": "Conservamos el original.",
     "hero.sub": "Reparación de abolladuras sin pintura a escala para aseguradoras, flotas y concesionarias. Desplegamos equipos completos donde cae el granizo, en Argentina y el exterior.",
@@ -64,7 +64,7 @@ export const I18N = {
   en: {
     "nav.about": "Company", "nav.services": "Services", "nav.process": "Operations",
     "nav.work": "Work", "nav.map": "Map", "nav.contact": "Contact",
-    "cta.request": "Request a deployment",
+    "cta.request": "Request a quote",
     "hero.kicker": "PDR · Hail · Mobile operations",
     "hero.t1": "We restore", "hero.t2": "the shape.", "hero.t3": "We keep the original.",
     "hero.sub": "Paintless dent repair at scale for insurers, fleets and dealerships. We deploy full teams wherever hail strikes, in Argentina and abroad.",

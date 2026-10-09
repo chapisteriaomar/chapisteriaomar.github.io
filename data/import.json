@@ -1,23 +1,27 @@
 {
-  "id": "parana-2026-10",
-  "titulo": "Operativo Paraná, Entre Ríos (2 fotos)",
-  "ops": [
+  "packages": [
     {
-      "key": "parana",
-      "name": "Paraná",
-      "province": "Entre Ríos",
-      "year": "2026",
-      "lat": -31.7773947,
-      "lng": -60.5016931,
-      "live": true,
-      "desc": "Operativo móvil en curso.",
-      "photos": ["assets/import/parana-frente.jpg"]
+      "id": "parana-2026-10",
+      "titulo": "Operativo Paraná, Entre Ríos (2 fotos)",
+      "ops": [
+        { "key": "parana", "name": "Paraná", "province": "Entre Ríos", "year": "2026", "lat": -31.7773947, "lng": -60.5016931,
+          "live": true, "desc": "Operativo móvil en curso.", "photos": ["assets/import/parana-frente.jpg"] }
+      ],
+      "works": [
+        { "title": "Trabajo PDR – Paraná", "cat": "pdr", "file": "assets/import/parana-trabajo-pdr.jpg", "op": "parana", "featured": true }
+      ],
+      "bases": [ { "nombre": "Paraná, Entre Ríos", "maps": "https://maps.app.goo.gl/EWwpqKRX9WEoaXVS6" } ]
+    },
+    {
+      "id": "operativos-posadas-monte-chacabuco",
+      "titulo": "Operativos: Posadas (en curso), San Miguel del Monte y Chacabuco (anteriores)",
+      "ops": [
+        { "key": "posadas", "name": "Posadas", "province": "Misiones", "year": "2026", "lat": -27.3671, "lng": -55.8961, "live": true, "desc": "Operativo móvil en curso.", "photos": [] },
+        { "key": "monte", "name": "San Miguel del Monte", "province": "Buenos Aires", "year": "", "lat": -35.4398, "lng": -58.8064, "live": false, "desc": "", "photos": [] },
+        { "key": "chacabuco", "name": "Chacabuco", "province": "Buenos Aires", "year": "", "lat": -34.6417, "lng": -60.4697, "live": false, "desc": "", "photos": [] }
+      ],
+      "works": [],
+      "bases": [ { "nombre": "Posadas, Misiones", "maps": "https://www.google.com/maps/search/?api=1&query=Posadas%2C%20Misiones" } ]
     }
-  ],
-  "works": [
-    { "title": "Trabajo PDR – Paraná", "cat": "pdr", "file": "assets/import/parana-trabajo-pdr.jpg", "op": "parana", "featured": true }
-  ],
-  "bases": [
-    { "nombre": "Paraná, Entre Ríos", "maps": "https://maps.app.goo.gl/EWwpqKRX9WEoaXVS6" }
   ]
 }

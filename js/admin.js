@@ -167,53 +167,44 @@ async function shell() {
 async function checkImport() {
   let pk;
   try { pk = await (await fetch("data/import.json?t=" + Date.now(), { cache: "no-store" })).json(); } catch { return; }
-  if (!pk?.id) return;
+  const packs = pk?.packages || (pk?.id ? [pk] : []);
+  if (!packs.length) return;
   const ref = fs.doc(db, "site", "imports");
   const done = await fs.getDoc(ref).then(d => d.exists() ? d.data() : {}).catch(() => ({}));
-  if (done[pk.id]) return;
-  const box = $("#imp"); box.hidden = false;
+  const todo = packs.filter(p => !done[p.id]);
+  const box = $("#imp");
+  if (!todo.length) { box.hidden = true; return; }
+  box.hidden = false;
   box.innerHTML = `<div class="ad-card" style="border-color:var(--red);display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin:0">
     <div><h2 style="font:700 19px var(--disp);text-transform:uppercase;letter-spacing:.06em">Contenido nuevo para publicar</h2>
-    <p style="color:var(--muted);font-size:14px">${e(pk.titulo || pk.id)}</p></div>
+    ${todo.map(p => `<p style="color:var(--muted);font-size:14px">• ${e(p.titulo || p.id)}</p>`).join("")}</div>
     <button class="b red big" id="impGo">${ico("up")} Publicar ahora</button></div>`;
   $("#impGo").onclick = ev => busy(ev.currentTarget, async () => {
-    const asFile = async path => { const b = await (await fetch(path)).blob(); return new File([b], path.split("/").pop(), { type: b.type }); };
-    const opIds = {};
-    for (const o of pk.ops || []) {
-      const photos = []; for (const p of o.photos || []) photos.push(await upload(await asFile(p)));
-      const { key, photos: _, ...data } = o;
-      const r = await add("ops", { ...data, photos });
-      opIds[key] = r.id;
-    }
-    for (const w of pk.works || []) {
-      const url = await upload(await asFile(w.file));
-      await add("works", { title: w.title || "", cat: w.cat || "pdr", type: "image", url, featured: !!w.featured, opId: opIds[w.op] || "" });
-    }
-    if (pk.bases?.length) {
-      const cref = fs.doc(db, "site", "config");
-      const c = await fs.getDoc(cref).then(d => d.exists() ? d.data() : {});
-      const cur = Array.isArray(c.bases) ? c.bases : (c.baseMaps ? [{ nombre: c.baseNombre, maps: c.baseMaps }] : (S.cfg.bases || []));
-      const merged = cur.filter(x => !/lCsnMDGQqBL9QDPB0/.test(x.maps || "")); pk.bases.forEach(b => { if (!merged.some(x => x.maps === b.maps || x.nombre === b.nombre)) merged.push(b); });
-      await fs.setDoc(cref, { bases: merged }, { merge: true });
-    }
-    await fs.setDoc(ref, { [pk.id]: true }, { merge: true });
+    for (const p of todo) { await importPack(p); await fs.setDoc(ref, { [p.id]: true }, { merge: true }); }
     box.hidden = true; toast("Publicado ✓"); await refresh(); go(view);
   });
 }
-async function refresh() {
-  const [works, ops, leads] = await Promise.all([list("works"), list("ops"), list("leads")].map(p => p.catch(() => [])));
-  Object.assign(cache, { works, ops, leads });
-  const n = leads.filter(l => !l.read).length, b = $("#unread");
-  if (b) { b.hidden = !n; b.textContent = n; }
-}
-function go(v) {
-  view = v;
-  $$(".ad-nav[data-v]").forEach(b => b.classList.toggle("on", b.dataset.v === v));
-  $("#vt").textContent = NAV.find(n => n[0] === v)[1];
-  $("#va").innerHTML = innerWidth > 860 ? "" : `<button class="b sm ghost" id="ax2">Ver sitio</button>`;
-  if ($("#ax2")) $("#ax2").onclick = close;
-  $(".ad-main").scrollTop = 0;
-  ({ home, texts, works, ops, leads, clients, reviews, config })[v]();
+async function importPack(pk) {
+  const asFile = async path => { const b = await (await fetch(path)).blob(); return new File([b], path.split("/").pop(), { type: b.type }); };
+  const opIds = {};
+  for (const o of pk.ops || []) {
+    const photos = []; for (const p of o.photos || []) photos.push(await upload(await asFile(p)));
+    const { key, photos: _, ...data } = o;
+    const r = await add("ops", { ...data, photos });
+    opIds[key] = r.id;
+  }
+  for (const w of pk.works || []) {
+    const url = await upload(await asFile(w.file));
+    await add("works", { title: w.title || "", cat: w.cat || "pdr", type: "image", url, featured: !!w.featured, opId: opIds[w.op] || "" });
+  }
+  if (pk.bases?.length) {
+    const cref = fs.doc(db, "site", "config");
+    const c = await fs.getDoc(cref).then(d => d.exists() ? d.data() : {});
+    const cur = Array.isArray(c.bases) ? c.bases : (c.baseMaps ? [{ nombre: c.baseNombre, maps: c.baseMaps }] : (S.cfg.bases || []));
+    const merged = cur.filter(x => !/lCsnMDGQqBL9QDPB0/.test(x.maps || ""));
+    pk.bases.forEach(b => { if (!merged.some(x => x.maps === b.maps || x.nombre === b.nombre)) merged.push(b); });
+    await fs.setDoc(cref, { bases: merged }, { merge: true });
+  }
 }
 
 /* ================= INICIO ================= */
