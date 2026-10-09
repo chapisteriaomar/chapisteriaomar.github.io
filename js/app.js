@@ -1,5 +1,8 @@
 import { FIREBASE_CONFIG, DEFAULTS } from "./config.js";
 import { I18N } from "./i18n.js";
+// Textos originales (los editados desde el panel se guardan en Firestore: site/texts)
+const BASE = JSON.parse(JSON.stringify(I18N));
+function applyTexts(over) { for (const l of Object.keys(BASE)) I18N[l] = { ...BASE[l], ...(over?.[l] || {}) }; }
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -95,10 +98,8 @@ function renderStats() {
   $("#heroStats").innerHTML = items.map(([k, l]) => `<div class="stat"><b>${esc(s[k])}</b><span>${t(l)}</span></div>`).join("");
 }
 function renderTicker() {
-  const words = state.lang === "en"
-    ? ["Paintless Dent Repair", "Hail Damage", "Mobile Operations", "Insurers", "Fleets", "Argentina & abroad"]
-    : ["Desabollado sin pintura", "Granizo", "Operativos móviles", "Aseguradoras", "Flotas", "Argentina y exterior"];
-  const one = words.map(w => `<span>${w}</span><i>◆</i>`).join("");
+  const one = [1, 2, 3, 4, 5, 6].map(i => t("ticker." + i)).filter(Boolean)
+    .map((w, i) => `<span data-i18n="ticker.${i + 1}">${esc(w)}</span><i>◆</i>`).join("");
   $("#ticker").innerHTML = one + one;
 }
 function renderConfig() {
@@ -258,9 +259,11 @@ async function loadData() {
     try { return (await fs.getDocs(fs.query(fs.collection(db, name), fs.orderBy(ord, "desc")))).docs.map(d => ({ id: d.id, ...d.data() })); }
     catch (e) { console.warn(name, e); return []; }
   };
-  const [cfgSnap, works, ops, clients, reviews] = await Promise.all([
-    fs.getDoc(fs.doc(db, "site", "config")).catch(() => null), get("works"), get("ops"), get("clients"), get("reviews")
+  const [cfgSnap, works, ops, clients, reviews, txSnap] = await Promise.all([
+    fs.getDoc(fs.doc(db, "site", "config")).catch(() => null), get("works"), get("ops"), get("clients"), get("reviews"),
+    fs.getDoc(fs.doc(db, "site", "texts")).catch(() => null)
   ]);
+  if (txSnap?.exists()) { applyTexts(txSnap.data()); applyLang(state.lang); }
   if (cfgSnap?.exists()) {
     const d = cfgSnap.data();
     state.cfg = { ...DEFAULTS, ...d, stats: { ...DEFAULTS.stats, ...(d.stats || {}) } };
@@ -310,4 +313,7 @@ $("#year").textContent = new Date().getFullYear();
 let saved = "es"; try { saved = localStorage.getItem("lang") || (navigator.language?.startsWith("es") ? "es" : "en"); } catch {}
 applyLang(saved);
 renderConfig(); renderWorks(); renderClients(); renderReviews(); observeReveal();
-loadData().then(checkAdmin);
+const editMode = new URLSearchParams(location.search).has("edit") && window.parent !== window;
+loadData().then(() => editMode
+  ? import("./editor.js").then(m => m.initEditor({ state, t, I18N, BASE, applyLang }))
+  : checkAdmin());

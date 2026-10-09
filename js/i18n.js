@@ -58,7 +58,8 @@ export const I18N = {
     "contact.wa": "WhatsApp directo", "contact.mail": "Email",
     "foot.tag": "Desabollado sin pintura y gestión de siniestros por granizo.",
     "foot.rights": "Todos los derechos reservados.",
-    "close": "Cerrar", "before": "Antes", "after": "Después"
+    "close": "Cerrar", "before": "Antes", "after": "Después",
+    "ticker.1": "Desabollado sin pintura", "ticker.2": "Granizo", "ticker.3": "Operativos móviles", "ticker.4": "Aseguradoras", "ticker.5": "Flotas", "ticker.6": "Argentina y exterior"
   },
   en: {
     "nav.about": "Company", "nav.services": "Services", "nav.process": "Operations",
@@ -119,6 +120,7 @@ export const I18N = {
     "contact.wa": "WhatsApp", "contact.mail": "Email",
     "foot.tag": "Paintless dent repair and hail claim management.",
     "foot.rights": "All rights reserved.",
-    "close": "Close", "before": "Before", "after": "After"
+    "close": "Close", "before": "Before", "after": "After",
+    "ticker.1": "Paintless Dent Repair", "ticker.2": "Hail Damage", "ticker.3": "Mobile Operations", "ticker.4": "Insurers", "ticker.5": "Fleets", "ticker.6": "Argentina & abroad"
   }
 };

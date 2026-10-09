@@ -16,6 +16,7 @@ const I = {
   quote: '<path d="M7 7h4v4c0 3-2 5-4 5M15 7h4v4c0 3-2 5-4 5"/>',
   inbox: '<path d="M3 13l3-8h12l3 8v6H3z"/><path d="M3 13h5l1 2h6l1-2h5"/>',
   gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.6 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+  pen: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M14 6l4 4"/>',
   up: '<path d="M12 16V4M6 10l6-6 6 6M4 20h16"/>',
   eye: '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
   out: '<path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 17l5-5-5-5M15 12H3"/>'
@@ -138,7 +139,7 @@ function login() {
 }
 
 /* ---------------- estructura ---------------- */
-const NAV = [["home", "Inicio", "home"], ["works", "Trabajos", "img"], ["ops", "Operativos", "pin"], ["leads", "Consultas", "inbox"],
+const NAV = [["home", "Inicio", "home"], ["texts", "Textos de la web", "pen"], ["works", "Trabajos", "img"], ["ops", "Operativos", "pin"], ["leads", "Consultas", "inbox"],
   ["clients", "Compañías", "shield"], ["reviews", "Referencias", "quote"], ["config", "Config", "gear"]];
 async function shell() {
   $("#adm").innerHTML = `<div class="ad">
@@ -209,7 +210,7 @@ function go(v) {
   $("#va").innerHTML = innerWidth > 860 ? "" : `<button class="b sm ghost" id="ax2">Ver sitio</button>`;
   if ($("#ax2")) $("#ax2").onclick = close;
   $(".ad-main").scrollTop = 0;
-  ({ home, works, ops, leads, clients, reviews, config })[v]();
+  ({ home, texts, works, ops, leads, clients, reviews, config })[v]();
 }
 
 /* ================= INICIO ================= */
@@ -571,4 +572,64 @@ async function config() {
     }, { merge: true });
     toast("Configuración guardada ✓");
   });
+}
+
+
+/* ================= TEXTOS DE LA WEB ================= */
+// Los originales están en js/i18n.js (BASE, sin modificar); lo editado se guarda en site/texts { es: {clave: texto}, en: {...} }
+let BASE_TX = null;
+async function loadBase() { if (!BASE_TX) BASE_TX = (await import("./i18n.js?base=1")).I18N; return BASE_TX; }
+async function saveText(lang, key, value) {
+  await fs.setDoc(fs.doc(db, "site", "texts"), { [lang]: { [key]: value == null ? fs.deleteField() : value } }, { merge: true });
+}
+// mensajes desde la vista editable (iframe)
+addEventListener("message", async ev => {
+  const fr = $("#cmsFrame");
+  if (!fr || ev.source !== fr.contentWindow || ev.origin !== location.origin || ev.data?.type !== "cms-save") return;
+  const { lang, key, value } = ev.data;
+  try { await saveText(lang, key, value); fr.contentWindow.postMessage({ type: "cms-saved", ok: true }, location.origin); }
+  catch (er) { fr.contentWindow.postMessage({ type: "cms-saved", ok: false, error: er.message }, location.origin); }
+});
+let txMode = "v", txW = "100%";
+const GROUPS = { nav: "Menú", cta: "Botones", hero: "Portada", stat: "Cifras", ticker: "Cinta roja", about: "La empresa", svc: "Servicios",
+  proc: "Cómo funciona", work: "Trabajos", map: "Mapa", clients: "Compañías", rev: "Referencias", loc: "Ubicaciones", ig: "Instagram",
+  contact: "Contacto", f: "Formulario", foot: "Pie de página" };
+function texts() {
+  $("#vc").innerHTML = `<div class="bar" style="justify-content:space-between;margin-bottom:14px">
+      <div class="seg" id="tm"><button data-m="v">Vista de la web</button><button data-m="l">Lista de textos (ES / EN)</button></div>
+      <div class="seg" id="tw"${txMode === "l" ? " hidden" : ""}><button data-w="100%">Compu</button><button data-w="390px">Celular</button></div></div>
+    <p style="color:var(--muted);font-size:14px;margin-bottom:12px">${txMode === "v"
+      ? "Tocá cualquier texto (o el lápiz rojo) para cambiarlo. Usá ES / EN arriba de la web para editar cada idioma."
+      : "Los cambios se guardan solos al salir de cada campo. Vacío = vuelve al texto original."}</p>
+    <div id="tb"></div>`;
+  $$("#tm button").forEach(b => { b.classList.toggle("on", b.dataset.m === txMode); b.onclick = () => { txMode = b.dataset.m; texts(); }; });
+  $$("#tw button").forEach(b => { b.classList.toggle("on", b.dataset.w === txW); b.onclick = () => { txW = b.dataset.w; $$("#tw button").forEach(x => x.classList.toggle("on", x === b)); $("#cmsFrame").style.width = txW; }; });
+  if (txMode === "v") {
+    $("#tb").innerHTML = `<div style="display:flex;justify-content:center;background:var(--bg2);border:1px solid var(--line);border-radius:10px;overflow:hidden">
+      <iframe id="cmsFrame" src="index.html?edit=1" style="width:${txW};max-width:100%;height:calc(100vh - 230px);min-height:480px;border:0;background:var(--bg)"></iframe></div>`;
+  } else txList();
+}
+async function txList() {
+  const base = await loadBase();
+  const snap = await fs.getDoc(fs.doc(db, "site", "texts")).catch(() => null);
+  const over = snap?.exists() ? snap.data() : {};
+  const keys = Object.keys(base.es);
+  const byGroup = {};
+  keys.forEach(k => (byGroup[k.split(".")[0]] ||= []).push(k));
+  $("#tb").innerHTML = `<input id="tq" placeholder="Buscar texto…" style="margin-bottom:16px">` + Object.entries(byGroup).map(([g, ks]) =>
+    `<div class="ad-card tx-g"><h2>${e(GROUPS[g] || g)}</h2><p class="sub">&nbsp;</p>${ks.map(k => `<div class="tx-r" data-k="${k}" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+      ${["es", "en"].map(l => { const v = over[l]?.[k] ?? base[l][k] ?? ""; const long = v.length > 70;
+        return `<label class="f"><span>${l.toUpperCase()}${over[l]?.[k] != null ? ' · <b style="color:var(--red)">editado</b>' : ""}</span>${long
+          ? `<textarea data-l="${l}" rows="3">${e(v)}</textarea>` : `<input data-l="${l}" value="${e(v)}">`}</label>`; }).join("")}</div>`).join("")}</div>`).join("");
+  $$("#tb [data-l]").forEach(inp => inp.onchange = async () => {
+    const k = inp.closest(".tx-r").dataset.k, l = inp.dataset.l, v = inp.value.trim();
+    const value = !v || v === base[l][k] ? null : v;
+    try { await saveText(l, k, value); if (value == null) inp.value = base[l][k]; toast(value == null ? "Restaurado al original" : "Guardado ✓"); }
+    catch (er) { toast(er.message, true); }
+  });
+  $("#tq").oninput = ev => {
+    const q = ev.target.value.toLowerCase();
+    $$(".tx-r").forEach(r => r.hidden = q && ![...r.querySelectorAll("[data-l]")].some(i => i.value.toLowerCase().includes(q)));
+    $$(".tx-g").forEach(g => g.hidden = !g.querySelector(".tx-r:not([hidden])"));
+  };
 }
