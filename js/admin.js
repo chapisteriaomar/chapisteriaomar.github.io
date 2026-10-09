@@ -207,6 +207,22 @@ async function importPack(pk) {
   }
 }
 
+async function refresh() {
+  const [works, ops, leads] = await Promise.all([list("works"), list("ops"), list("leads")].map(p => p.catch(() => [])));
+  Object.assign(cache, { works, ops, leads });
+  const n = leads.filter(l => !l.read).length, b = $("#unread");
+  if (b) { b.hidden = !n; b.textContent = n; }
+}
+function go(v) {
+  view = v;
+  $$(".ad-nav[data-v]").forEach(b => b.classList.toggle("on", b.dataset.v === v));
+  $("#vt").textContent = NAV.find(n => n[0] === v)[1];
+  $("#va").innerHTML = innerWidth > 860 ? "" : `<button class="b sm ghost" id="ax2">Ver sitio</button>`;
+  if ($("#ax2")) $("#ax2").onclick = close;
+  $(".ad-main").scrollTop = 0;
+  ({ home, texts, works, ops, leads, clients, reviews, config })[v]();
+}
+
 /* ================= INICIO ================= */
 function home() {
   const live = cache.ops.filter(o => o.live).length, unread = cache.leads.filter(l => !l.read).length;
@@ -383,17 +399,18 @@ function opForm() {
     <div class="sticky-act"><span class="note">${edit ? "Las fotos nuevas se suman a las que ya tiene." : "Podés agregar más fotos después."}</span>
       <div class="bar">${edit ? '<button class="b ghost" id="oc">Cancelar</button>' : ""}<button class="b red big" id="os">${edit ? "Guardar cambios" : "Crear operativo"}</button></div></div>`;
   let lat = o.lat ?? null, lng = o.lng ?? null;
-  admMap = L.map("admMap").setView(lat != null ? [lat, lng] : [-36.5, -63.5], lat != null ? 10 : 4);
-  L.tileLayer(`https://{s}.basemaps.cartocdn.com/${document.documentElement.dataset.theme === "light" ? "light_all" : "dark_all"}/{z}/{x}/{y}{r}.png`, { subdomains: "abcd", maxZoom: 18, attribution: "© OSM © CARTO" }).addTo(admMap);
-  const icon = L.divIcon({ className: "", html: '<div class="pin"></div>', iconSize: [18, 18], iconAnchor: [9, 9] });
+  const hasL = !!window.L;
+  if (!hasL) $("#admMap").innerHTML = '<p style="padding:20px;color:var(--muted)">No se pudo cargar el mapa. Recargá la página o usá el buscador.</p>';
+  admMap = hasL ? L.map("admMap").setView(lat != null ? [lat, lng] : [-36.5, -63.5], lat != null ? 10 : 4) : null;
+  if (hasL) L.tileLayer(`https://{s}.basemaps.cartocdn.com/${document.documentElement.dataset.theme === "light" ? "light_all" : "dark_all"}/{z}/{x}/{y}{r}.png`, { subdomains: "abcd", maxZoom: 18, attribution: "© OSM © CARTO" }).addTo(admMap);
+  const icon = hasL ? L.divIcon({ className: "", html: '<div class="pin"></div>', iconSize: [18, 18], iconAnchor: [9, 9] }) : null;
   const setPt = (a, b, zoom) => {
-    lat = +a; lng = +b; mk ? mk.setLatLng([lat, lng]) : (mk = L.marker([lat, lng], { icon }).addTo(admMap));
-    if (zoom) admMap.setView([lat, lng], zoom);
+    lat = +a; lng = +b;
+    if (hasL) { mk ? mk.setLatLng([lat, lng]) : (mk = L.marker([lat, lng], { icon }).addTo(admMap)); if (zoom) admMap.setView([lat, lng], zoom); }
     $("#ll").textContent = `📍 ${lat.toFixed(3)}, ${lng.toFixed(3)}`;
   };
   mk = null; if (lat != null) setPt(lat, lng);
-  admMap.on("click", ev => setPt(ev.latlng.lat, ev.latlng.lng));
-  setTimeout(() => admMap.invalidateSize(), 50);
+  if (hasL) { admMap.on("click", ev => setPt(ev.latlng.lat, ev.latlng.lng)); setTimeout(() => admMap.invalidateSize(), 50); }
 
   // búsqueda de localidades (OpenStreetMap)
   let tmr;
