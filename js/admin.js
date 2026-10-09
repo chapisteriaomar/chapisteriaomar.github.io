@@ -402,7 +402,7 @@ function opForm() {
   const hasL = !!window.L;
   if (!hasL) $("#admMap").innerHTML = '<p style="padding:20px;color:var(--muted)">No se pudo cargar el mapa. Recargá la página o usá el buscador.</p>';
   admMap = hasL ? L.map("admMap").setView(lat != null ? [lat, lng] : [-36.5, -63.5], lat != null ? 10 : 4) : null;
-  if (hasL) L.tileLayer(`https://{s}.basemaps.cartocdn.com/${document.documentElement.dataset.theme === "light" ? "light_all" : "dark_all"}/{z}/{x}/{y}{r}.png`, { subdomains: "abcd", maxZoom: 18, attribution: "© OSM © CARTO" }).addTo(admMap);
+  if (hasL) L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 18, attribution: "© OpenStreetMap" }).addTo(admMap);
   const icon = hasL ? L.divIcon({ className: "", html: '<div class="pin"></div>', iconSize: [18, 18], iconAnchor: [9, 9] }) : null;
   const setPt = (a, b, zoom) => {
     lat = +a; lng = +b;

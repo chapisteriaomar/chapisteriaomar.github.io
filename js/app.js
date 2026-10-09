@@ -35,7 +35,9 @@ $("#themeBtn").onclick = () => {
   try { localStorage.setItem("theme", next); } catch {}
   setTiles();
 };
-const tileURL = () => `https://{s}.basemaps.cartocdn.com/${isLight() ? "light_all" : "dark_all"}/{z}/{x}/{y}{r}.png`;
+// Mapas sin API key: Esri (gris claro / oscuro). Si falla, cae a OpenStreetMap.
+const tileURL = () => `https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_${isLight() ? "Light" : "Dark"}_Gray_Base/MapServer/tile/{z}/{y}/{x}`;
+const OSM_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
 let tiles;
 function setTiles() { if (tiles) tiles.setUrl(tileURL()); }
 
@@ -167,9 +169,9 @@ let map, layer;
 function initMap() {
   if (map || !window.L) return;
   map = L.map("opsMap", { scrollWheelZoom: false, zoomControl: true, attributionControl: true }).setView([-36.5, -63.5], 4);
-  tiles = L.tileLayer(tileURL(), {
-    attribution: '&copy; OpenStreetMap &copy; CARTO', subdomains: "abcd", maxZoom: 18
-  }).addTo(map);
+  tiles = L.tileLayer(tileURL(), { attribution: "Tiles &copy; Esri &middot; &copy; OpenStreetMap", maxZoom: 16 }).addTo(map);
+  let fails = 0;
+  tiles.on("tileerror", () => { if (++fails === 4) tiles.setUrl(OSM_URL); });
   layer = L.layerGroup().addTo(map);
   map.on("click", () => map.scrollWheelZoom.enable());
 }
@@ -307,7 +309,7 @@ async function checkAdmin() {
   if (!FIREBASE_CONFIG.apiKey) { alert("Falta completar FIREBASE_CONFIG en js/config.js"); return; }
   try {
     await initFirebase();
-    const m = await import("./admin.js?v=6");
+    const m = await import("./admin.js?v=10");
     await m.openAdmin(state, { reload: loadData, cld, esc });
   } catch (er) {
     console.error(er);
