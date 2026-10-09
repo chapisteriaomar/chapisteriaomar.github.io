@@ -153,7 +153,7 @@ async function ops() {
     <div class="row"><button class="sbtn" id="os">Guardar operativo</button></div></div>
     <div class="adm-card"><h3>Operativos</h3><div class="adm-rows" id="olist">Cargando…</div></div>`;
   admMap = L.map("admMap").setView([-36.5, -63.5], 4);
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", { subdomains: "abcd", maxZoom: 18 }).addTo(admMap);
+  L.tileLayer(`https://{s}.basemaps.cartocdn.com/${document.documentElement.dataset.theme === "light" ? "light_all" : "dark_all"}/{z}/{x}/{y}{r}.png`, { subdomains: "abcd", maxZoom: 18 }).addTo(admMap);
   admMap.on("click", ev => {
     $("#olat").value = ev.latlng.lat.toFixed(5); $("#olng").value = ev.latlng.lng.toFixed(5);
     pick ? pick.setLatLng(ev.latlng) : (pick = L.marker(ev.latlng).addTo(admMap));
@@ -241,10 +241,12 @@ async function config() {
   $("#ab").innerHTML = `<div class="adm-card"><h3>Contacto y redes</h3><div class="adm-grid">
       ${f("cw", "WhatsApp (con código país)", c.whatsapp, "5491100000000")}${f("ce", "Email", c.email)}
       ${f("ci", "Instagram (usuario)", c.instagram)}${f("ciu", "Instagram (link)", c.instagramUrl)}</div></div>
-    <div class="adm-card"><h3>Ubicaciones</h3><div class="adm-grid">
-      ${f("tn", "Taller principal – nombre", c.tallerNombre)}${f("tm", "Taller principal – link Maps", c.tallerMaps)}
-      ${f("bn", "Base operativa – nombre / ciudad", c.baseNombre)}${f("bm", "Base operativa – link Maps", c.baseMaps)}</div>
-      <p class="note" style="margin-top:10px">Cuando cambien de operativo, actualizá la base acá.</p></div>
+    <div class="adm-card"><h3>Taller principal</h3><div class="adm-grid">
+      ${f("tn", "Nombre", c.tallerNombre)}${f("tm", "Link Google Maps", c.tallerMaps)}</div></div>
+    <div class="adm-card"><h3>Operativos móviles en curso</h3>
+      <p class="note" style="margin-bottom:12px">Uno por cada localidad donde estén trabajando ahora. Se muestran todos en la web.</p>
+      <div id="bases"></div>
+      <div class="row"><button type="button" class="sbtn ghost" id="addBase">+ Agregar operativo móvil</button></div></div>
     <div class="adm-card"><h3>Cifras del inicio (vacías = ocultas)</h3><div class="adm-grid">
       ${f("s1", "Años de oficio", st.years, "Ej: 25+")}${f("s2", "Vehículos reparados", st.vehicles, "Ej: 8.000+")}
       ${f("s3", "Provincias / países", st.provinces, "Ej: 10")}${f("s4", "Operativos realizados", st.ops, "Ej: 30+")}</div></div>
@@ -252,12 +254,23 @@ async function config() {
       ${c.aboutImg ? `<img src="${e(H.cld(c.aboutImg, 500))}" style="max-width:260px;margin-bottom:12px">` : ""}
       <input type="file" id="ai" accept="image/*">${prog()}</div>
     <div class="row"><button class="sbtn" id="cs">Guardar cambios</button></div>`;
+  const bases = Array.isArray(c.bases) ? c.bases : (c.baseMaps ? [{ nombre: c.baseNombre, maps: c.baseMaps }] : []);
+  const baseRow = (b = {}) => `<div class="adm-grid base-row" style="margin-bottom:12px;align-items:end">
+      <label><span>Localidad / nombre</span><input class="b-n" value="${e(b.nombre || "")}" placeholder="Ej: Posadas, Misiones"></label>
+      <label><span>Link Google Maps</span><input class="b-m" value="${e(b.maps || "")}"></label>
+      <label><span>Detalle (opcional)</span><input class="b-d" value="${e(b.detalle || "")}" placeholder="Ej: Nave en Ruta 12 km 5"></label>
+      <button type="button" class="sbtn del b-x">Quitar</button></div>`;
+  $("#bases").innerHTML = (bases.length ? bases : [{}]).map(baseRow).join("");
+  $("#bases").onclick = ev => { if (ev.target.classList.contains("b-x")) ev.target.closest(".base-row").remove(); };
+  $("#addBase").onclick = () => $("#bases").insertAdjacentHTML("beforeend", baseRow());
   $("#cs").onclick = ev => busy(ev.target, async () => {
     let aboutImg = c.aboutImg || "";
     const fi = $("#ai").files[0]; if (fi) aboutImg = (await uploadMany([fi], $(".prog", $("#ab"))))[0];
     const v = id => $("#" + id).value.trim();
     await fs.setDoc(ref, { whatsapp: v("cw").replace(/\D/g, ""), email: v("ce"), instagram: v("ci").replace("@", ""), instagramUrl: v("ciu"),
-      tallerNombre: v("tn"), tallerMaps: v("tm"), baseNombre: v("bn"), baseMaps: v("bm"),
+      tallerNombre: v("tn"), tallerMaps: v("tm"),
+      bases: $$(".base-row").map(r => ({ nombre: $(".b-n", r).value.trim(), maps: $(".b-m", r).value.trim(), detalle: $(".b-d", r).value.trim() })).filter(b => b.nombre || b.maps),
+      baseNombre: fs.deleteField(), baseMaps: fs.deleteField(),
       stats: { years: v("s1"), vehicles: v("s2"), provinces: v("s3"), ops: v("s4") }, aboutImg }, { merge: true });
     alert("Guardado."); config();
   });

@@ -20,9 +20,21 @@ function applyLang(lang) {
   $$("[data-i18n]").forEach(el => { const v = t(el.dataset.i18n); if (v) el.textContent = v; });
   $$(".lang button").forEach(b => b.classList.toggle("on", b.dataset.lang === lang));
   try { localStorage.setItem("lang", lang); } catch {}
-  renderStats(); renderTicker(); renderOps();
+  renderStats(); renderTicker(); renderOps(); renderConfig();
 }
 $$(".lang button").forEach(b => b.onclick = () => applyLang(b.dataset.lang));
+
+/* ================= tema claro / oscuro ================= */
+const isLight = () => document.documentElement.dataset.theme === "light";
+$("#themeBtn").onclick = () => {
+  const next = isLight() ? "dark" : "light";
+  document.documentElement.dataset.theme = next;
+  try { localStorage.setItem("theme", next); } catch {}
+  setTiles();
+};
+const tileURL = () => `https://{s}.basemaps.cartocdn.com/${isLight() ? "light_all" : "dark_all"}/{z}/{x}/{y}{r}.png`;
+let tiles;
+function setTiles() { if (tiles) tiles.setUrl(tileURL()); }
 
 /* ================= nav ================= */
 const nav = $("#nav");
@@ -64,7 +76,7 @@ const observeReveal = () => $$(".reveal:not(.in)").forEach(el => rev.observe(el)
         }
         px ? x.lineTo(px, y0 + dy) : x.moveTo(px, y0 + dy);
       }
-      x.strokeStyle = hl ? "rgba(221,60,51,.75)" : "rgba(255,255,255,.22)";
+      x.strokeStyle = hl ? "rgba(221,60,51,.75)" : (isLight() ? "rgba(17,17,19,.2)" : "rgba(255,255,255,.22)");
       x.lineWidth = hl ? 1.4 : 1;
       x.stroke();
     }
@@ -93,7 +105,13 @@ function renderConfig() {
   const c = state.cfg;
   renderStats();
   $("#locMain").href = c.tallerMaps; $("#locMainName").textContent = c.tallerNombre || "Chapistería Omar";
-  $("#locBase").href = c.baseMaps; $("#locBaseName").textContent = c.baseNombre || "Chapistería Omar Solutions";
+  const bases = Array.isArray(c.bases) ? c.bases.filter(b => b.nombre || b.maps)
+    : (c.baseMaps ? [{ nombre: c.baseNombre, maps: c.baseMaps }] : []);
+  $("#locBases").innerHTML = bases.map(b => `<a class="loc loc-live reveal in"${b.maps ? ` href="${esc(b.maps)}" target="_blank" rel="noopener"` : ""}>
+      <span class="loc-tag"><span class="pulse"></span><span>${t("loc.base")}</span></span>
+      <h3>${esc(b.nombre || "Chapistería Omar Solutions")}</h3>
+      <p>${esc(b.detalle || t("loc.baseD"))}</p>
+      ${b.maps ? `<span class="loc-go"><span>${t("loc.go")}</span> →</span>` : ""}</a>`).join("");
   $("#igLink").href = c.instagramUrl || `https://instagram.com/${c.instagram}`;
   $("#igHandle").textContent = "@" + (c.instagram || "").replace("@", "");
   if (c.whatsapp) {
@@ -132,7 +150,7 @@ let map, layer;
 function initMap() {
   if (map || !window.L) return;
   map = L.map("opsMap", { scrollWheelZoom: false, zoomControl: true, attributionControl: true }).setView([-36.5, -63.5], 4);
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+  tiles = L.tileLayer(tileURL(), {
     attribution: '&copy; OpenStreetMap &copy; CARTO', subdomains: "abcd", maxZoom: 18
   }).addTo(map);
   layer = L.layerGroup().addTo(map);
@@ -223,7 +241,11 @@ async function loadData() {
   const [cfgSnap, works, ops, clients, reviews] = await Promise.all([
     fs.getDoc(fs.doc(db, "site", "config")).catch(() => null), get("works"), get("ops"), get("clients"), get("reviews")
   ]);
-  if (cfgSnap?.exists()) state.cfg = { ...DEFAULTS, ...cfgSnap.data(), stats: { ...DEFAULTS.stats, ...(cfgSnap.data().stats || {}) } };
+  if (cfgSnap?.exists()) {
+    const d = cfgSnap.data();
+    state.cfg = { ...DEFAULTS, ...d, stats: { ...DEFAULTS.stats, ...(d.stats || {}) } };
+    if (!Array.isArray(d.bases) && d.baseMaps) state.cfg.bases = [{ nombre: d.baseNombre, maps: d.baseMaps }];
+  }
   Object.assign(state, { works, ops, clients, reviews });
   renderConfig(); renderWorks(); renderOps(); renderClients(); renderReviews(); observeReveal();
 }

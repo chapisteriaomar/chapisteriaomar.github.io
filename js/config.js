@@ -27,8 +27,8 @@ export const DEFAULTS = {
   instagramUrl: "https://www.instagram.com/chapisteriaomarsrl/",
   tallerNombre: "Chapistería Omar",
   tallerMaps: "https://share.google/7TK7TCiUOezFoH4EV",
-  baseNombre: "Base operativa actual",
-  baseMaps: "https://share.google/lCsnMDGQqBL9QDPB0",
+  // Operativos móviles activos (pueden ser varios a la vez; se editan en admin → Config)
+  bases: [{ nombre: "Chapistería Omar Solutions", maps: "https://share.google/lCsnMDGQqBL9QDPB0" }],
   // Cifras del hero: se completan en admin → Config (las vacías no se muestran)
   stats: { years: "", vehicles: "", provinces: "", ops: "" },
   companias: []                 // nombres de compañías (se cargan en admin)
