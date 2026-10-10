@@ -1,4 +1,4 @@
-import { CLOUDINARY } from "./config.js?v=15";
+import { CLOUDINARY } from "./config.js?v=16";
 
 const FB = "https://www.gstatic.com/firebasejs/10.12.4/";
 const $ = (s, r = document) => r.querySelector(s);
@@ -598,7 +598,7 @@ async function config() {
 /* ================= TEXTOS DE LA WEB ================= */
 // Los originales están en js/i18n.js (BASE, sin modificar); lo editado se guarda en site/texts { es: {clave: texto}, en: {...} }
 let BASE_TX = null;
-async function loadBase() { if (!BASE_TX) BASE_TX = (await import("./i18n.js?v=15&base=1")).I18N; return BASE_TX; }
+async function loadBase() { if (!BASE_TX) BASE_TX = (await import("./i18n.js?v=16&base=1")).I18N; return BASE_TX; }
 async function saveText(lang, key, value) {
   await fs.setDoc(fs.doc(db, "site", "texts"), { [lang]: { [key]: value == null ? fs.deleteField() : value } }, { merge: true });
 }

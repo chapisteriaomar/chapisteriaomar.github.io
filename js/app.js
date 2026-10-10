@@ -1,5 +1,5 @@
-import { FIREBASE_CONFIG, DEFAULTS } from "./config.js?v=15";
-import { I18N } from "./i18n.js?v=15";
+import { FIREBASE_CONFIG, DEFAULTS } from "./config.js?v=16";
+import { I18N } from "./i18n.js?v=16";
 // Textos originales (los editados desde el panel se guardan en Firestore: site/texts)
 const BASE = JSON.parse(JSON.stringify(I18N));
 function applyTexts(over) { for (const l of Object.keys(BASE)) I18N[l] = { ...BASE[l], ...(over?.[l] || {}) }; }
@@ -322,7 +322,7 @@ async function checkAdmin() {
   if (!FIREBASE_CONFIG.apiKey) { alert("Falta completar FIREBASE_CONFIG en js/config.js"); return; }
   try {
     await initFirebase();
-    const m = await import("./admin.js?v=15");
+    const m = await import("./admin.js?v=16");
     await m.openAdmin(state, { reload: loadData, cld, esc });
   } catch (er) {
     console.error(er);
@@ -338,5 +338,5 @@ applyLang(saved);
 renderConfig(); renderWorks(); renderClients(); renderReviews(); observeReveal();
 const editMode = new URLSearchParams(location.search).has("edit") && window.parent !== window;
 loadData().catch(er => console.error("Carga de datos:", er)).then(() => editMode
-  ? import("./editor.js?v=15").then(m => m.initEditor({ state, t, I18N, BASE, applyLang }))
+  ? import("./editor.js?v=16").then(m => m.initEditor({ state, t, I18N, BASE, applyLang }))
   : checkAdmin());

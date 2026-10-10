@@ -48,7 +48,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,500;0,700;0,800;1,700;1,800&family=Archivo:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-<link rel="stylesheet" href="css/style.css?v=15">
+<link rel="stylesheet" href="css/style.css?v=16">
 <script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}
 try{if(localStorage.getItem("mobileOff")==="1"&&matchMedia("(max-width:900px)").matches&&!/#admin/.test(location.hash)&&!/[?&]edit/.test(location.search))document.documentElement.classList.add("mob-off")}catch(e){}</script>
 </head>
@@ -312,14 +312,16 @@ try{if(localStorage.getItem("mobileOff")==="1"&&matchMedia("(max-width:900px)").
 <!-- ============ PRÓXIMAMENTE EN CELULARES ============ -->
 <div class="mob" id="mobOff" aria-live="polite">
   <div class="mob-in">
-    <img class="logo-dark" src="assets/logo-grande.svg" alt="Chapistería Omar Solutions">
-    <img class="logo-light" src="assets/logo-grande-dark.svg" alt="Chapistería Omar Solutions">
+    <div class="mob-top">
+      <img class="logo-dark" src="assets/logo-grande.svg" alt="Chapistería Omar Solutions">
+      <img class="logo-light" src="assets/logo-grande-dark.svg" alt="Chapistería Omar Solutions">
+    </div>
     <h2 class="mob-t" data-i18n="mob.title">Muy pronto
 en celular</h2>
     <div class="mob-b">
       <a class="btn btn-ghost" id="mobIg" target="_blank" rel="noopener" data-i18n="mob.ig">Ver Instagram</a>
+      <span class="mob-url">chapisteriaomar.com</span>
     </div>
-    <span class="mob-url">chapisteriaomar.com</span>
   </div>
 </div>
 
@@ -327,6 +329,6 @@ en celular</h2>
 <div class="adm" id="adm" hidden></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script type="module" src="js/app.js?v=15"></script>
+<script type="module" src="js/app.js?v=16"></script>
 </body>
 </html>
