@@ -1,4 +1,4 @@
-import { CLOUDINARY } from "./config.js?v=13";
+import { CLOUDINARY } from "./config.js?v=14";
 
 const FB = "https://www.gstatic.com/firebasejs/10.12.4/";
 const $ = (s, r = document) => r.querySelector(s);
@@ -544,7 +544,7 @@ async function config() {
   const f = (id, label, v, ph = "") => `<label class="f"><span>${label}</span><input id="${id}" value="${e(v ?? "")}" placeholder="${e(ph)}"></label>`;
   $("#vc").innerHTML = `
     <div class="ad-card" style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
-      <div><h2>Web en celulares</h2><p class="sub" style="margin:0">Apagada: en el celular se ve el aviso "Muy pronto en tu celular" con WhatsApp e Instagram. En la compu se ve normal.</p></div>
+      <div><h2>Web en celulares</h2><p class="sub" style="margin:0">Apagada: en el celular se ve el aviso "Muy pronto en tu celular" con el botón de Instagram. En la compu se ve normal.</p></div>
       <label class="switch"><input type="checkbox" id="mobT"${c.mobileOff ? "" : " checked"}><i></i><span id="mobL">${c.mobileOff ? "Apagada" : "Encendida"}</span></label></div>
     <div class="ad-card"><h2>Operativos móviles en curso</h2><p class="sub">Uno por cada localidad donde estén trabajando ahora. Aparecen todos en "Dónde encontrarnos".</p>
       <div id="bases"></div><button type="button" class="b ghost" id="addBase">+ Agregar operativo móvil</button></div>
@@ -598,7 +598,7 @@ async function config() {
 /* ================= TEXTOS DE LA WEB ================= */
 // Los originales están en js/i18n.js (BASE, sin modificar); lo editado se guarda en site/texts { es: {clave: texto}, en: {...} }
 let BASE_TX = null;
-async function loadBase() { if (!BASE_TX) BASE_TX = (await import("./i18n.js?v=13&base=1")).I18N; return BASE_TX; }
+async function loadBase() { if (!BASE_TX) BASE_TX = (await import("./i18n.js?v=14&base=1")).I18N; return BASE_TX; }
 async function saveText(lang, key, value) {
   await fs.setDoc(fs.doc(db, "site", "texts"), { [lang]: { [key]: value == null ? fs.deleteField() : value } }, { merge: true });
 }

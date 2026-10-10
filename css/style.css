@@ -360,7 +360,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .mob-in{position:relative;max-width:420px;width:100%;text-align:center;display:flex;flex-direction:column;align-items:center}
 .mob-in img{width:min(250px,70vw);margin-bottom:34px}
 .mob-in .kicker{justify-content:center}
-.mob-t{font:800 italic clamp(40px,12vw,58px)/.92 var(--disp);text-transform:uppercase;margin-bottom:16px}
+.mob-t{font:800 italic clamp(40px,12vw,58px)/.92 var(--disp);text-transform:uppercase;margin-bottom:30px}
 .mob-p{color:var(--soft);font-size:16px;margin-bottom:28px}
 .mob-b{display:grid;gap:12px;width:100%}
 .mob-b .btn{width:100%}

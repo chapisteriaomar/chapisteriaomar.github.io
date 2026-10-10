@@ -1,5 +1,5 @@
-import { FIREBASE_CONFIG, DEFAULTS } from "./config.js?v=13";
-import { I18N } from "./i18n.js?v=13";
+import { FIREBASE_CONFIG, DEFAULTS } from "./config.js?v=14";
+import { I18N } from "./i18n.js?v=14";
 // Textos originales (los editados desde el panel se guardan en Firestore: site/texts)
 const BASE = JSON.parse(JSON.stringify(I18N));
 function applyTexts(over) { for (const l of Object.keys(BASE)) I18N[l] = { ...BASE[l], ...(over?.[l] || {}) }; }
@@ -287,18 +287,8 @@ function applyMobileOff() {
   const skip = location.hash === "#admin" || new URLSearchParams(location.search).has("edit");
   document.documentElement.classList.toggle("mob-off", on && small && !skip);
   const c = state.cfg;
-  const n = String(c.whatsapp || "").replace(/\D/g, "");
-  $("#mobWa").hidden = !n;
-  if (n) $("#mobWa").href = `https://wa.me/${n}?text=${encodeURIComponent("Hola, los contacto desde chapisteriaomar.com")}`;
   $("#mobIg").href = c.instagramUrl || `https://instagram.com/${c.instagram}`;
 }
-$("#mobCopy").onclick = async () => {
-  const url = "https://chapisteriaomar.com";
-  try { await navigator.clipboard.writeText(url); }
-  catch { const i = document.createElement("input"); i.value = url; document.body.append(i); i.select(); document.execCommand("copy"); i.remove(); }
-  $("#mobCopy").textContent = t("mob.copied");
-  setTimeout(() => $("#mobCopy").textContent = t("mob.copy"), 2200);
-};
 addEventListener("hashchange", () => { if (location.hash === "#admin") document.documentElement.classList.remove("mob-off"); });
 
 /* ================= contacto ================= */
@@ -332,7 +322,7 @@ async function checkAdmin() {
   if (!FIREBASE_CONFIG.apiKey) { alert("Falta completar FIREBASE_CONFIG en js/config.js"); return; }
   try {
     await initFirebase();
-    const m = await import("./admin.js?v=13");
+    const m = await import("./admin.js?v=14");
     await m.openAdmin(state, { reload: loadData, cld, esc });
   } catch (er) {
     console.error(er);
@@ -348,5 +338,5 @@ applyLang(saved);
 renderConfig(); renderWorks(); renderClients(); renderReviews(); observeReveal();
 const editMode = new URLSearchParams(location.search).has("edit") && window.parent !== window;
 loadData().catch(er => console.error("Carga de datos:", er)).then(() => editMode
-  ? import("./editor.js?v=13").then(m => m.initEditor({ state, t, I18N, BASE, applyLang }))
+  ? import("./editor.js?v=14").then(m => m.initEditor({ state, t, I18N, BASE, applyLang }))
   : checkAdmin());
