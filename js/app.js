@@ -274,9 +274,32 @@ async function loadData() {
     state.cfg = { ...DEFAULTS, ...d, stats: { ...DEFAULTS.stats, ...(d.stats || {}) } };
     if (!Array.isArray(d.bases) && d.baseMaps) state.cfg.bases = [{ nombre: d.baseNombre, maps: d.baseMaps }];
   }
+  applyMobileOff();
   Object.assign(state, { works, ops, clients, reviews });
   renderConfig(); renderWorks(); renderOps(); renderClients(); renderReviews(); observeReveal();
 }
+
+/* ================= aviso "próximamente en celulares" ================= */
+function applyMobileOff() {
+  const on = !!state.cfg.mobileOff;
+  try { localStorage.setItem("mobileOff", on ? "1" : "0"); } catch {}
+  const small = matchMedia("(max-width:900px)").matches;
+  const skip = location.hash === "#admin" || new URLSearchParams(location.search).has("edit");
+  document.documentElement.classList.toggle("mob-off", on && small && !skip);
+  const c = state.cfg;
+  const n = String(c.whatsapp || "").replace(/\D/g, "");
+  $("#mobWa").hidden = !n;
+  if (n) $("#mobWa").href = `https://wa.me/${n}?text=${encodeURIComponent("Hola, los contacto desde chapisteriaomar.com")}`;
+  $("#mobIg").href = c.instagramUrl || `https://instagram.com/${c.instagram}`;
+}
+$("#mobCopy").onclick = async () => {
+  const url = "https://chapisteriaomar.com";
+  try { await navigator.clipboard.writeText(url); }
+  catch { const i = document.createElement("input"); i.value = url; document.body.append(i); i.select(); document.execCommand("copy"); i.remove(); }
+  $("#mobCopy").textContent = t("mob.copied");
+  setTimeout(() => $("#mobCopy").textContent = t("mob.copy"), 2200);
+};
+addEventListener("hashchange", () => { if (location.hash === "#admin") document.documentElement.classList.remove("mob-off"); });
 
 /* ================= contacto ================= */
 $("#leadForm").addEventListener("submit", async e => {
@@ -309,7 +332,7 @@ async function checkAdmin() {
   if (!FIREBASE_CONFIG.apiKey) { alert("Falta completar FIREBASE_CONFIG en js/config.js"); return; }
   try {
     await initFirebase();
-    const m = await import("./admin.js?v=10");
+    const m = await import("./admin.js?v=12");
     await m.openAdmin(state, { reload: loadData, cld, esc });
   } catch (er) {
     console.error(er);

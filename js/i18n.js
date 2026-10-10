@@ -58,6 +58,9 @@ export const I18N = {
     "contact.wa": "WhatsApp directo", "contact.mail": "Email",
     "foot.tag": "Desabollado sin pintura y gestión de siniestros por granizo.",
     "foot.rights": "Todos los derechos reservados.",
+    "mob.kicker": "Versión móvil en camino", "mob.title": "Muy pronto en tu celular.",
+    "mob.text": "Estamos terminando la versión para celulares. Mientras tanto, entrá desde una computadora para vivir la experiencia completa: operativos en el mapa, trabajos antes y después, y mucho más.",
+    "mob.wa": "Escribinos por WhatsApp", "mob.ig": "Ver Instagram", "mob.copy": "Copiar link para la compu", "mob.copied": "¡Link copiado!",
     "close": "Cerrar", "before": "Antes", "after": "Después",
     "ticker.1": "Desabollado sin pintura", "ticker.2": "Granizo", "ticker.3": "Operativos móviles", "ticker.4": "Aseguradoras", "ticker.5": "Flotas", "ticker.6": "Argentina y exterior"
   },
@@ -120,6 +123,9 @@ export const I18N = {
     "contact.wa": "WhatsApp", "contact.mail": "Email",
     "foot.tag": "Paintless dent repair and hail claim management.",
     "foot.rights": "All rights reserved.",
+    "mob.kicker": "Mobile version on the way", "mob.title": "Coming soon to your phone.",
+    "mob.text": "We're finishing the mobile version. In the meantime, visit us from a computer for the full experience: live operations map, before & after work and much more.",
+    "mob.wa": "Message us on WhatsApp", "mob.ig": "View Instagram", "mob.copy": "Copy link for desktop", "mob.copied": "Link copied!",
     "close": "Close", "before": "Before", "after": "After",
     "ticker.1": "Paintless Dent Repair", "ticker.2": "Hail Damage", "ticker.3": "Mobile Operations", "ticker.4": "Insurers", "ticker.5": "Fleets", "ticker.6": "Argentina & abroad"
   }

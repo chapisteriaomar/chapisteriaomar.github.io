@@ -350,3 +350,19 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 /* trabajos: ver más */
 .grid-work.clip{max-height:var(--clipH);overflow:hidden;-webkit-mask-image:linear-gradient(#000 70%,transparent);mask-image:linear-gradient(#000 70%,transparent)}
 .more-wrap{display:flex;justify-content:center;margin-top:18px}
+
+/* ---------- aviso "próximamente en celulares" ---------- */
+.mob{display:none}
+.mob-off .mob{display:flex;position:fixed;inset:0;z-index:150;background:var(--bg);overflow-y:auto;padding:32px 22px;align-items:center;justify-content:center}
+.mob-off body{overflow:hidden}
+.mob-off .nav,.mob-off .ticker{visibility:hidden}
+.mob::before{content:"";position:absolute;inset:0;background:radial-gradient(70% 50% at 50% 30%,var(--redDim),transparent 70%),repeating-linear-gradient(0deg,transparent 0 17px,rgba(127,127,127,.06) 17px 18px);pointer-events:none}
+.mob-in{position:relative;max-width:420px;width:100%;text-align:center;display:flex;flex-direction:column;align-items:center}
+.mob-in img{width:min(250px,70vw);margin-bottom:34px}
+.mob-in .kicker{justify-content:center}
+.mob-t{font:800 italic clamp(40px,12vw,58px)/.92 var(--disp);text-transform:uppercase;margin-bottom:16px}
+.mob-p{color:var(--soft);font-size:16px;margin-bottom:28px}
+.mob-b{display:grid;gap:12px;width:100%}
+.mob-b .btn{width:100%}
+.mob-copy{margin-top:4px;color:var(--muted);font:600 14px var(--body);text-decoration:underline;text-underline-offset:3px;padding:8px}
+.mob-url{margin-top:26px;font:700 13px var(--disp);letter-spacing:.3em;color:var(--dim)}
