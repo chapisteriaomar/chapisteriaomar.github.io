@@ -321,17 +321,36 @@ html{scroll-padding-top:90px}
 .step-n:empty{display:none}
 
 /* botón flotante de Instagram, siempre abajo a la derecha */
-.ig-fab{position:fixed;right:max(18px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom));z-index:55;width:54px;height:54px;border-radius:50%;display:grid;place-items:center;color:var(--ink);transition:transform .25s,background .25s}
-.ig-fab:hover{transform:scale(1.08);background:linear-gradient(135deg,#f58529,#dd2a7b 50%,#8134af);color:#fff}
+.ig-fab{position:fixed;right:calc(var(--gut) + 11px);bottom:max(18px,env(safe-area-inset-bottom));z-index:55;width:54px;height:54px;border-radius:50%;display:grid;place-items:center;color:var(--ink)}
 .ig-fab svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.9}
 .cms .ig-fab{display:none}
 
 /* flechas del carrusel de ubicaciones: solo indican que se puede deslizar (no se tocan) */
-.cf-hint{position:absolute;bottom:88px;z-index:3;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;pointer-events:none;color:#fff;background:rgba(0,0,0,.35);border:1px solid var(--edge);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:opacity .3s}
 .cf-hint svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
-.cf-hint.l{left:12px}.cf-hint.r{right:12px}
+.cf-hint.l{left:4px}.cf-hint.r{right:4px}
 .at-start .cf-hint.l,.at-end .cf-hint.r{opacity:0}
 @media(prefers-reduced-motion:no-preference){.cf-hint.l svg{animation:nudgeL 1.6s ease-in-out infinite}.cf-hint.r svg{animation:nudgeR 1.6s ease-in-out infinite}}
 @keyframes nudgeL{50%{transform:translateX(-4px)}}
 @keyframes nudgeR{50%{transform:translateX(4px)}}
-@media(max-width:700px){.cf-hint{bottom:auto;top:calc(clamp(420px,62vh,640px) + 95px);width:34px;height:34px}}
+.cf-hint{position:absolute;top:var(--cfy,70%);transform:translateY(-50%);z-index:3;width:30px;height:44px;display:grid;place-items:center;pointer-events:none;color:rgba(255,255,255,.55);transition:opacity .3s}
+.cf-hint svg{filter:drop-shadow(0 1px 3px rgba(0,0,0,.6))}
+
+/* créditos del mapa (obligatorios por la licencia de OpenStreetMap): chicos y oscuros en vez del recuadro blanco */
+.maplibregl-ctrl-attrib,.maplibregl-ctrl-attrib.maplibregl-compact{background:transparent!important;color:rgba(255,255,255,.3)!important;font-size:9px!important}
+.maplibregl-ctrl-attrib a{color:inherit!important}
+.maplibregl-ctrl-attrib-button{filter:invert(1);opacity:.25}
+:root[data-theme="light"] .maplibregl-ctrl-attrib{color:rgba(0,0,0,.35)!important}
+:root[data-theme="light"] .maplibregl-ctrl-attrib-button{filter:none}
+
+/* pie: solo logo, frase y derechos */
+.foot-g{grid-template-columns:1fr}
+/* WhatsApp y email al final del formulario */
+.form .direct{margin-top:4px}
+
+@media(max-width:700px){
+  .xp{height:100svh}
+  .dc-stick{height:66svh}
+  .dc-stage li{top:40%}
+  .dc + .sec{padding-top:28px}
+}
+@media(max-width:600px){.ig-fab{right:calc(var(--gut) + 8px);width:48px;height:48px}}

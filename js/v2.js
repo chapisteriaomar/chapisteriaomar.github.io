@@ -19,7 +19,7 @@ function applyLang(lang) {
   $$("[data-i18n]").forEach(el => el.textContent = t(el.dataset.i18n));
   $$(".lang button").forEach(b => b.classList.toggle("on", b.dataset.l === lang));
   $("#mq").innerHTML = [1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5, 6].map(i => t("ticker." + i)).filter(Boolean).map(s => `<span>${esc(s)}</span>`).join("");
-  splitHero(); splitReveal(); renderStats();
+  splitHero(); renderStats();
 }
 $$(".lang button").forEach(b => b.onclick = () => applyLang(b.dataset.l));
 
@@ -38,10 +38,10 @@ function splitHero() {
   let i = 0;
   $$("#xpText .fx").forEach(el => el.innerHTML = el.textContent.split(/(\s+)/).map(w => /^\s*$/.test(w) ? w : `<span class="bw" style="--i:${i++}">${esc(w)}</span>`).join(""));
 }
-// scroll reveal: los títulos de sección se parten en palabras que se aclaran al bajar
+// scroll reveal: títulos, etiquetas, textos y cifras se parten en palabras que se aclaran al bajar
 function splitReveal() {
   if (editMode || calm) return;
-  $$(".h2").forEach(el => { el.classList.add("sr"); el.innerHTML = el.textContent.split(/(\s+)/).map(w => /^\s*$/.test(w) ? w : `<span class="sw">${esc(w)}</span>`).join(""); });
+  $$(".h2, .eyebrow, .lead, .stat span").forEach(el => { el.classList.add("sr"); el.innerHTML = el.textContent.split(/(\s+)/).map(w => /^\s*$/.test(w) ? w : `<span class="sw">${esc(w)}</span>`).join(""); });
 }
 function updReveal() {
   $$(".sr").forEach(el => {
@@ -80,6 +80,7 @@ function renderStats() {
   $("#stats").innerHTML = [["years", "stat.years"], ["vehicles", "stat.vehicles"], ["provinces", "stat.provinces"], ["ops", "stat.ops"]].filter(([k]) => s[k])
     .map(([k, l]) => `<div class="stat glass rv in"><b data-v="${esc(s[k])}">${esc(s[k])}</b><span>${esc(t(l))}</span></div>`).join("");
   $$("#stats b").forEach(b => cio.observe(b));
+  splitReveal(); // incluye las etiquetas de las cifras
 }
 
 /* ================= scroll: video que se expande, logo que se achica, pasos en profundidad ================= */
@@ -87,11 +88,12 @@ const xp = $("#top"), frame = $("#xpFrame"), txt = $("#xpText"), hdr = $("#hdr")
 const dc = $("#operativo"), steps = $$("#dcStage li");
 const prog = el => Math.min(Math.max(-el.getBoundingClientRect().top / (el.offsetHeight - innerHeight), 0), 1);
 function onScroll() {
-  const e = Math.min(prog(xp) / .7, 1), k = 1 - e, side = Math.max(16, innerWidth * .025);
+  // en celular el video queda enmarcado (no se expande); en compu crece hasta ocupar la pantalla
+  const mob = innerWidth < 700, e = mob ? 0 : Math.min(prog(xp) / .7, 1), k = 1 - e, side = Math.max(16, innerWidth * .025);
   frame.style.setProperty("--t", 96 * k + "px"); frame.style.setProperty("--b", side * k + "px");
   frame.style.setProperty("--s", side * k + "px"); frame.style.setProperty("--r", 28 * k + "px");
   txt.style.opacity = Math.max(1 - e * 1.6, 0); txt.style.transform = `translateY(${-e * 70}px)`;
-  hdr.style.setProperty("--lg", Math.max(1 - e * 2.5, 0));
+  hdr.style.setProperty("--lg", Math.max(1 - (mob ? scrollY / 160 : e * 2.5), 0));
   // barra de arriba: 0% arriba de todo, 100% al llegar a Contacto
   hdr.style.setProperty("--pg", Math.min(Math.max(scrollY / Math.max($("#contacto").offsetTop - innerHeight * .4, 1), 0), 1));
   // el desenfoque de abajo se apaga al final para no tapar el pie
@@ -136,10 +138,11 @@ function sfx(kind) {
   } catch {}
 }
 
-/* ================= botón de cotización: suena y, al tocarlo, se apaga el desenfoque hasta que el mouse sale ================= */
-const ctaTop = $(".cta-top");
-ctaTop.addEventListener("click", () => { sfx("tick"); document.documentElement.classList.add("cta-done"); });
-ctaTop.addEventListener("pointerleave", () => document.documentElement.classList.remove("cta-done"));
+/* ================= botones de cotización e Instagram: suenan y, al tocarlos, se apaga el desenfoque hasta que el mouse sale ================= */
+$$(".cta-top").forEach(b => {
+  b.addEventListener("click", () => { sfx("tick"); document.documentElement.classList.add("cta-done"); });
+  b.addEventListener("pointerleave", () => document.documentElement.classList.remove("cta-done"));
+});
 
 /* ================= magnet: los botones principales se acercan al cursor ================= */
 if (!calm && matchMedia("(pointer:fine)").matches) $$(".mag").forEach(el => {
@@ -175,10 +178,9 @@ function render() {
   $("#sustImg").hidden = !sImg; $("#sust").classList.toggle("solo", !sImg);
   if (sImg) $("#sustImg").innerHTML = `<img src="${esc(cld(sImg, 1000))}" alt="" loading="lazy">`;
   const wa = String(cfg.whatsapp || "").replace(/\D/g, "");
-  if (wa) { $("#waLink").href = `https://wa.me/${wa}?text=${encodeURIComponent("Hola, los contacto desde chapisteriaomar.com")}`; $("#waText").textContent = "+" + wa; $("#fWa").innerHTML = `<a href="https://wa.me/${wa}">+${wa}</a>`; }
-  if (cfg.email) { $("#mailLink").href = "mailto:" + cfg.email; $("#mailText").textContent = cfg.email; $("#fMail").innerHTML = `<a href="mailto:${esc(cfg.email)}">${esc(cfg.email)}</a>`; }
-  $("#fIg").href = cfg.instagramUrl || `https://instagram.com/${cfg.instagram}`; $("#fIg").textContent = "@" + cfg.instagram;
-  $("#igFab").href = $("#fIg").href;
+  if (wa) { $("#waLink").href = `https://wa.me/${wa}?text=${encodeURIComponent("Hola, los contacto desde chapisteriaomar.com")}`; $("#waText").textContent = "+" + wa; }
+  if (cfg.email) { $("#mailLink").href = "mailto:" + cfg.email; $("#mailText").textContent = cfg.email; }
+  $("#igFab").href = cfg.instagramUrl || `https://instagram.com/${cfg.instagram}`;
   renderLocs(); renderMap(); reveal(); onScroll();
 }
 
@@ -205,6 +207,8 @@ function coverflow() {
   const mid = cf.scrollLeft + cf.clientWidth / 2;
   // las flechas (solo visuales) se apagan en los extremos del carrusel
   cf.parentNode.classList.toggle("at-start", cf.scrollLeft < 20); cf.parentNode.classList.toggle("at-end", cf.scrollLeft > cf.scrollWidth - cf.clientWidth - 20);
+  // flechas a la altura del centro de las tarjetas
+  const c0 = $(".loc", cf); if (c0) { const br = cf.parentNode.getBoundingClientRect(), cr = c0.getBoundingClientRect(); cf.parentNode.style.setProperty("--cfy", cr.top - br.top + cr.height / 2 + "px"); }
   $$(".loc", cf).forEach(el => {
     const d = Math.max(-2, Math.min(2, (el.offsetLeft + el.offsetWidth / 2 - mid) / (el.offsetWidth + 20))), a = Math.abs(d);
     el.style.transform = `rotateY(${-d * 32}deg) translateZ(${-a * 130}px) scale(${1 - a * .06})`;
