@@ -84,6 +84,8 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .hero-title span{display:block}
 .hero-title .l2{color:var(--red)}
 .hero-title .l3{font-size:.34em;letter-spacing:.04em;line-height:1.2;color:var(--muted);margin-top:14px;font-style:normal;font-weight:700}
+@media(prefers-reduced-motion:no-preference){.hero-title span{animation:blurIn 1s cubic-bezier(.2,.7,.2,1) both}.hero-title .l2{animation-delay:.18s}.hero-title .l3{animation-delay:.36s}}
+@keyframes blurIn{from{opacity:0;filter:blur(12px);transform:translateY(-.25em)}}
 .hero-sub{max-width:560px;font-size:18px;color:var(--soft);margin-bottom:36px}
 .hero-ctas{display:flex;gap:16px;flex-wrap:wrap}
 .hero-stats{position:relative;z-index:2;display:grid;grid-template-columns:repeat(4,1fr);margin-top:72px;border-top:1px solid var(--line)}
@@ -136,6 +138,8 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .svc::after{content:"";position:absolute;left:0;top:0;height:3px;width:0;background:var(--red);transition:width .45s}
 .svc:hover{background:var(--card)}
 .svc:hover::after{width:100%}
+.svc::before{content:"";position:absolute;inset:0;background:radial-gradient(circle 280px at var(--mx,50%) var(--my,50%),var(--redDim),transparent 70%);opacity:0;transition:opacity .4s;pointer-events:none}
+.svc:hover::before{opacity:1}
 .svc-n{position:absolute;top:26px;right:28px;font:700 14px var(--disp);color:var(--dim);letter-spacing:.1em}
 .ico{width:44px;height:44px;fill:none;stroke:var(--red);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;margin-bottom:26px}
 .svc h3{font:800 italic 27px/1 var(--disp);text-transform:uppercase;margin-bottom:12px}
@@ -158,9 +162,9 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .filters button{padding:9px 16px;font:700 13px/1 var(--disp);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line2);transition:all .2s}
 .filters button:hover{color:var(--text)}
 .filters button.on{background:var(--text);color:var(--bg);border-color:var(--text)}
-.grid-work{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:220px;gap:10px}
-.wk{position:relative;overflow:hidden;background:var(--card);cursor:pointer}
-.wk.big{grid-column:span 2;grid-row:span 2}
+.grid-work{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:10px;gap:10px;--clip:450px}
+.wk{position:relative;overflow:hidden;background:var(--card);cursor:pointer;grid-row-end:span 22}
+.wk.big{grid-column:span 2}
 .wk img,.wk video{width:100%;height:100%;object-fit:cover;transition:transform .7s cubic-bezier(.2,.7,.2,1)}
 .wk:hover img{transform:scale(1.05)}
 .wk-cap{position:absolute;inset:auto 0 0;padding:40px 16px 14px;background:linear-gradient(transparent,rgba(0,0,0,.85));font:700 16px/1.15 var(--disp);text-transform:uppercase;letter-spacing:.04em;transform:translateY(8px);opacity:0;transition:all .3s}
@@ -168,8 +172,8 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .wk-tag{position:absolute;top:12px;left:12px;font:700 11px/1 var(--disp);letter-spacing:.14em;text-transform:uppercase;background:var(--red);padding:6px 9px}
 .wk-play{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
 .wk-play::before{content:"";width:0;height:0;border-left:22px solid #fff;border-block:14px solid transparent;filter:drop-shadow(0 2px 8px rgba(0,0,0,.6))}
-@media(max-width:900px){.grid-work{grid-template-columns:repeat(2,1fr);grid-auto-rows:180px}}
-@media(max-width:480px){.grid-work{grid-auto-rows:150px;gap:6px}}
+@media(max-width:900px){.grid-work{grid-template-columns:repeat(2,1fr);--clip:370px}}
+@media(max-width:480px){.grid-work{gap:6px;--clip:306px}}
 .empty{display:none;padding:60px 20px;text-align:center;color:var(--dim);border:1px dashed var(--line2)}
 .empty.show{display:block}
 
@@ -327,7 +331,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   .svc p{font-size:clamp(13px,1.8vh,15px);line-height:1.5}
   .svc-n{top:clamp(12px,2.4vh,26px)}
   /* trabajos */
-  .grid-work{grid-auto-rows:clamp(110px,21vh,220px)}
+  .grid-work{--clip:clamp(230px,43vh,450px)}
   /* mapa */
   .map-wrap{height:min(560px,58vh)}
   /* ubicaciones */

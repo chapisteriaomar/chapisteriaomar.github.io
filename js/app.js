@@ -1,5 +1,5 @@
-import { FIREBASE_CONFIG, DEFAULTS } from "./config.js?v=17";
-import { I18N } from "./i18n.js?v=17";
+import { FIREBASE_CONFIG, DEFAULTS } from "./config.js?v=18";
+import { I18N } from "./i18n.js?v=18";
 // Textos originales (los editados desde el panel se guardan en Firestore: site/texts)
 const BASE = JSON.parse(JSON.stringify(I18N));
 function applyTexts(over) { for (const l of Object.keys(BASE)) I18N[l] = { ...BASE[l], ...(over?.[l] || {}) }; }
@@ -94,10 +94,23 @@ const observeReveal = () => $$(".reveal:not(.in)").forEach(el => rev.observe(el)
 })();
 
 /* ================= render ================= */
+const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
 function renderStats() {
   const s = state.cfg.stats || {};
   const items = [["years", "stat.years"], ["vehicles", "stat.vehicles"], ["provinces", "stat.provinces"], ["ops", "stat.ops"]].filter(([k]) => s[k]);
   $("#heroStats").innerHTML = items.map(([k, l]) => `<div class="stat"><b>${esc(s[k])}</b><span>${t(l)}</span></div>`).join("");
+  if (!calm) $$("#heroStats b").forEach(countUp);
+}
+// "+1.500 autos" cuenta de 0 a 1500 conservando lo que va antes y después del número
+function countUp(el) {
+  const m = el.textContent.match(/^(\D*)(\d+(?:\.\d{3})*)(.*)$/); if (!m) return;
+  const end = +m[2].replace(/\./g, ""), dots = m[2].includes("."), t0 = performance.now();
+  const step = now => {
+    const p = Math.min((now - t0) / 1500, 1), v = Math.round(end * (1 - (1 - p) ** 3));
+    el.textContent = m[1] + (dots ? v.toLocaleString("es-AR") : v) + m[3];
+    if (p < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
 }
 function renderTicker() {
   const one = [1, 2, 3, 4, 5, 6].map(i => t("ticker." + i)).filter(Boolean)
@@ -143,13 +156,21 @@ function renderWorks() {
   $("#workEmpty").classList.toggle("show", !list.length);
   clipWorks(list.length);
   $$("#workGrid .wk").forEach(el => el.onclick = () => openLB(list.map(workToSlide), +el.dataset.i));
+  $$("#workGrid img, #workGrid video").forEach(m => m.addEventListener(m.tagName === "IMG" ? "load" : "loadedmetadata", () => clipWorks(list.length)));
+}
+// masonry: cada trabajo ocupa tantas filas de 10px como pide su foto
+function sizeWk(el) {
+  const m = el.querySelector("img,video"), w = m?.naturalWidth || m?.videoWidth, h = m?.naturalHeight || m?.videoHeight;
+  if (!w) return;
+  const gap = parseFloat(getComputedStyle(el.parentNode).rowGap) || 0;
+  el.style.gridRowEnd = `span ${Math.round((el.offsetWidth * h / w + gap) / (10 + gap))}`;
 }
 let worksOpen = false;
 function clipWorks(n) {
   const g = $("#workGrid"), wrap = $("#workMoreWrap"), btn = $("#workMore");
   g.classList.remove("clip");
-  const cs = getComputedStyle(g), row = parseFloat(cs.gridAutoRows) || 220, gap = parseFloat(cs.rowGap) || 10;
-  const clipH = row * 2 + gap;
+  $$("#workGrid .wk").forEach(sizeWk);
+  const clipH = parseFloat(getComputedStyle(g).getPropertyValue("--clip")) || 450;
   const tall = g.scrollHeight > clipH + 4;
   wrap.hidden = !tall;
   if (!tall) return;
@@ -322,7 +343,7 @@ async function checkAdmin() {
   if (!FIREBASE_CONFIG.apiKey) { alert("Falta completar FIREBASE_CONFIG en js/config.js"); return; }
   try {
     await initFirebase();
-    const m = await import("./admin.js?v=17");
+    const m = await import("./admin.js?v=18");
     await m.openAdmin(state, { reload: loadData, cld, esc });
   } catch (er) {
     console.error(er);
@@ -336,12 +357,17 @@ $("#year").textContent = new Date().getFullYear();
 let saved = "es"; try { saved = localStorage.getItem("lang") || (navigator.language?.startsWith("es") ? "es" : "en"); } catch {}
 applyLang(saved);
 renderConfig(); renderWorks(); renderClients(); renderReviews(); observeReveal();
+// spotlight: la luz de la tarjeta sigue al mouse
+$$(".svc").forEach(el => el.onpointermove = e => {
+  const r = el.getBoundingClientRect();
+  el.style.setProperty("--mx", e.clientX - r.left + "px"); el.style.setProperty("--my", e.clientY - r.top + "px");
+});
 const editMode = new URLSearchParams(location.search).has("edit") && window.parent !== window;
 // scroll suave (no en el editor ni con "reducir movimiento")
 // import dinámico: si el CDN falla, la web sigue andando con scroll normal
 let lenis = null;
-if (!editMode && !matchMedia("(prefers-reduced-motion: reduce)").matches)
+if (!editMode && !calm)
   import("https://cdn.jsdelivr.net/npm/lenis@1.3.25/dist/lenis.mjs").then(m => lenis = new m.default({ autoRaf: true, anchors: true })).catch(console.warn);
 loadData().catch(er => console.error("Carga de datos:", er)).then(() => editMode
-  ? import("./editor.js?v=17").then(m => m.initEditor({ state, t, I18N, BASE, applyLang }))
+  ? import("./editor.js?v=18").then(m => m.initEditor({ state, t, I18N, BASE, applyLang }))
   : checkAdmin());
