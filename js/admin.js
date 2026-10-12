@@ -62,8 +62,7 @@ function dbg(msg) {
   box.textContent = "DIAGNÓSTICO (sacale una captura)\n" + dlog.join("\n");
   if (!fs || !db || !auth?.currentUser) return;
   clearTimeout(dbg.t);
-  dbg.t = setTimeout(() => fs.setDoc(fs.doc(db, "site", "debug"), { log: dlog.slice(-40), ua: navigator.userAgent, vp: innerWidth + "x" + innerHeight, at: new Date().toISOString() }).catch(er => { document.getElementById("dbgBox").textContent += "
-(no se pudo guardar el registro: " + (er.code || er.message) + ")"; }), 400);
+  dbg.t = setTimeout(() => fs.setDoc(fs.doc(db, "site", "debug"), { log: dlog.slice(-40), ua: navigator.userAgent, vp: innerWidth + "x" + innerHeight, at: new Date().toISOString() }).catch(er => { document.getElementById("dbgBox").textContent += "\n(no se pudo guardar el registro: " + (er.code || er.message) + ")"; }), 400);
 }
 function note(er) {
   const d = document.createElement("div"); d.textContent = "Error: " + (er?.message || String(er));
