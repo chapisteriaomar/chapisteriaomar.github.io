@@ -1,5 +1,5 @@
-import { FIREBASE_CONFIG, DEFAULTS } from "./config.js?v=16";
-import { I18N } from "./i18n.js?v=16";
+import { FIREBASE_CONFIG, DEFAULTS } from "./config.js?v=17";
+import { I18N } from "./i18n.js?v=17";
 // Textos originales (los editados desde el panel se guardan en Firestore: site/texts)
 const BASE = JSON.parse(JSON.stringify(I18N));
 function applyTexts(over) { for (const l of Object.keys(BASE)) I18N[l] = { ...BASE[l], ...(over?.[l] || {}) }; }
@@ -156,7 +156,7 @@ function clipWorks(n) {
   g.style.setProperty("--clipH", clipH + "px");
   g.classList.toggle("clip", !worksOpen);
   btn.textContent = worksOpen ? t("work.less") : `${t("work.more")} (${n})`;
-  btn.onclick = () => { worksOpen = !worksOpen; clipWorks(n); if (!worksOpen) $("#work").scrollIntoView({ behavior: "smooth" }); };
+  btn.onclick = () => { worksOpen = !worksOpen; clipWorks(n); if (!worksOpen) lenis ? lenis.scrollTo("#work") : $("#work").scrollIntoView({ behavior: "smooth" }); };
 }
 addEventListener("resize", () => clipWorks(state.works.filter(workMatches).length));
 const workToSlide = w => ({ type: w.type, url: w.url, url2: w.url2, cap: w.title });
@@ -173,7 +173,7 @@ function initMap() {
   let fails = 0;
   tiles.on("tileerror", () => { if (++fails === 4) tiles.setUrl(OSM_URL); });
   layer = L.layerGroup().addTo(map);
-  map.on("click", () => map.scrollWheelZoom.enable());
+  map.on("click", () => { map.scrollWheelZoom.enable(); $("#opsMap").dataset.lenisPreventWheel = ""; });
 }
 function renderOps() {
   initMap(); if (!map) return;
@@ -322,7 +322,7 @@ async function checkAdmin() {
   if (!FIREBASE_CONFIG.apiKey) { alert("Falta completar FIREBASE_CONFIG en js/config.js"); return; }
   try {
     await initFirebase();
-    const m = await import("./admin.js?v=16");
+    const m = await import("./admin.js?v=17");
     await m.openAdmin(state, { reload: loadData, cld, esc });
   } catch (er) {
     console.error(er);
@@ -337,6 +337,11 @@ let saved = "es"; try { saved = localStorage.getItem("lang") || (navigator.langu
 applyLang(saved);
 renderConfig(); renderWorks(); renderClients(); renderReviews(); observeReveal();
 const editMode = new URLSearchParams(location.search).has("edit") && window.parent !== window;
+// scroll suave (no en el editor ni con "reducir movimiento")
+// import dinámico: si el CDN falla, la web sigue andando con scroll normal
+let lenis = null;
+if (!editMode && !matchMedia("(prefers-reduced-motion: reduce)").matches)
+  import("https://cdn.jsdelivr.net/npm/lenis@1.3.25/dist/lenis.mjs").then(m => lenis = new m.default({ autoRaf: true, anchors: true })).catch(console.warn);
 loadData().catch(er => console.error("Carga de datos:", er)).then(() => editMode
-  ? import("./editor.js?v=16").then(m => m.initEditor({ state, t, I18N, BASE, applyLang }))
+  ? import("./editor.js?v=17").then(m => m.initEditor({ state, t, I18N, BASE, applyLang }))
   : checkAdmin());
