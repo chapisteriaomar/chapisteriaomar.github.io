@@ -335,7 +335,3 @@ html{scroll-padding-top:90px}
   .pres-head{margin-bottom:18px}
 }
 @media(max-height:560px) and (orientation:landscape){.xp{height:200vh}.hero-title{font-size:clamp(34px,7vh,56px)}.dc-stick{padding-top:70px}}
-
-/* con el panel admin abierto, la web de atrás no se dibuja */
-.adm-open body>main,.adm-open .hdr,.adm-open .foot,.adm-open .gblur,.adm-open .focus-ov,.adm-open .intro-ov{display:none!important}
-.adm-open body::before{display:none}

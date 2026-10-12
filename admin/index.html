@@ -1,2 +1,48 @@
-<!doctype html><meta charset="utf-8"><title>Admin</title><meta name="robots" content="noindex">
-<script>location.replace("/#admin")</script><a href="/#admin">Ir al panel</a>
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Panel · Chapistería Omar Solutions</title>
+<link rel="icon" href="/assets/favicon.svg?v=2" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<!-- Panel en su propia página, sin la web pública atrás (video, mapa 3D, desenfoques): con eso algunas placas de video dejaban todo en negro -->
+<style>
+:root{--bg:#0b0a09;--bg2:#141210;--card:#1c1a17;--line:#2c2925;--line2:#4a463f;--text:#F7F6F3;--ink:#F7F6F3;--muted:#a8a39b;--dim:#7d7870;--red:#DD3C33;--red2:#ff5a4f;--disp:Inter,"Helvetica Neue",Arial,sans-serif;--body:var(--disp)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font:15px/1.5 var(--body);-webkit-font-smoothing:antialiased}
+a{color:inherit}
+button,input,select,textarea{font:inherit;color:inherit}
+button{background:none;border:0;cursor:pointer}
+img,video{display:block;max-width:100%}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="adm" id="adm"><div style="display:grid;place-items:center;height:100vh;color:var(--muted)">Cargando panel…</div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script type="module">
+import { FIREBASE_CONFIG, DEFAULTS } from "/js/config.js?v=33";
+const FB = "https://www.gstatic.com/firebasejs/10.12.4/";
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`);
+const cld = (u, w = 1200) => u && u.includes("/upload/") && !u.includes("/upload/f_auto") ? u.replace("/upload/", `/upload/f_auto,q_auto,c_limit,w_${w}/`) : u;
+try {
+  const [{ initializeApp }, fs] = await Promise.all([import(FB + "firebase-app.js"), import(FB + "firebase-firestore.js")]);
+  const app = initializeApp(FIREBASE_CONFIG), db = fs.getFirestore(app);
+  const state = { cfg: { ...DEFAULTS }, fb: { app, fs }, db, lang: "es" };
+  const snap = await fs.getDoc(fs.doc(db, "site", "config")).catch(() => null);
+  if (snap?.exists()) state.cfg = { ...DEFAULTS, ...snap.data() };
+  const m = await import("/js/admin.js?v=33");
+  // "Ver sitio" / "Volver al sitio" vuelven a la web
+  await m.openAdmin(state, { reload: () => location.href = "/", cld, esc });
+} catch (er) {
+  console.error(er);
+  document.getElementById("adm").innerHTML = `<div style="display:grid;place-items:center;height:100vh;text-align:center;padding:24px">No se pudo abrir el panel.<br><small style="color:var(--muted)">${esc(er?.message || er)}</small></div>`;
+}
+</script>
+</body>
+</html>

@@ -245,9 +245,6 @@ new IntersectionObserver(([e], o) => {
   if (!e.isIntersecting) return; o.disconnect();
   loadScript("https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js", "https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css").then(renderMap, console.warn);
 }, { rootMargin: "800px" }).observe($("#map"));
-// el panel admin sigue usando Leaflet para cargar operativos
-let leafP;
-const loadLeaflet = () => leafP ||= loadScript("https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js", "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css");
 function renderMap() {
   if (!window.maplibregl) return;
   if (!map) {
@@ -374,19 +371,8 @@ async function loadData() {
   applyLang(state.lang); render();
 }
 
-/* ================= panel admin (carga diferida) ================= */
-async function checkAdmin() {
-  if (location.hash !== "#admin") return;
-  if (!FIREBASE_CONFIG.apiKey) { alert("Falta completar FIREBASE_CONFIG en js/config.js"); return; }
-  try {
-    await Promise.all([initFirebase(), loadLeaflet().catch(console.warn)]); // el panel usa Leaflet para los operativos
-    const m = await import("./admin.js?v=32");
-    await m.openAdmin(state, { reload: loadData, cld, esc });
-  } catch (er) {
-    console.error(er);
-    alert("No se pudo abrir el panel: " + (er?.message || er));
-  }
-}
+/* ================= panel admin: vive en su propia página (/admin/) ================= */
+const checkAdmin = () => { if (location.hash === "#admin") location.replace("/admin/"); };
 addEventListener("hashchange", checkAdmin);
 
 /* ================= Lenis (si el CDN falla, queda el scroll normal) ================= */

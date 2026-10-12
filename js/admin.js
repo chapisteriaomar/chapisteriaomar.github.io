@@ -1,4 +1,4 @@
-import { CLOUDINARY } from "./config.js?v=32";
+import { CLOUDINARY } from "./config.js?v=33";
 
 const FB = "https://www.gstatic.com/firebasejs/10.12.4/";
 const $ = (s, r = document) => r.querySelector(s);
@@ -30,12 +30,10 @@ export async function openAdmin(state, helpers) {
 }
 async function start(state, helpers) {
   S = state; H = helpers; fs = state.fb.fs; db = state.db;
-  if (!$("#admCss")) document.head.insertAdjacentHTML("beforeend", '<link id="admCss" rel="stylesheet" href="css/admin.css">');
+  if (!$("#admCss")) document.head.insertAdjacentHTML("beforeend", '<link id="admCss" rel="stylesheet" href="/css/admin.css">');
   if (!$(".toasts")) document.body.insertAdjacentHTML("beforeend", '<div class="toasts"></div>');
   // se muestra algo enseguida; antes quedaba en negro mientras cargaba (o para siempre si algo fallaba)
   const el = $("#adm"); el.hidden = false; document.body.style.overflow = "hidden";
-  // la web de atrás (video, desenfoques) se oculta mientras el panel está abierto: alivia la placa de video
-  document.documentElement.classList.add("adm-open");
   // cualquier error, aunque pase fuera del armado del panel, se muestra abajo en rojo (sin tapar el panel)
   addEventListener("error", ev => open && note(ev.error || ev.message));
   addEventListener("unhandledrejection", ev => open && note(ev.reason));
@@ -62,7 +60,7 @@ function fail(er) {
 }
 function close() {
   open = false; unsub?.(); unsub = null;
-  $("#adm").hidden = true; $("#adm").innerHTML = ""; document.body.style.overflow = ""; document.documentElement.classList.remove("adm-open");
+  $("#adm").hidden = true; $("#adm").innerHTML = ""; document.body.style.overflow = "";
   history.replaceState(null, "", location.pathname); H.reload();
 }
 
@@ -150,7 +148,7 @@ function imgPick(el, label, onFile, existing, kind = "image") {
 /* ---------------- login ---------------- */
 function login() {
   $("#adm").innerHTML = `<div class="ad ad-login" style="display:grid"><form id="lf">
-      <img src="${document.documentElement.dataset.theme === "light" ? "assets/logo-chico-dark.svg" : "assets/logo-chico.svg"}" alt="">
+      <img src="${document.documentElement.dataset.theme === "light" ? "/assets/logo-chico-dark.svg" : "/assets/logo-chico.svg"}" alt="">
       <label class="f"><span>Email</span><input name="e" type="email" required autocomplete="username"></label>
       <label class="f"><span>Contraseña</span><input name="p" type="password" required autocomplete="current-password"></label>
       <p class="err" id="le"></p>
@@ -170,7 +168,7 @@ const NAV = [["home", "Inicio", "home"], ["texts", "Textos de la web", "pen"], [
 async function shell() {
   $("#adm").innerHTML = `<div class="ad">
     <aside class="ad-side">
-      <div class="ad-logo"><img src="${document.documentElement.dataset.theme === "light" ? "assets/logo-chico-dark.svg" : "assets/logo-chico.svg"}" alt=""></div>
+      <div class="ad-logo"><img src="${document.documentElement.dataset.theme === "light" ? "/assets/logo-chico-dark.svg" : "/assets/logo-chico.svg"}" alt=""></div>
       ${NAV.map(([k, l, i]) => `<button class="ad-nav" data-v="${k}">${ico(i)}<span>${l}</span>${k === "leads" ? '<span class="badge" id="unread" hidden></span>' : ""}</button>`).join("")}
       <div class="grow"></div>
       <button class="ad-nav side-only" id="ax">${ico("eye")}<span>Ver sitio</span></button>
@@ -189,7 +187,7 @@ async function shell() {
 /* ---------- contenido pendiente de importar (data/import.json del repo) ---------- */
 async function checkImport() {
   let pk;
-  try { pk = await (await fetch("data/import.json?t=" + Date.now(), { cache: "no-store" })).json(); } catch { return; }
+  try { pk = await (await fetch("/data/import.json?t=" + Date.now(), { cache: "no-store" })).json(); } catch { return; }
   const packs = pk?.packages || (pk?.id ? [pk] : []);
   if (!packs.length) return;
   const ref = fs.doc(db, "site", "imports");
@@ -663,7 +661,7 @@ function texts() {
   $$("#tw button").forEach(b => { b.classList.toggle("on", b.dataset.w === txW); b.onclick = () => { txW = b.dataset.w; $$("#tw button").forEach(x => x.classList.toggle("on", x === b)); $("#cmsFrame").style.width = txW; }; });
   if (txMode === "v") {
     $("#tb").innerHTML = `<div style="display:flex;justify-content:center;background:var(--bg2);border:1px solid var(--line);border-radius:10px;overflow:hidden">
-      <iframe id="cmsFrame" src="index.html?edit=1" style="width:${txW};max-width:100%;height:calc(100vh - 230px);min-height:480px;border:0;background:var(--bg)"></iframe></div>`;
+      <iframe id="cmsFrame" src="/index.html?edit=1" style="width:${txW};max-width:100%;height:calc(100vh - 230px);min-height:480px;border:0;background:var(--bg)"></iframe></div>`;
   } else txList();
 }
 async function txList() {
