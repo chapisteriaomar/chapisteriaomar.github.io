@@ -172,7 +172,7 @@ button{background:none;border:0;cursor:pointer}
 .rv.in{opacity:1;transform:none}
 @media(prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}.marquee-t,.dw-row{animation:none}html{scroll-behavior:auto}}
 @media(max-width:900px){.method,.sust,.contact,.foot-g{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.dc-stage li{grid-template-columns:1fr}.step-n{grid-row:auto;margin-bottom:8px}}
-@media(max-width:560px){.form{grid-template-columns:1fr}.lang{display:none}}
+@media(max-width:560px){.form{grid-template-columns:1fr}}
 
 /* dentro del editor de textos del panel */
 .cms .hdr{position:absolute}
@@ -321,9 +321,6 @@ html{scroll-padding-top:90px}
 .step-n:empty{display:none}
 
 /* botón flotante de Instagram, siempre abajo a la derecha */
-.ig-fab{position:fixed;right:calc(var(--gut) + 11px);bottom:max(18px,env(safe-area-inset-bottom));z-index:55;width:54px;height:54px;border-radius:50%;display:grid;place-items:center;color:var(--ink)}
-.ig-fab svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.9}
-.cms .ig-fab{display:none}
 
 /* flechas del carrusel de ubicaciones: solo indican que se puede deslizar (no se tocan) */
 .cf-hint svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
@@ -349,9 +346,27 @@ html{scroll-padding-top:90px}
 
 @media(max-width:700px){
   .xp{height:100svh}
-  .dc-stick{height:66svh}
-  .dc-stage li{top:40%}
-  .dc + .sec{padding-top:28px}
 }
-@media(max-width:600px){.ig-fab{right:calc(var(--gut) + 8px);width:48px;height:48px}}
 .foot-mail{display:inline-block;margin-top:6px;color:var(--muted);font-size:14px}.foot-mail:hover{color:var(--ink)}
+
+/* Instagram en la barra de arriba (mismo efecto que "Solicitar cotización") */
+.ig-top{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:var(--ink)}
+.ig-top svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.9}
+/* idioma ES / EN flotando abajo a la derecha */
+.lang-fab{position:fixed;right:max(18px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom));z-index:55;padding:4px}
+.lang-fab button{padding:9px 12px}
+.cms .lang-fab{position:absolute}
+@media(max-width:600px){.ig-top{width:36px;height:36px}}
+
+/* botón de deslizar: el texto se centra en el espacio libre a la derecha de la manija */
+.sc-txt{padding-left:56px}
+
+/* celular: "Lo que resolvemos" como lista simple, sin efecto de profundidad */
+@media(max-width:700px){
+  .dc{height:auto!important}
+  .dc-stick{position:static;height:auto!important;display:block;padding:var(--sy) 0 0;overflow:visible}
+  .dc-stage{perspective:none;padding:0 var(--gut);margin-top:24px;display:grid;gap:26px}
+  .dc-stage li{position:static;width:auto;transform:none!important;opacity:1!important;filter:none!important}
+  .dc + .sec{padding-top:var(--sy)}
+}
+.pres-box #map{touch-action:pan-y}

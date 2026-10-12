@@ -1,5 +1,5 @@
 import { FIREBASE_CONFIG, DEFAULTS } from "./config.js?v=38";
-import { I18N } from "./i18n.js?v=44";
+import { I18N } from "./i18n.js?v=45";
 // Textos originales (los editados desde el panel se guardan en Firestore: site/texts)
 const BASE = JSON.parse(JSON.stringify(I18N));
 function applyTexts(over) { for (const l of Object.keys(BASE)) I18N[l] = { ...BASE[l], ...(over?.[l] || {}) }; }
@@ -188,14 +188,17 @@ const cf = $("#cf");
 function renderLocs() {
   const c = state.cfg, tag = k => `<span class="loc-tag"><i></i><span data-i18n="${k}">${esc(t(k))}</span></span>`;
   // las tarjetas solo se deslizan (no se tocan); el punto del mapa es el que abre Google Maps
-  const card = (cls, name, desc, attrs) => `<div class="loc ${cls}" ${attrs}><div class="loc-in"><div class="loc-f glass">${tag(cls === "main" ? "loc.main" : cls === "live" ? "loc.base" : "loc.past")}<h3>${name}</h3><p>${desc}</p></div></div></div>`;
+  const norm = s => String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, ""), slug = s => norm(s).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "x";
+  // título y texto de cada tarjeta se editan desde el editor visual: clave propia por tarjeta, con el dato como texto por defecto
+  const ed = (k, def) => { for (const l of Object.keys(BASE)) { const v = typeof def === "function" ? def(l) : def; BASE[l][k] ??= v; I18N[l][k] ??= v; } return `<span data-i18n="${k}">${esc(t(k))}</span>`; };
+  const card = (cls, id, title, desc, attrs) => `<div class="loc ${cls}" ${attrs}><div class="loc-in"><div class="loc-f glass">${tag(cls === "main" ? "loc.main" : cls === "live" ? "loc.base" : "loc.past")}<h3>${ed(`locc.${id}.t`, title)}</h3><p>${ed(`locc.${id}.d`, desc)}</p></div></div></div>`;
   // operativos del mapa: los en curso que no estén ya como base en Config (ej: Paraná) y después los finalizados
-  const bases = (c.bases || []).filter(b => b.nombre), norm = s => String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  const bases = (c.bases || []).filter(b => b.nombre);
   const ops = state.ops.filter(o => o.lat != null && o.lng != null && !(o.live && bases.some(b => norm(b.nombre).startsWith(norm(o.name)))));
   const opCards = [...ops.filter(o => o.live), ...ops.filter(o => !o.live)];
-  cf.innerHTML =card("main", esc(c.tallerNombre || "Chapistería Omar"), `<span data-i18n="loc.mainD">${esc(t("loc.mainD"))}</span>`, `data-url="${esc(c.tallerMaps || "")}" data-q="${esc(c.tallerDir || DEFAULTS.tallerDir)}"`)
-    + bases.map(b => card("live", esc(b.nombre), b.detalle ? esc(b.detalle) : `<span data-i18n="loc.baseD">${esc(t("loc.baseD"))}</span>`, `data-url="${esc(b.maps || "")}" data-q="${esc(b.nombre)}"`)).join("")
-    + opCards.map(o => card(o.live ? "live" : "past", esc(o.name), `${esc([o.province, o.year].filter(Boolean).join(" · "))}${o.units ? ` · ${esc(o.units)} <span data-i18n="map.units">${esc(t("map.units"))}</span>` : ""}`, `data-ll="${o.lng},${o.lat}"`)).join("");
+  cf.innerHTML = card("main", "taller", c.tallerNombre || "Chapistería Omar", l => I18N[l]["loc.mainD"], `data-url="${esc(c.tallerMaps || "")}" data-q="${esc(c.tallerDir || DEFAULTS.tallerDir)}"`)
+    + bases.map(b => card("live", "base-" + slug(b.nombre), b.nombre, l => b.detalle || I18N[l]["loc.baseD"], `data-url="${esc(b.maps || "")}" data-q="${esc(b.nombre)}"`)).join("")
+    + opCards.map(o => card(o.live ? "live" : "past", "op-" + slug(o.name), o.name, l => [o.province, o.year, o.units ? `${o.units} ${I18N[l]["map.units"]}` : ""].filter(Boolean).join(" · "), `data-ll="${o.lng},${o.lat}"`)).join("");
   coverflow();
   // ubica taller y operativos en curso para los pines y para que el mapa vuele hasta ellos
   // si la dirección del taller no se encuentra, se usan sus coordenadas fijas (config.js)
@@ -216,6 +219,20 @@ function coverflow() {
 }
 cf.addEventListener("scroll", () => requestAnimationFrame(coverflow), { passive: true });
 addEventListener("resize", coverflow);
+// deslizar en cualquier parte del mapa (no solo sobre las tarjetas) mueve el carrusel
+const pres = cf.parentNode;
+let sx = null, dragged = false;
+pres.addEventListener("pointerdown", e => { if (!e.target.closest(".cf")) { sx = e.clientX; dragged = false; } });
+pres.addEventListener("pointermove", e => { if (sx != null && Math.abs(e.clientX - sx) > 8) dragged = true; });
+pres.addEventListener("pointercancel", () => sx = null);
+pres.addEventListener("pointerup", e => {
+  if (sx == null) return;
+  const dx = e.clientX - sx; sx = null;
+  if (Math.abs(dx) > 40) cf.scrollBy({ left: -Math.sign(dx) * (($(".loc", cf)?.offsetWidth || 300) + 16), behavior: "smooth" });
+});
+// un arrastre no cuenta como toque sobre un punto del mapa
+pres.addEventListener("click", e => { if (dragged) { e.stopPropagation(); e.preventDefault(); dragged = false; } }, true);
+pres.addEventListener("wheel", e => { if (Math.abs(e.deltaX) > Math.abs(e.deltaY) && !e.target.closest(".cf")) cf.scrollLeft += e.deltaX; }, { passive: true });
 
 /* ================= visor ================= */
 function openLB(w) {
