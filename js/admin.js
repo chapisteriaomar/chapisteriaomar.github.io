@@ -584,7 +584,7 @@ async function config() {
   const f = (id, label, v, ph = "") => `<label class="f"><span>${label}</span><input id="${id}" value="${e(v ?? "")}" placeholder="${e(ph)}"></label>`;
   $("#vc").innerHTML = `
     <div class="pn-card"><h2>Opciones de la web</h2><p class="sub">Se guardan al tocarlas. Los visitantes las ven al recargar.</p>
-      ${[["showLang", "Botón de idioma (ES / EN)", "Apagado: la web queda en español."], ["showTheme", "Botón de modo claro / oscuro", "Apagado: la web queda en modo oscuro."], ["rolling", "Cifras con rodillo (Counter)", "Apagado: los números cuentan de 0 al valor (Count up)."], ["showKicker", "Etiqueta arriba del título del video", "La de \"PDR · Granizo · Operativos móviles\"."], ["sounds", "Sonidos", "Suaves: al abrir la web, al elegir el tipo de consulta y al enviarla."], ...[1, 2, 3, 4, 5].map(n => ["showP" + n, "Subtexto del paso " + n, "En \"Lo que resolvemos\": la explicación debajo del título del paso " + n + "."])]
+      ${[["showLang", "Botón de idioma (ES / EN)", "Apagado: la web queda en español."], ["showTheme", "Botón de modo claro / oscuro", "Apagado: la web queda en modo oscuro."], ["rolling", "Cifras con rodillo (Counter)", "Apagado: los números cuentan de 0 al valor (Count up)."], ["showKicker", "Etiqueta arriba del título del video", "La de \"PDR · Granizo · Operativos móviles\"."], ["sounds", "Sonidos", "Suaves: al abrir la web, al elegir el tipo de consulta y al enviarla."], ...[1, 2, 3, 4, 5].map(n => ["showP" + n, "Paso " + n, "En \"Lo que resolvemos\": apagado oculta el paso " + n + " entero (título y texto)."])]
         .map(([k, h, d]) => `<div style="display:flex;justify-content:space-between;align-items:center;gap:16px;padding:10px 0;border-top:1px solid var(--line)"><div><b>${h}</b><p class="sub" style="margin:0">${d}</p></div>
         <label class="switch"><input type="checkbox" data-opt="${k}"${(c[k] ?? k !== "rolling") ? " checked" : ""}><i></i></label></div>`).join("")}
       <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;padding:10px 0;border-top:1px solid var(--line)"><div><b>Largo de "Cómo funciona un operativo"</b><p class="sub" style="margin:0">Cuánto hay que scrollear para pasar los 5 pasos.</p></div>
@@ -652,7 +652,7 @@ async function config() {
 /* ================= TEXTOS DE LA WEB ================= */
 // Los originales están en js/i18n.js (BASE, sin modificar); lo editado se guarda en site/texts { es: {clave: texto}, en: {...} }
 let BASE_TX = null;
-async function loadBase() { if (!BASE_TX) BASE_TX = (await import("./i18n.js?v=40&base=1")).I18N; return BASE_TX; }
+async function loadBase() { if (!BASE_TX) BASE_TX = (await import("./i18n.js?v=44&base=1")).I18N; return BASE_TX; }
 async function saveText(lang, key, value) {
   await fs.setDoc(fs.doc(db, "site", "texts"), { [lang]: { [key]: value == null ? fs.deleteField() : value } }, { merge: true });
 }

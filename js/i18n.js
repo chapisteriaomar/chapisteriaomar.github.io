@@ -72,7 +72,7 @@ export const I18N = {
     "pres.title": "Dónde estuvimos y dónde estamos", "loc.past": "Operativo móvil finalizado",
     "cta.short": "Cotizar",
     "proc.1n": "1", "proc.2n": "2", "proc.3n": "3", "proc.4n": "4", "proc.5n": "5",
-    "fq.name": "Nombre / Razón social", "fq.place": "Localidad", "fq.email": "Mail", "fq.phone": "Teléfono", "fq.ins": "Compañía de seguro (si tiene)", "fq.msg": "Detalle del caso", "fq.need": "Dejanos un mail o un teléfono para responderte.",
+    "fq.name": "Nombre o Razón social", "fq.email": "Correo", "fq.phone": "Teléfono", "fq.msg": "Detalles del caso", "fq.need": "Dejanos un correo o un teléfono para responderte.",
     "close": "Cerrar", "before": "Antes", "after": "Después",
     "ticker.1": "Desabollado sin pintura", "ticker.2": "Granizo", "ticker.3": "Operativos móviles", "ticker.4": "Aseguradoras", "ticker.5": "Flotas", "ticker.6": "Argentina y exterior"
   },
@@ -149,7 +149,7 @@ export const I18N = {
     "pres.title": "Where we've been and where we are", "loc.past": "Mobile operation completed",
     "cta.short": "Get a quote",
     "proc.1n": "1", "proc.2n": "2", "proc.3n": "3", "proc.4n": "4", "proc.5n": "5",
-    "fq.name": "Name / Company name", "fq.place": "City", "fq.email": "Email", "fq.phone": "Phone", "fq.ins": "Insurance company (if any)", "fq.msg": "Case details", "fq.need": "Leave an email or a phone so we can reply.",
+    "fq.name": "Name or company name", "fq.email": "Email", "fq.phone": "Phone", "fq.msg": "Case details", "fq.need": "Leave an email or a phone so we can reply.",
     "close": "Close", "before": "Before", "after": "After",
     "ticker.1": "Paintless Dent Repair", "ticker.2": "Hail Damage", "ticker.3": "Mobile Operations", "ticker.4": "Insurers", "ticker.5": "Fleets", "ticker.6": "Argentina & abroad"
   }

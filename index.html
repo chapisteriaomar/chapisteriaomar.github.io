@@ -48,7 +48,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lenis@1.3.25/dist/lenis.css">
-<link rel="stylesheet" href="css/v2.css?v=43">
+<link rel="stylesheet" href="css/v2.css?v=44">
 <script>if(location.hash==="#admin")location.replace("/admin/");
 try{var d=document.documentElement,th=localStorage.getItem("theme");if(th)d.dataset.theme=th;
 // intro con aurora: una vez por visita, nunca en el panel ni en el editor
@@ -149,12 +149,10 @@ if(!sessionStorage.getItem("intro")&&!/edit|admin/.test(location.search+location
       <p class="lead" data-i18n="contact.sub"></p>
     </div>
     <form class="form glass rv" id="leadForm" novalidate>
-      <!-- campos de la base (reglas de Firestore): name, country, email, phone, company, message -->
-      <label class="fl"><input name="name" required maxlength="190" placeholder=" " autocomplete="name"><span><i data-i18n="fq.name">Nombre / Razón social</i> *</span></label>
-      <label class="fl"><input name="country" maxlength="190" placeholder=" " autocomplete="address-level2"><span data-i18n="fq.place">Localidad</span></label>
+      <!-- campos de la base (reglas de Firestore): name, email, phone, message (company se manda vacío) -->
+      <label class="fl full"><input name="name" maxlength="190" placeholder=" " autocomplete="name"><span data-i18n="fq.name">Nombre o Razón social</span></label>
       <label class="fl"><input name="email" type="email" maxlength="190" placeholder=" " autocomplete="email"><span data-i18n="fq.email">Mail</span></label>
       <label class="fl"><input name="phone" type="tel" maxlength="60" placeholder=" " autocomplete="tel"><span data-i18n="fq.phone">Teléfono</span></label>
-      <label class="fl full"><input name="company" maxlength="190" placeholder=" "><span data-i18n="fq.ins">Compañía de seguro (si tiene)</span></label>
       <label class="fl full"><textarea name="message" rows="3" maxlength="4900" placeholder=" "></textarea><span data-i18n="fq.msg">Detalle del caso</span></label>
       <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
       <!-- slide commit: se desliza para enviar; con teclado alcanza con Enter -->
@@ -165,10 +163,6 @@ if(!sessionStorage.getItem("intro")&&!/edit|admin/.test(location.search+location
         <button class="sc-h" type="submit" id="scH" aria-label="Enviar consulta"><svg class="sc-arr" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><i class="sc-spin"></i></button>
       </div>
       <p class="form-msg full" id="formMsg" role="status"></p>
-      <div class="direct full">
-        <a class="glass mag" id="waLink" href="https://wa.me/5491130526505" target="_blank" rel="noopener"><small data-i18n="contact.wa">WhatsApp directo</small><b id="waText">+5491130526505</b></a>
-        <a class="glass mag" id="mailLink" href="mailto:chapisteriaomar@gmail.com"><small data-i18n="contact.mail">Email</small><b id="mailText">chapisteriaomar@gmail.com</b></a>
-      </div>
     </form>
   </div>
 </section>
@@ -177,7 +171,7 @@ if(!sessionStorage.getItem("intro")&&!/edit|admin/.test(location.search+location
 <footer class="foot">
   <div class="wrap">
     <div class="foot-g">
-      <div><img class="logo-d" src="assets/logo-chico.svg" alt="Chapistería Omar Solutions"><img class="logo-l" src="assets/logo-chico-dark.svg" alt="Chapistería Omar Solutions"><p data-i18n="foot.tag"></p></div>
+      <div><img class="logo-d" src="assets/logo-chico.svg" alt="Chapistería Omar Solutions"><img class="logo-l" src="assets/logo-chico-dark.svg" alt="Chapistería Omar Solutions"><p data-i18n="foot.tag"></p><a class="foot-mail" id="footMail" href="mailto:contacto@chapisteriaomar.com">contacto@chapisteriaomar.com</a></div>
     </div>
     <div class="foot-b"><span>© <span id="yr"></span> Chapistería Omar Solutions · <span data-i18n="foot.rights"></span></span><a href="/admin/" class="admin-link" aria-label="Admin">·</a></div>
   </div>
@@ -188,6 +182,6 @@ if(!sessionStorage.getItem("intro")&&!/edit|admin/.test(location.search+location
 <div class="focus-ov" aria-hidden="true"></div>
 <div class="gblur" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
 
-<script type="module" src="js/v2.js?v=42"></script>
+<script type="module" src="js/v2.js?v=44"></script>
 </body>
 </html>

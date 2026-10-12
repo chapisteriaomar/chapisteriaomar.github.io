@@ -36,7 +36,7 @@ try {
   const state = { cfg: { ...DEFAULTS }, fb: { app, fs }, db, lang: "es" };
   const snap = await fs.getDoc(fs.doc(db, "site", "config")).catch(() => null);
   if (snap?.exists()) state.cfg = { ...DEFAULTS, ...snap.data() };
-  const m = await import("/js/admin.js?v=40");
+  const m = await import("/js/admin.js?v=44");
   // "Ver sitio" / "Volver al sitio" vuelven a la web
   await m.openAdmin(state, { reload: () => location.href = "/", cld, esc });
 } catch (er) {

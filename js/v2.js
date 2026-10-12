@@ -1,5 +1,5 @@
 import { FIREBASE_CONFIG, DEFAULTS } from "./config.js?v=38";
-import { I18N } from "./i18n.js?v=40";
+import { I18N } from "./i18n.js?v=44";
 // Textos originales (los editados desde el panel se guardan en Firestore: site/texts)
 const BASE = JSON.parse(JSON.stringify(I18N));
 function applyTexts(over) { for (const l of Object.keys(BASE)) I18N[l] = { ...BASE[l], ...(over?.[l] || {}) }; }
@@ -46,7 +46,7 @@ function splitReveal() {
 function updReveal() {
   $$(".sr").forEach(el => {
     const r = el.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) return;
-    const ws = el.children, p = Math.min(Math.max((innerHeight - r.top) / (innerHeight * .55), 0), 1) * (ws.length + 1);
+    const ws = el.children, p = Math.min(Math.max((innerHeight - r.top) / (innerHeight * .3), 0), 1) * (ws.length + 1);
     el.style.transform = `rotate(${(1 - Math.min(p / ws.length, 1)) * 3}deg)`;
     for (let i = 0; i < ws.length; i++) { const w = Math.min(Math.max(p - i, 0), 1); ws[i].style.opacity = .12 + .88 * w; ws[i].style.filter = `blur(${(1 - w) * 4}px)`; }
   });
@@ -85,7 +85,7 @@ function renderStats() {
 
 /* ================= scroll: video que se expande, logo que se achica, pasos en profundidad ================= */
 const xp = $("#top"), frame = $("#xpFrame"), txt = $("#xpText"), hdr = $("#hdr"), gb = $(".gblur");
-const dc = $("#operativo"), steps = $$("#dcStage li");
+const dc = $("#operativo");
 const prog = el => Math.min(Math.max(-el.getBoundingClientRect().top / (el.offsetHeight - innerHeight), 0), 1);
 function onScroll() {
   // en celular el video queda enmarcado (no se expande); en compu crece hasta ocupar la pantalla
@@ -99,7 +99,8 @@ function onScroll() {
   // el desenfoque de abajo se apaga al final para no tapar el pie
   gb.style.opacity = Math.min((document.documentElement.scrollHeight - innerHeight - scrollY) / 160, 1);
   // depth carousel: el paso activo adelante, los demás se alejan en profundidad
-  const f = prog(dc) * (steps.length - 1);
+  // solo los pasos visibles (cada uno se puede ocultar desde el panel)
+  const steps = $$("#dcStage li:not([hidden])"), f = prog(dc) * Math.max(steps.length - 1, 0);
   steps.forEach((li, i) => {
     const d = i - f, a = Math.abs(d);
     li.style.transform = `translate(-50%,-50%) translateY(${d * 110}px) translateZ(${-a * 320}px) rotateX(${-d * 14}deg)`;
@@ -177,9 +178,7 @@ function render() {
   const sw = photos[3], sImg = cfg.aboutImg || (sw && (sw.type === "ba" ? sw.url2 : sw.url));
   $("#sustImg").hidden = !sImg; $("#sust").classList.toggle("solo", !sImg);
   if (sImg) $("#sustImg").innerHTML = `<img src="${esc(cld(sImg, 1000))}" alt="" loading="lazy">`;
-  const wa = String(cfg.whatsapp || "").replace(/\D/g, "");
-  if (wa) { $("#waLink").href = `https://wa.me/${wa}?text=${encodeURIComponent("Hola, los contacto desde chapisteriaomar.com")}`; $("#waText").textContent = "+" + wa; }
-  if (cfg.email) { $("#mailLink").href = "mailto:" + cfg.email; $("#mailText").textContent = cfg.email; }
+  if (cfg.email) { $("#footMail").href = "mailto:" + cfg.email; $("#footMail").textContent = cfg.email; }
   $("#igFab").href = cfg.instagramUrl || `https://instagram.com/${cfg.instagram}`;
   renderLocs(); renderMap(); reveal(); onScroll();
 }
@@ -319,7 +318,8 @@ $("#leadForm").addEventListener("submit", async e => {
   if (!f.checkValidity()) { scSet(0); f.reportValidity(); return; }
   // hace falta un mail o un teléfono para poder responder
   if (!f.email.value.trim() && !f.phone.value.trim()) { scSet(0); msg.className = "form-msg full err"; msg.textContent = t("fq.need"); f.email.focus(); return; }
-  const data = Object.fromEntries(new FormData(f)); delete data.website;
+  // company va vacío: las reglas de Firestore lo piden como texto
+  const data = { company: "", ...Object.fromEntries(new FormData(f)) }; delete data.website;
   scSet(1); sc.classList.add("busy"); msg.className = "form-msg full"; msg.textContent = "";
   try {
     if (!state.db) throw new Error("no-db");
@@ -362,8 +362,8 @@ async function loadData() {
   if (cfgSnap?.exists()) { const d = cfgSnap.data(); state.cfg = { ...DEFAULTS, ...d, stats: { ...DEFAULTS.stats, ...(d.stats || {}) } }; }
   // opciones del panel: sin botón de idioma la web queda en español; sin botón de tema, en oscuro
   const { showLang, showTheme, showKicker, dcLen } = state.cfg;
-  // subtextos de los 5 pasos: cada uno se puede ocultar desde el panel
-  $$("#dcStage li p").forEach((p, i) => p.hidden = state.cfg["showP" + (i + 1)] === false);
+  // pasos de "Lo que resolvemos": cada uno se puede ocultar entero desde el panel
+  $$("#dcStage li").forEach((li, i) => li.hidden = state.cfg["showP" + (i + 1)] === false);
   $(".lang").hidden = showLang === false; $("#themeBtn").hidden = showTheme === false;
   $("#xpText .kicker").hidden = showKicker === false;
   if (dcLen) dc.style.setProperty("--dcl", dcLen + "vh");
