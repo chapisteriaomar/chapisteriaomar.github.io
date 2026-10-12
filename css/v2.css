@@ -80,15 +80,6 @@ button{background:none;border:0;cursor:pointer}
 .stat span{display:block;margin-top:10px;color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:.08em}
 
 
-/* cómo funciona: depth carousel al scrollear entre los 5 pasos */
-.dc{position:relative;height:var(--dcl,260vh)}
-.dc-stick{position:sticky;top:0;height:100vh;height:100svh;display:grid;grid-template-rows:auto 1fr;padding-top:clamp(90px,14vh,140px);overflow:hidden}
-.dc-head{width:100%}
-.dc-stage{position:relative;list-style:none;perspective:1100px;perspective-origin:50% 40%}
-.dc-stage li{position:absolute;left:50%;top:42%;width:min(720px,88vw);display:grid;grid-template-columns:auto 1fr;column-gap:28px;align-items:start;transform-style:preserve-3d;will-change:transform,opacity,filter}
-.step-n{grid-row:span 2;font:700 clamp(84px,11vw,150px)/.8 var(--body);letter-spacing:-.06em;color:var(--red)}
-.dc-stage h3{font:700 clamp(30px,3.6vw,48px)/1.05 var(--body);letter-spacing:-.03em;margin:6px 0 10px}
-.dc-stage p{color:var(--muted);font-size:clamp(16px,1.4vw,19px);max-width:44ch}
 
 /* trabajos: drift wall, filas de fotos que derivan lento en direcciones opuestas */
 .dw{position:relative;overflow:hidden;margin-top:56px;padding:40px 0;perspective:1400px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
@@ -167,7 +158,7 @@ button{background:none;border:0;cursor:pointer}
 .rv{opacity:0;transform:translateY(32px);transition:opacity .7s,transform .7s cubic-bezier(.2,.7,.2,1)}
 .rv.in{opacity:1;transform:none}
 @media(prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}.marquee-t,.dw-row{animation:none}html{scroll-behavior:auto}}
-@media(max-width:900px){.method,.sust,.contact,.foot-g{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.dc-stage li{grid-template-columns:1fr}.step-n{grid-row:auto;margin-bottom:8px}}
+@media(max-width:900px){.method,.sust,.contact,.foot-g{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}}
 @media(max-width:560px){.form{grid-template-columns:1fr}}
 
 /* dentro del editor de textos del panel */
@@ -299,9 +290,6 @@ html{scroll-padding-top:90px}
   .eyebrow{margin-bottom:14px}
   .stats{gap:10px;margin-top:36px}.stat{padding:18px}.stat b{font-size:clamp(30px,9vw,40px)}
   .marquee{padding:16px 0}
-  .dc-stick{padding-top:84px}
-  .dc-stage li{width:calc(100vw - 2 * var(--gut));column-gap:16px}
-  .step-n{font-size:clamp(64px,20vw,96px)}
   .dw{margin-top:32px;padding:20px 0}.dw .media{width:clamp(160px,46vw,220px)}
   .direct a{flex-direction:column;align-items:flex-start;gap:4px;padding:14px 18px}
   .direct b{text-align:left;font-size:15.5px}
@@ -311,8 +299,7 @@ html{scroll-padding-top:90px}
   .foot{padding-top:48px}.foot-g{gap:24px}
   .pres-head{margin-bottom:18px}
 }
-@media(max-height:560px) and (orientation:landscape){.xp{height:200vh}.hero-title{font-size:clamp(34px,7vh,56px)}.dc-stick{padding-top:70px}}
-.step-n:empty{display:none}
+@media(max-height:560px) and (orientation:landscape){.xp{height:200vh}.hero-title{font-size:clamp(34px,7vh,56px)}}
 
 /* botón flotante de Instagram, siempre abajo a la derecha */
 
@@ -352,14 +339,6 @@ html{scroll-padding-top:90px}
 /* botón de deslizar: el texto se centra en el espacio libre a la derecha de la manija */
 .sc-txt{padding-left:56px}
 
-/* celular: "Lo que resolvemos" como lista simple, sin efecto de profundidad */
-@media(max-width:700px){
-  .dc{height:auto!important}
-  .dc-stick{position:static;height:auto!important;display:block;padding:var(--sy) 0 0;overflow:visible}
-  .dc-stage{perspective:none;padding:0 var(--gut);margin-top:24px;display:grid;gap:26px}
-  .dc-stage li{position:static;width:auto;transform:none!important;opacity:1!important;filter:none!important}
-  .dc + .sec{padding-top:var(--sy)}
-}
 .pres-box #map{touch-action:pan-y}
 .form textarea{resize:none}
 
@@ -375,3 +354,15 @@ html{scroll-padding-top:90px}
 @media(max-width:600px){.globe{width:36px;height:36px}}
 /* ocultos desde el arranque según las opciones del panel (sin parpadeo) */
 .no-theme #themeBtn,.no-lang #globeBtn{display:none!important}
+
+/* "Lo que resolvemos": tarjetas verticales en carrusel con profundidad (la del centro adelante) */
+.dcwrap{position:relative;margin-top:28px}
+.dcards{list-style:none;display:flex;gap:18px;overflow-x:auto;scroll-snap-type:x mandatory;padding:36px calc(50% - min(140px,38vw)) 44px;perspective:1200px;scrollbar-width:none;cursor:grab;user-select:none}
+.dcards::-webkit-scrollbar{display:none}
+.dcards.drag{cursor:grabbing;scroll-snap-type:none}
+.dcard{flex:0 0 min(280px,76vw);aspect-ratio:3/4;scroll-snap-align:center;scroll-snap-stop:always;border-radius:26px;padding:28px 26px;display:flex;flex-direction:column;justify-content:flex-end;gap:10px;will-change:transform;transition:transform .15s linear,opacity .15s linear}
+.step-n{margin-bottom:auto;font:700 clamp(64px,7vw,96px)/.85 var(--body);letter-spacing:-.06em;color:var(--red)}
+.step-n:empty{display:none}
+.dcard h3{font:700 clamp(26px,2.4vw,32px)/1.05 var(--body);letter-spacing:-.03em}
+.dcard p{color:var(--muted);font-size:15.5px}
+.dcwrap .cf-hint{top:50%}

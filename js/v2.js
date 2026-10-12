@@ -83,9 +83,8 @@ function renderStats() {
   splitReveal(); // incluye las etiquetas de las cifras
 }
 
-/* ================= scroll: video que se expande, logo que se achica, pasos en profundidad ================= */
+/* ================= scroll: video que se expande y logo que se achica ================= */
 const xp = $("#top"), frame = $("#xpFrame"), txt = $("#xpText"), hdr = $("#hdr"), gb = $(".gblur");
-const dc = $("#operativo");
 const prog = el => Math.min(Math.max(-el.getBoundingClientRect().top / (el.offsetHeight - innerHeight), 0), 1);
 function onScroll() {
   // en celular el video queda enmarcado (no se expande); en compu crece hasta ocupar la pantalla
@@ -98,20 +97,31 @@ function onScroll() {
   hdr.style.setProperty("--pg", Math.min(Math.max(scrollY / Math.max($("#contacto").offsetTop - innerHeight * .4, 1), 0), 1));
   // el desenfoque de abajo se apaga al final para no tapar el pie
   gb.style.opacity = Math.min((document.documentElement.scrollHeight - innerHeight - scrollY) / 160, 1);
-  // depth carousel: el paso activo adelante, los demás se alejan en profundidad
-  // solo los pasos visibles (cada uno se puede ocultar desde el panel)
-  const steps = $$("#dcStage li:not([hidden])"), f = prog(dc) * Math.max(steps.length - 1, 0);
-  steps.forEach((li, i) => {
-    const d = i - f, a = Math.abs(d);
-    li.style.transform = `translate(-50%,-50%) translateY(${d * 110}px) translateZ(${-a * 320}px) rotateX(${-d * 14}deg)`;
-    li.style.opacity = Math.max(1 - a * .55, 0);
-    li.style.filter = `blur(${Math.min(a * 4, 10)}px)`;
-    li.style.zIndex = 10 - Math.round(a);
-  });
   updReveal();
 }
 addEventListener("scroll", () => requestAnimationFrame(onScroll), { passive: true });
 addEventListener("resize", onScroll);
+
+/* ================= "Lo que resolvemos": tarjetas verticales en carrusel con profundidad ================= */
+const dcs = $("#dcStage");
+function dcFlow() {
+  const mid = dcs.scrollLeft + dcs.clientWidth / 2;
+  dcs.parentNode.classList.toggle("at-start", dcs.scrollLeft < 20);
+  dcs.parentNode.classList.toggle("at-end", dcs.scrollLeft > dcs.scrollWidth - dcs.clientWidth - 20);
+  // la tarjeta del centro adelante; las de los costados giran y se alejan
+  $$("li:not([hidden])", dcs).forEach(li => {
+    const d = Math.max(-2, Math.min(2, (li.offsetLeft + li.offsetWidth / 2 - mid) / (li.offsetWidth + 18))), a = Math.abs(d);
+    li.style.transform = `rotateY(${-d * 30}deg) translateZ(${-a * 120}px) scale(${1 - a * .08})`;
+    li.style.opacity = 1 - a * .3;
+  });
+}
+dcs.addEventListener("scroll", () => requestAnimationFrame(dcFlow), { passive: true });
+addEventListener("resize", dcFlow);
+// con mouse se puede arrastrar el carrusel (en celular se desliza solo con el dedo)
+let dcX = null, dcL = 0;
+dcs.addEventListener("pointerdown", e => { if (e.pointerType !== "mouse") return; dcX = e.clientX; dcL = dcs.scrollLeft; dcs.classList.add("drag"); });
+addEventListener("pointermove", e => { if (dcX != null) dcs.scrollLeft = dcL - (e.clientX - dcX); });
+addEventListener("pointerup", () => { if (dcX == null) return; dcX = null; dcs.classList.remove("drag"); });
 
 /* ================= sonidos suaves (sintetizados, sin archivos); se apagan desde el panel ================= */
 let ac;
@@ -180,7 +190,7 @@ function render() {
   if (sImg) $("#sustImg").innerHTML = `<img src="${esc(cld(sImg, 1000))}" alt="" loading="lazy">`;
   if (cfg.email) { $("#footMail").href = "mailto:" + cfg.email; $("#footMail").textContent = cfg.email; }
   $("#igFab").href = cfg.instagramUrl || `https://instagram.com/${cfg.instagram}`;
-  renderLocs(); renderMap(); reveal(); onScroll();
+  renderLocs(); renderMap(); reveal(); onScroll(); dcFlow();
 }
 
 /* ================= ubicaciones: taller + operativos en curso, en carrusel con profundidad ================= */
@@ -378,15 +388,15 @@ async function loadData() {
   ]);
   if (cfgSnap?.exists()) { const d = cfgSnap.data(); state.cfg = { ...DEFAULTS, ...d, stats: { ...DEFAULTS.stats, ...(d.stats || {}) } }; }
   // opciones del panel: sin botón de idioma la web queda en español; sin botón de tema, en oscuro
-  const { showLang, showTheme, showKicker, dcLen } = state.cfg;
+  const { showLang, showTheme, showKicker } = state.cfg;
   // pasos de "Lo que resolvemos": cada uno se puede ocultar entero desde el panel
   $$("#dcStage li").forEach((li, i) => li.hidden = state.cfg["showP" + (i + 1)] === false);
+  requestAnimationFrame(dcFlow);
   $("#globeBtn").hidden = showLang === false; $("#themeBtn").hidden = showTheme === false;
   // se guardan para ocultar los botones desde el arranque en la próxima visita (sin que aparezcan medio segundo)
   try { localStorage.setItem("opts", JSON.stringify({ showLang, showTheme })); } catch {}
   document.documentElement.classList.toggle("no-lang", showLang === false); document.documentElement.classList.toggle("no-theme", showTheme === false);
   $("#xpText .kicker").hidden = showKicker === false;
-  if (dcLen) dc.style.setProperty("--dcl", dcLen + "vh");
   if (showLang === false) state.lang = "es";
   if (showTheme === false) delete document.documentElement.dataset.theme;
   Object.assign(state, { works, ops, clients, reviews });

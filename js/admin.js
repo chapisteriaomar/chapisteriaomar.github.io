@@ -587,8 +587,7 @@ async function config() {
       ${[["showLang", "Botón de idioma (ES / EN)", "Apagado: la web queda en español."], ["showTheme", "Botón de modo claro / oscuro", "Apagado: la web queda en modo oscuro."], ["rolling", "Cifras con rodillo (Counter)", "Apagado: los números cuentan de 0 al valor (Count up)."], ["showKicker", "Etiqueta arriba del título del video", "La de \"PDR · Granizo · Operativos móviles\"."], ["sounds", "Sonidos", "Suaves: al abrir la web, al elegir el tipo de consulta y al enviarla."], ...[1, 2, 3, 4, 5].map(n => ["showP" + n, "Paso " + n, "En \"Lo que resolvemos\": apagado oculta el paso " + n + " entero (título y texto)."])]
         .map(([k, h, d]) => `<div style="display:flex;justify-content:space-between;align-items:center;gap:16px;padding:10px 0;border-top:1px solid var(--line)"><div><b>${h}</b><p class="sub" style="margin:0">${d}</p></div>
         <label class="switch"><input type="checkbox" data-opt="${k}"${(c[k] ?? k !== "rolling") ? " checked" : ""}><i></i></label></div>`).join("")}
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;padding:10px 0;border-top:1px solid var(--line)"><div><b>Largo de "Cómo funciona un operativo"</b><p class="sub" style="margin:0">Cuánto hay que scrollear para pasar los 5 pasos.</p></div>
-        <select id="dcLen" style="width:auto">${[[200, "Corto"], [260, "Medio"], [420, "Largo"]].map(([v, l]) => `<option value="${v}"${(c.dcLen || 260) == v ? " selected" : ""}>${l}</option>`).join("")}</select></div></div>
+      </div>
     <div class="pn-card"><h2>Operativos móviles en curso</h2><p class="sub">Uno por cada localidad donde estén trabajando ahora. Aparecen todos en "Dónde encontrarnos".</p>
       <div id="bases"></div><button type="button" class="b ghost" id="addBase">+ Agregar operativo móvil</button></div>
     <div class="pn-cols">
@@ -616,10 +615,6 @@ async function config() {
     try { await fs.setDoc(ref, { [inp.dataset.opt]: inp.checked }, { merge: true }); S.cfg[inp.dataset.opt] = inp.checked; toast("Guardado ✓"); }
     catch (er) { inp.checked = !inp.checked; toast(er.message, true); }
   });
-  $("#dcLen").onchange = async ev => {
-    try { await fs.setDoc(ref, { dcLen: +ev.target.value }, { merge: true }); S.cfg.dcLen = +ev.target.value; toast("Guardado ✓"); }
-    catch (er) { toast(er.message, true); }
-  };
   const baseRow = (b = {}) => `<div class="pn-fields base-row" style="margin-bottom:12px;align-items:end;grid-template-columns:1fr 1.2fr 1fr auto">
       <label class="f"><span>Localidad / nombre</span><input class="b-n" value="${e(b.nombre || "")}" placeholder="Ej: Posadas, Misiones"></label>
       <label class="f"><span>Link Google Maps</span><input class="b-m" value="${e(b.maps || "")}"></label>
