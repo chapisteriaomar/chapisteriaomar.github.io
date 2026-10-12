@@ -1,5 +1,5 @@
-import { FIREBASE_CONFIG, DEFAULTS } from "./config.js?v=23";
-import { I18N } from "./i18n.js?v=28";
+import { FIREBASE_CONFIG, DEFAULTS } from "./config.js?v=32";
+import { I18N } from "./i18n.js?v=32";
 // Textos originales (los editados desde el panel se guardan en Firestore: site/texts)
 const BASE = JSON.parse(JSON.stringify(I18N));
 function applyTexts(over) { for (const l of Object.keys(BASE)) I18N[l] = { ...BASE[l], ...(over?.[l] || {}) }; }
@@ -149,7 +149,9 @@ const pic = (w, size, auto) => w.type === "video"
   : `<img src="${esc(cld(w.type === "ba" ? w.url2 : w.url, size))}" alt="${esc(w.title || "")}" loading="lazy">`;
 function render() {
   const { cfg, works, clients, reviews } = state, media = works.filter(w => w.url), photos = media.filter(w => w.type !== "video");
-  const hero = media.find(w => w.type === "video") || media.find(w => w.featured) || media[0];
+  // video del inicio: el de celular o compu cargado en el panel; si no hay, el primer video de los trabajos
+  const hv = (matchMedia("(max-width: 700px)").matches && cfg.heroVideoM) || cfg.heroVideo;
+  const hero = hv ? { type: "video", url: hv } : media.find(w => w.type === "video") || media.find(w => w.featured) || media[0];
   $("#heroBg").innerHTML = hero ? pic(hero, 1800, true) : "";
   renderStats();
   // drift wall: tres filas de fotos repetidas para que el loop no corte (sin videos: decenas repetidos traban la página)
@@ -171,7 +173,7 @@ function render() {
   const wa = String(cfg.whatsapp || "").replace(/\D/g, "");
   if (wa) { $("#waLink").href = `https://wa.me/${wa}?text=${encodeURIComponent("Hola, los contacto desde chapisteriaomar.com")}`; $("#waText").textContent = "+" + wa; $("#fWa").innerHTML = `<a href="https://wa.me/${wa}">+${wa}</a>`; }
   if (cfg.email) { $("#mailLink").href = "mailto:" + cfg.email; $("#mailText").textContent = cfg.email; $("#fMail").innerHTML = `<a href="mailto:${esc(cfg.email)}">${esc(cfg.email)}</a>`; }
-  $("#fIg").href = cfg.instagramUrl || `https://instagram.com/${cfg.instagram}`;
+  $("#fIg").href = cfg.instagramUrl || `https://instagram.com/${cfg.instagram}`; $("#fIg").textContent = "@" + cfg.instagram;
   renderLocs(); renderMap(); reveal(); onScroll();
 }
 
@@ -180,14 +182,14 @@ const cf = $("#cf");
 function renderLocs() {
   const c = state.cfg, tag = k => `<span class="loc-tag"><i></i><span data-i18n="${k}">${esc(t(k))}</span></span>`;
   // taller y operativos en curso: al tocar se dan vuelta preguntando "¿Ir a la ubicación?"; el segundo toque abre Google Maps
-  const flip = (cls, name, desc, url) => `<div class="loc ${cls}" role="button" tabindex="0" data-url="${esc(url || "")}"><div class="loc-in">
+  const flip = (cls, name, desc, url, q) => `<div class="loc ${cls}" role="button" tabindex="0" data-url="${esc(url || "")}" data-q="${esc(q || "")}"><div class="loc-in">
     <div class="loc-f glass">${tag(cls === "main" ? "loc.main" : "loc.base")}<h3>${name}</h3><p>${desc}</p></div>
     <div class="loc-b glass"><b data-i18n="loc.ask">${esc(t("loc.ask"))}</b><small data-i18n="loc.again">${esc(t("loc.again"))}</small></div></div></div>`;
   // operativos terminados (los del mapa): al tocarlos, el mapa vuela hasta ese punto
   const past = state.ops.filter(o => !o.live && o.lat != null && o.lng != null);
-  cf.innerHTML = flip("main", esc(c.tallerNombre || "Chapistería Omar"), `<span data-i18n="loc.mainD">${esc(t("loc.mainD"))}</span>`, c.tallerMaps)
-    + (c.bases || []).filter(b => b.nombre).map(b => flip("live", esc(b.nombre), b.detalle ? esc(b.detalle) : `<span data-i18n="loc.baseD">${esc(t("loc.baseD"))}</span>`, b.maps)).join("")
-    + past.map(o => `<button class="loc past" data-op="${state.ops.indexOf(o)}"><div class="loc-in"><div class="loc-f glass">${tag("loc.past")}<h3>${esc(o.name)}</h3><p>${esc([o.province, o.year].filter(Boolean).join(" · "))}${o.units ? ` · ${esc(o.units)} <span data-i18n="map.units">${esc(t("map.units"))}</span>` : ""}</p></div></div></button>`).join("");
+  cf.innerHTML = flip("main", esc(c.tallerNombre || "Chapistería Omar"), `<span data-i18n="loc.mainD">${esc(t("loc.mainD"))}</span>`, c.tallerMaps, c.tallerDir)
+    + (c.bases || []).filter(b => b.nombre).map(b => flip("live", esc(b.nombre), b.detalle ? esc(b.detalle) : `<span data-i18n="loc.baseD">${esc(t("loc.baseD"))}</span>`, b.maps, b.nombre)).join("")
+    + past.map(o => `<button class="loc past" data-op="${state.ops.indexOf(o)}" data-ll="${o.lng},${o.lat}"><div class="loc-in"><div class="loc-f glass">${tag("loc.past")}<h3>${esc(o.name)}</h3><p>${esc([o.province, o.year].filter(Boolean).join(" · "))}${o.units ? ` · ${esc(o.units)} <span data-i18n="map.units">${esc(t("map.units"))}</span>` : ""}</p></div></div></button>`).join("");
   $$("[data-op]", cf).forEach(b => b.onclick = () => {
     const m = pinByOp.get(state.ops[+b.dataset.op]); if (!m) return;
     map.flyTo({ center: m.getLngLat(), zoom: 8, pitch: 50, duration: calm ? 0 : 1800 });
@@ -202,6 +204,8 @@ function renderLocs() {
     el.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } };
   });
   coverflow();
+  // ubica taller y operativos en curso para los pines y para que el mapa vuele hasta ellos
+  $$("[data-url]", cf).forEach(async el => { const ll = await geocode(el.dataset.url, el.dataset.q); if (ll) { el.dataset.ll = ll.join(","); syncLocPins(); follow(); } });
 }
 // tocar fuera de una tarjeta dada vuelta la vuelve a su frente
 addEventListener("pointerdown", e => { if (!e.target.closest?.(".loc")) $$(".loc.flip", cf).forEach(x => x.classList.remove("flip")); });
@@ -247,10 +251,9 @@ const loadLeaflet = () => leafP ||= loadScript("https://cdnjs.cloudflare.com/aja
 function renderMap() {
   if (!window.maplibregl) return;
   if (!map) {
-    // arranca lejos y vuela hasta los operativos cuando el mapa entra en pantalla
-    map = new maplibregl.Map({ container: "map", style: mapStyle(), center: [-63.5, -30], zoom: 1.6, attributionControl: { compact: true }, cooperativeGestures: true });
-    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-left");
-    new IntersectionObserver(([e], o) => { if (e.isIntersecting) { o.disconnect(); fly(); } }, { threshold: .5 }).observe($("#map"));
+    // el mapa no se toca: lo mueven las tarjetas del carrusel
+    map = new maplibregl.Map({ container: "map", style: mapStyle(), center: [-63.5, -30], zoom: 1.6, attributionControl: { compact: true }, interactive: false });
+    new IntersectionObserver(([e], o) => { if (e.isIntersecting) { o.disconnect(); follow(0); } }, { threshold: .5 }).observe($("#map"));
   }
   pins.forEach(p => p.remove()); pinByOp.clear();
   pins = state.ops.filter(o => o.lat != null && o.lng != null).map(o => {
@@ -259,12 +262,43 @@ function renderMap() {
       .setPopup(new maplibregl.Popup({ offset: 14, closeButton: false }).setHTML(`<b>${esc(o.name)}</b>${esc([o.province, o.year].filter(Boolean).join(" · "))}${o.units ? ` · ${esc(o.units)} ${esc(t("map.units"))}` : ""}`)).addTo(map);
     pinByOp.set(o, m); return m;
   });
+  syncLocPins();
 }
-function fly() {
-  if (!pins.length) return map.flyTo({ center: [-63.5, -36.5], zoom: 3.6, pitch: 40, duration: calm ? 0 : 2600 });
-  const b = new maplibregl.LngLatBounds(); pins.forEach(p => b.extend(p.getLngLat()));
-  map.fitBounds(b, { padding: 70, maxZoom: 6.5, pitch: 40, bearing: -8, duration: calm ? 0 : 2600 });
+// pines del taller (rojo) y de los operativos en curso (verde), cuando ya se sabe dónde están
+let locPins = [];
+function syncLocPins() {
+  if (!map) return;
+  locPins.forEach(p => p.remove());
+  locPins = $$(".loc[data-url][data-ll]", cf).map(el => {
+    const d = document.createElement("div"); d.className = el.classList.contains("main") ? "pin main" : "pin live";
+    return new maplibregl.Marker({ element: d }).setLngLat(el.dataset.ll.split(",").map(Number)).addTo(map);
+  });
 }
+// coordenadas: del link de Google Maps si las trae; si no, buscando el lugar en OpenStreetMap (se guarda para no repetir)
+async function geocode(url, q) {
+  const m = /@(-?\d+\.\d+),(-?\d+\.\d+)/.exec(url || "") || /query=(-?\d+\.\d+)(?:,|%2C)\s*(-?\d+\.\d+)/.exec(url || "");
+  if (m) return [+m[2], +m[1]];
+  if (!q) return null;
+  try { const c = JSON.parse(localStorage.getItem("geo:" + q)); if (c) return c; } catch {}
+  try {
+    const r = await (await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`)).json();
+    if (!r[0]) return null;
+    const ll = [+r[0].lon, +r[0].lat]; try { localStorage.setItem("geo:" + q, JSON.stringify(ll)); } catch {}
+    return ll;
+  } catch { return null; }
+}
+// al deslizar el carrusel, el mapa vuela hasta la tarjeta del centro
+let followT;
+function follow(delay = 180) {
+  clearTimeout(followT);
+  followT = setTimeout(() => {
+    const cards = $$(".loc", cf); if (!map || !cards.length) return;
+    const mid = cf.scrollLeft + cf.clientWidth / 2, dist = el => Math.abs(el.offsetLeft + el.offsetWidth / 2 - mid);
+    const el = cards.reduce((a, b) => dist(b) < dist(a) ? b : a);
+    if (el.dataset.ll) map.flyTo({ center: el.dataset.ll.split(",").map(Number), zoom: el.classList.contains("past") ? 8 : 12, pitch: 45, duration: calm ? 0 : 1600 });
+  }, delay);
+}
+cf.addEventListener("scroll", () => follow(), { passive: true });
 /* ================= formulario ================= */
 // slide commit: se arrastra la manija hasta el final para enviar; con teclado, Enter envía directo
 const sc = $("#sc"), scH = $("#scH");
@@ -346,7 +380,7 @@ async function checkAdmin() {
   if (!FIREBASE_CONFIG.apiKey) { alert("Falta completar FIREBASE_CONFIG en js/config.js"); return; }
   try {
     await Promise.all([initFirebase(), loadLeaflet().catch(console.warn)]); // el panel usa Leaflet para los operativos
-    const m = await import("./admin.js?v=30");
+    const m = await import("./admin.js?v=32");
     await m.openAdmin(state, { reload: loadData, cld, esc });
   } catch (er) {
     console.error(er);

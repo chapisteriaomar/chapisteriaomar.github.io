@@ -1,4 +1,4 @@
-import { CLOUDINARY } from "./config.js?v=23";
+import { CLOUDINARY } from "./config.js?v=32";
 
 const FB = "https://www.gstatic.com/firebasejs/10.12.4/";
 const $ = (s, r = document) => r.querySelector(s);
@@ -133,12 +133,12 @@ function dropzone(el, { multiple = true, accept = "image/*,video/*", title = "Ar
   el.ondragleave = () => el.classList.remove("over");
   el.ondrop = ev => { ev.preventDefault(); el.classList.remove("over"); const fl = [...ev.dataTransfer.files].filter(f => /^(image|video)\//.test(f.type)); if (fl.length) onFiles(multiple ? fl : [fl[0]]); };
 }
-function imgPick(el, label, onFile, existing) {
+function imgPick(el, label, onFile, existing, kind = "image") {
   el.classList.add("dz");
-  const inp = document.createElement("input"); inp.type = "file"; inp.accept = "image/*"; inp.hidden = true;
+  const inp = document.createElement("input"); inp.type = "file"; inp.accept = kind + "/*"; inp.hidden = true;
   const empty = () => { el.classList.remove("has-img"); el.innerHTML = `${ico("up")}<b>${label}</b><small>arrastrá o tocá</small>`; el.append(inp); };
-  const show = src => { el.classList.add("has-img"); el.innerHTML = `<img src="${src}" alt=""><span class="dz-tag">${label} · tocá para cambiar</span>`; el.append(inp); };
-  const take = f => { if (!f || !f.type.startsWith("image")) return; show(URL.createObjectURL(f)); onFile(f); };
+  const show = src => { el.classList.add("has-img"); el.innerHTML = `${kind === "video" ? `<video src="${src}" muted playsinline autoplay loop></video>` : `<img src="${src}" alt="">`}<span class="dz-tag">${label} · tocá para cambiar</span>`; el.append(inp); };
+  const take = f => { if (!f || !f.type.startsWith(kind)) return; show(URL.createObjectURL(f)); onFile(f); };
   existing ? show(existing) : empty();
   el.onclick = ev => { if (ev.target !== inp) inp.click(); };
   inp.onchange = () => { take(inp.files[0]); inp.value = ""; };
@@ -580,13 +580,18 @@ async function config() {
           ${f("cw", "WhatsApp (con código país)", c.whatsapp, "5491100000000")}${f("ce", "Email", c.email)}
           ${f("ci", "Instagram (usuario)", c.instagram)}${f("ciu", "Instagram (link)", c.instagramUrl)}</div></div>
         <div class="ad-card"><h2>Taller principal</h2><p class="sub">&nbsp;</p><div class="ad-fields">
-          ${f("tn", "Nombre", c.tallerNombre)}${f("tm", "Link Google Maps", c.tallerMaps)}</div></div>
+          ${f("tn", "Nombre", c.tallerNombre)}${f("tm", "Link Google Maps", c.tallerMaps)}
+          ${f("tg", "Dirección o ciudad (para ubicarlo en el mapa)", c.tallerDir, "Ej: Av. San Martín 1234, Paraná")}</div></div>
         <div class="ad-card"><h2>Cifras del inicio</h2><p class="sub">Las vacías no se muestran.</p><div class="ad-fields">
           ${f("s1", "Años de oficio", st.years, "Ej: 25+")}${f("s2", "Vehículos reparados", st.vehicles, "Ej: 8.000+")}
           ${f("s3", "Provincias / países", st.provinces, "Ej: 10")}${f("s4", "Operativos realizados", st.ops, "Ej: 30+")}</div></div>
       </div>
-      <div class="ad-card"><h2>Foto de "La empresa"</h2><p class="sub">Se ve al lado del texto de la empresa.</p>
-        <div id="az" style="aspect-ratio:4/3"></div></div>
+      <div>
+        <div class="ad-card"><h2>Videos del inicio</h2><p class="sub">El video de fondo de la portada. Si no subís el de celular, se usa el de compu.</p>
+          <div class="ad-fields" style="grid-template-columns:1.6fr 1fr;align-items:start"><div id="hvD" style="aspect-ratio:16/9"></div><div id="hvM" style="aspect-ratio:9/16"></div></div></div>
+        <div class="ad-card"><h2>Foto de "Ambiente"</h2><p class="sub">Se ve al lado del texto sobre el cuidado del ambiente.</p>
+          <div id="az" style="aspect-ratio:4/3"></div></div>
+      </div>
     </div>
     <div class="ad-card" style="position:sticky;bottom:12px;margin:0;display:flex;justify-content:space-between;align-items:center;gap:12px">
       <span style="color:var(--muted);font-size:14px">Los cambios se ven en la web al recargar.</span><button class="b red big" id="cs">Guardar cambios</button></div>`;
@@ -607,13 +612,17 @@ async function config() {
   $("#bases").onclick = ev => { if (ev.target.classList.contains("b-x")) ev.target.closest(".base-row").remove(); };
   $("#addBase").onclick = () => $("#bases").insertAdjacentHTML("beforeend", baseRow());
   imgPick($("#az"), "Foto de la empresa", fl => aboutFile = fl, c.aboutImg ? H.cld(c.aboutImg, 800) : null);
+  let vidD = null, vidM = null;
+  imgPick($("#hvD"), "Video compu", fl => vidD = fl, c.heroVideo || null, "video");
+  imgPick($("#hvM"), "Video celular", fl => vidM = fl, c.heroVideoM || null, "video");
 
   $("#cs").onclick = ev => busy(ev.currentTarget, async () => {
     const v = id => $("#" + id).value.trim();
     const aboutImg = aboutFile ? await upload(aboutFile) : (c.aboutImg || "");
+    const heroVideo = vidD ? await upload(vidD) : (c.heroVideo || ""), heroVideoM = vidM ? await upload(vidM) : (c.heroVideoM || "");
     await fs.setDoc(ref, {
       whatsapp: v("cw").replace(/\D/g, ""), email: v("ce"), instagram: v("ci").replace("@", ""), instagramUrl: v("ciu"),
-      tallerNombre: v("tn"), tallerMaps: v("tm"),
+      tallerNombre: v("tn"), tallerMaps: v("tm"), tallerDir: v("tg"), heroVideo, heroVideoM,
       bases: $$(".base-row").map(r => ({ nombre: $(".b-n", r).value.trim(), maps: $(".b-m", r).value.trim(), detalle: $(".b-d", r).value.trim() })).filter(b => b.nombre || b.maps),
       baseNombre: fs.deleteField(), baseMaps: fs.deleteField(),
       stats: { years: v("s1"), vehicles: v("s2"), provinces: v("s3"), ops: v("s4") }, aboutImg
@@ -626,7 +635,7 @@ async function config() {
 /* ================= TEXTOS DE LA WEB ================= */
 // Los originales están en js/i18n.js (BASE, sin modificar); lo editado se guarda en site/texts { es: {clave: texto}, en: {...} }
 let BASE_TX = null;
-async function loadBase() { if (!BASE_TX) BASE_TX = (await import("./i18n.js?v=28&base=1")).I18N; return BASE_TX; }
+async function loadBase() { if (!BASE_TX) BASE_TX = (await import("./i18n.js?v=32&base=1")).I18N; return BASE_TX; }
 async function saveText(lang, key, value) {
   await fs.setDoc(fs.doc(db, "site", "texts"), { [lang]: { [key]: value == null ? fs.deleteField() : value } }, { merge: true });
 }

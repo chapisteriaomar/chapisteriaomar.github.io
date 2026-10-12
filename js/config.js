@@ -23,8 +23,8 @@ export const CLOUDINARY = {
 export const DEFAULTS = {
   whatsapp: "5491130526505",                 // ej: 5491100000000 (sin + ni espacios)
   email: "chapisteriaomar@gmail.com",
-  instagram: "chapisteriaomarsrl",
-  instagramUrl: "https://www.instagram.com/chapisteriaomarsrl/",
+  instagram: "chapisteriaomarsolutions",
+  instagramUrl: "https://www.instagram.com/chapisteriaomarsolutions/",
   tallerNombre: "Chapistería Omar",
   tallerMaps: "https://share.google/7TK7TCiUOezFoH4EV",
   // Operativos móviles activos (pueden ser varios a la vez; se editan en admin → Config)
