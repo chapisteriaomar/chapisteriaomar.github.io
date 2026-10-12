@@ -1,4 +1,4 @@
-import { CLOUDINARY } from "./config.js?v=33";
+import { CLOUDINARY } from "./config.js?v=38";
 
 const FB = "https://www.gstatic.com/firebasejs/10.12.4/";
 const $ = (s, r = document) => r.querySelector(s);
@@ -652,7 +652,7 @@ async function config() {
 /* ================= TEXTOS DE LA WEB ================= */
 // Los originales están en js/i18n.js (BASE, sin modificar); lo editado se guarda en site/texts { es: {clave: texto}, en: {...} }
 let BASE_TX = null;
-async function loadBase() { if (!BASE_TX) BASE_TX = (await import("./i18n.js?v=32&base=1")).I18N; return BASE_TX; }
+async function loadBase() { if (!BASE_TX) BASE_TX = (await import("./i18n.js?v=38&base=1")).I18N; return BASE_TX; }
 async function saveText(lang, key, value) {
   await fs.setDoc(fs.doc(db, "site", "texts"), { [lang]: { [key]: value == null ? fs.deleteField() : value } }, { merge: true });
 }
@@ -697,7 +697,8 @@ async function txList() {
           ? `<textarea data-l="${l}" rows="3">${e(v)}</textarea>` : `<input data-l="${l}" value="${e(v)}">`}</label>`; }).join("")}</div>`).join("")}</div>`).join("");
   $$("#tb [data-l]").forEach(inp => inp.onchange = async () => {
     const k = inp.closest(".tx-r").dataset.k, l = inp.dataset.l, v = inp.value.trim();
-    const value = !v || v === base[l][k] ? null : v;
+    // vacío = vuelve al original, salvo los números de los pasos, que pueden quedar vacíos
+    const value = v === base[l][k] ? null : !v && !/^proc\.\dn$/.test(k) ? null : v;
     try { await saveText(l, k, value); if (value == null) inp.value = base[l][k]; toast(value == null ? "Restaurado al original" : "Guardado ✓"); }
     catch (er) { toast(er.message, true); }
   });

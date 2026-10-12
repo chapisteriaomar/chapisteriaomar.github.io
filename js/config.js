@@ -27,6 +27,7 @@ export const DEFAULTS = {
   instagramUrl: "https://www.instagram.com/chapisteriaomarsolutions/",
   tallerNombre: "Chapistería Omar",
   tallerMaps: "https://share.google/7TK7TCiUOezFoH4EV",
+  tallerDir: "-34.4551712,-58.8027503",  // ubicación del taller para el mapa (dirección o "lat, lng")
   // Operativos móviles activos (pueden ser varios a la vez; se editan en admin → Config)
   bases: [{ nombre: "Paraná, Entre Ríos", maps: "https://maps.app.goo.gl/EWwpqKRX9WEoaXVS6" }, { nombre: "Posadas, Misiones", maps: "https://www.google.com/maps/search/?api=1&query=Posadas%2C%20Misiones" }],
   // Cifras del hero: se completan en admin → Config (las vacías no se muestran)

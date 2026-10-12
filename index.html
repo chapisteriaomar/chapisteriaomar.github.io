@@ -48,7 +48,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lenis@1.3.25/dist/lenis.css">
-<link rel="stylesheet" href="css/v2.css?v=32">
+<link rel="stylesheet" href="css/v2.css?v=38">
 <script>if(location.hash==="#admin")location.replace("/admin/");
 try{var d=document.documentElement,th=localStorage.getItem("theme");if(th)d.dataset.theme=th;
 // intro con aurora: una vez por visita, nunca en el panel ni en el editor
@@ -59,7 +59,6 @@ if(!sessionStorage.getItem("intro")&&!/edit|admin/.test(location.search+location
 <div class="intro-ov" id="intro" aria-hidden="true">
   <div class="aur"><i></i><i></i><i></i><i></i></div>
   <img class="logo-d" src="assets/logo-grande.svg" alt=""><img class="logo-l" src="assets/logo-grande-dark.svg" alt="">
-  <span class="intro-hint" data-i18n="intro.hint">Deslizá para entrar</span>
 </div>
 
 <header class="hdr glass" id="hdr">
@@ -100,11 +99,11 @@ if(!sessionStorage.getItem("intro")&&!/edit|admin/.test(location.search+location
   <div class="dc-stick">
     <div class="wrap dc-head" id="servicios"><span class="eyebrow" data-i18n="svc.kicker">Servicios</span><h2 class="h2" data-i18n="svc.title">Lo que resolvemos</h2></div>
     <ol class="dc-stage" id="dcStage">
-      <li><span class="step-n">1</span><h3 data-i18n="proc.1t"></h3><p data-i18n="proc.1d"></p></li>
-      <li><span class="step-n">2</span><h3 data-i18n="proc.2t"></h3><p data-i18n="proc.2d"></p></li>
-      <li><span class="step-n">3</span><h3 data-i18n="proc.3t"></h3><p data-i18n="proc.3d"></p></li>
-      <li><span class="step-n">4</span><h3 data-i18n="proc.4t"></h3><p data-i18n="proc.4d"></p></li>
-      <li><span class="step-n">5</span><h3 data-i18n="proc.5t"></h3><p data-i18n="proc.5d"></p></li>
+      <li><span class="step-n" data-i18n="proc.1n">1</span><h3 data-i18n="proc.1t"></h3><p data-i18n="proc.1d"></p></li>
+      <li><span class="step-n" data-i18n="proc.2n">2</span><h3 data-i18n="proc.2t"></h3><p data-i18n="proc.2d"></p></li>
+      <li><span class="step-n" data-i18n="proc.3n">3</span><h3 data-i18n="proc.3t"></h3><p data-i18n="proc.3d"></p></li>
+      <li><span class="step-n" data-i18n="proc.4n">4</span><h3 data-i18n="proc.4t"></h3><p data-i18n="proc.4d"></p></li>
+      <li><span class="step-n" data-i18n="proc.5n">5</span><h3 data-i18n="proc.5t"></h3><p data-i18n="proc.5d"></p></li>
     </ol>
   </div>
 </section>
@@ -130,7 +129,6 @@ if(!sessionStorage.getItem("intro")&&!/edit|admin/.test(location.search+location
   <div class="wrap"><div class="pres-box rv">
     <div id="map"></div>
     <div class="cf" id="cf"></div>
-    <div class="cf-nav"><button class="glass" data-d="-1" aria-label="Anterior">←</button><button class="glass" data-d="1" aria-label="Siguiente">→</button></div>
   </div></div>
 </section>
 
@@ -156,20 +154,13 @@ if(!sessionStorage.getItem("intro")&&!/edit|admin/.test(location.search+location
       </div>
     </div>
     <form class="form glass rv" id="leadForm" novalidate>
-      <fieldset class="full chips">
-        <legend data-i18n="f.need">¿Qué necesitás?</legend>
-        <label><input type="radio" name="type" checked><span data-i18n="f.t1">Siniestro de granizo</span></label>
-        <label><input type="radio" name="type"><span data-i18n="f.t2">Convenio / proveedor</span></label>
-        <label><input type="radio" name="type"><span data-i18n="f.t3">Flota / concesionaria</span></label>
-        <label><input type="radio" name="type"><span data-i18n="f.t4">Otro</span></label>
-      </fieldset>
-      <label class="fl"><input name="name" required maxlength="190" placeholder=" " autocomplete="name"><span><i data-i18n="f.name">Nombre y cargo</i> *</span></label>
-      <label class="fl"><input name="company" required maxlength="190" placeholder=" " autocomplete="organization"><span><i data-i18n="f.company">Empresa / compañía</i> *</span></label>
-      <label class="fl"><input name="email" type="email" required maxlength="190" placeholder=" " autocomplete="email"><span><i data-i18n="f.email">Email</i> *</span></label>
-      <label class="fl"><input name="phone" type="tel" placeholder=" " autocomplete="tel"><span data-i18n="f.phone">Teléfono</span></label>
-      <label class="fl"><input name="country" placeholder=" "><span data-i18n="f.country">País / provincia</span></label>
-      <label class="fl"><input name="units" inputmode="numeric" placeholder=" "><span data-i18n="f.units">Unidades estimadas</span></label>
-      <label class="fl full"><textarea name="message" rows="3" maxlength="4900" placeholder=" "></textarea><span data-i18n="f.msg">Mensaje</span></label>
+      <!-- campos de la base (reglas de Firestore): name, country, email, phone, company, message -->
+      <label class="fl"><input name="name" required maxlength="190" placeholder=" " autocomplete="name"><span><i data-i18n="fq.name">Nombre / Razón social</i> *</span></label>
+      <label class="fl"><input name="country" maxlength="190" placeholder=" " autocomplete="address-level2"><span data-i18n="fq.place">Localidad</span></label>
+      <label class="fl"><input name="email" type="email" maxlength="190" placeholder=" " autocomplete="email"><span data-i18n="fq.email">Mail</span></label>
+      <label class="fl"><input name="phone" type="tel" maxlength="60" placeholder=" " autocomplete="tel"><span data-i18n="fq.phone">Teléfono</span></label>
+      <label class="fl full"><input name="company" maxlength="190" placeholder=" "><span data-i18n="fq.ins">Compañía de seguro (si tiene)</span></label>
+      <label class="fl full"><textarea name="message" rows="3" maxlength="4900" placeholder=" "></textarea><span data-i18n="fq.msg">Detalle del caso</span></label>
       <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
       <!-- slide commit: se desliza para enviar; con teclado alcanza con Enter -->
       <div class="full sc" id="sc">
@@ -200,6 +191,6 @@ if(!sessionStorage.getItem("intro")&&!/edit|admin/.test(location.search+location
 <div class="focus-ov" aria-hidden="true"></div>
 <div class="gblur" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
 
-<script type="module" src="js/v2.js?v=37"></script>
+<script type="module" src="js/v2.js?v=38"></script>
 </body>
 </html>

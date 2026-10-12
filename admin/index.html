@@ -26,7 +26,7 @@ img,video{display:block;max-width:100%}
 <div class="pnl" id="pnl"><div style="display:grid;place-items:center;height:100vh;color:var(--muted)">Cargando panel…</div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script type="module">
-import { FIREBASE_CONFIG, DEFAULTS } from "/js/config.js?v=33";
+import { FIREBASE_CONFIG, DEFAULTS } from "/js/config.js?v=38";
 const FB = "https://www.gstatic.com/firebasejs/10.12.4/";
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`);
 const cld = (u, w = 1200) => u && u.includes("/upload/") && !u.includes("/upload/f_auto") ? u.replace("/upload/", `/upload/f_auto,q_auto,c_limit,w_${w}/`) : u;
@@ -36,7 +36,7 @@ try {
   const state = { cfg: { ...DEFAULTS }, fb: { app, fs }, db, lang: "es" };
   const snap = await fs.getDoc(fs.doc(db, "site", "config")).catch(() => null);
   if (snap?.exists()) state.cfg = { ...DEFAULTS, ...snap.data() };
-  const m = await import("/js/admin.js?v=34");
+  const m = await import("/js/admin.js?v=38");
   // "Ver sitio" / "Volver al sitio" vuelven a la web
   await m.openAdmin(state, { reload: () => location.href = "/", cld, esc });
 } catch (er) {

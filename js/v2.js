@@ -1,5 +1,5 @@
-import { FIREBASE_CONFIG, DEFAULTS } from "./config.js?v=32";
-import { I18N } from "./i18n.js?v=32";
+import { FIREBASE_CONFIG, DEFAULTS } from "./config.js?v=38";
+import { I18N } from "./i18n.js?v=38";
 // Textos originales (los editados desde el panel se guardan en Firestore: site/texts)
 const BASE = JSON.parse(JSON.stringify(I18N));
 function applyTexts(over) { for (const l of Object.keys(BASE)) I18N[l] = { ...BASE[l], ...(over?.[l] || {}) }; }
@@ -19,7 +19,6 @@ function applyLang(lang) {
   $$("[data-i18n]").forEach(el => el.textContent = t(el.dataset.i18n));
   $$(".lang button").forEach(b => b.classList.toggle("on", b.dataset.l === lang));
   $("#mq").innerHTML = [1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5, 6].map(i => t("ticker." + i)).filter(Boolean).map(s => `<span>${esc(s)}</span>`).join("");
-  $$(".chips input").forEach(r => r.value = r.nextElementSibling.textContent);
   splitHero(); splitReveal(); renderStats();
 }
 $$(".lang button").forEach(b => b.onclick = () => applyLang(b.dataset.l));
@@ -137,6 +136,11 @@ function sfx(kind) {
   } catch {}
 }
 
+/* ================= botón de cotización: suena y, al tocarlo, se apaga el desenfoque hasta que el mouse sale ================= */
+const ctaTop = $(".cta-top");
+ctaTop.addEventListener("click", () => { sfx("tick"); document.documentElement.classList.add("cta-done"); });
+ctaTop.addEventListener("pointerleave", () => document.documentElement.classList.remove("cta-done"));
+
 /* ================= magnet: los botones principales se acercan al cursor ================= */
 if (!calm && matchMedia("(pointer:fine)").matches) $$(".mag").forEach(el => {
   el.addEventListener("pointermove", e => { const r = el.getBoundingClientRect(); el.style.transform = `translate(${(e.clientX - r.left - r.width / 2) * .3}px,${(e.clientY - r.top - r.height / 2) * .4}px)`; });
@@ -187,13 +191,12 @@ function renderLocs() {
     <div class="loc-b glass"><b data-i18n="loc.ask">${esc(t("loc.ask"))}</b><small data-i18n="loc.again">${esc(t("loc.again"))}</small></div></div></div>`;
   // operativos terminados (los del mapa): al tocarlos, el mapa vuela hasta ese punto
   const past = state.ops.filter(o => !o.live && o.lat != null && o.lng != null);
-  cf.innerHTML = flip("main", esc(c.tallerNombre || "Chapistería Omar"), `<span data-i18n="loc.mainD">${esc(t("loc.mainD"))}</span>`, c.tallerMaps, c.tallerDir)
+  cf.innerHTML = flip("main", esc(c.tallerNombre || "Chapistería Omar"), `<span data-i18n="loc.mainD">${esc(t("loc.mainD"))}</span>`, c.tallerMaps, c.tallerDir || DEFAULTS.tallerDir)
     + (c.bases || []).filter(b => b.nombre).map(b => flip("live", esc(b.nombre), b.detalle ? esc(b.detalle) : `<span data-i18n="loc.baseD">${esc(t("loc.baseD"))}</span>`, b.maps, b.nombre)).join("")
     + past.map(o => `<button class="loc past" data-op="${state.ops.indexOf(o)}" data-ll="${o.lng},${o.lat}"><div class="loc-in"><div class="loc-f glass">${tag("loc.past")}<h3>${esc(o.name)}</h3><p>${esc([o.province, o.year].filter(Boolean).join(" · "))}${o.units ? ` · ${esc(o.units)} <span data-i18n="map.units">${esc(t("map.units"))}</span>` : ""}</p></div></div></button>`).join("");
   $$("[data-op]", cf).forEach(b => b.onclick = () => {
     const m = pinByOp.get(state.ops[+b.dataset.op]); if (!m) return;
     map.flyTo({ center: m.getLngLat(), zoom: 8, pitch: 50, duration: calm ? 0 : 1800 });
-    if (!m.getPopup().isOpen()) m.togglePopup();
   });
   $$("[data-url]", cf).forEach(el => {
     const go = () => {
@@ -205,7 +208,8 @@ function renderLocs() {
   });
   coverflow();
   // ubica taller y operativos en curso para los pines y para que el mapa vuele hasta ellos
-  $$("[data-url]", cf).forEach(async el => { const ll = await geocode(el.dataset.url, el.dataset.q); if (ll) { el.dataset.ll = ll.join(","); syncLocPins(); follow(); } });
+  // si la dirección del taller no se encuentra, se usan sus coordenadas fijas (config.js)
+  $$("[data-url]", cf).forEach(async el => { const ll = await geocode(el.dataset.url, el.dataset.q) || (el.classList.contains("main") ? await geocode("", DEFAULTS.tallerDir) : null); if (ll) { el.dataset.ll = ll.join(","); syncLocPins(); follow(); } });
 }
 // tocar fuera de una tarjeta dada vuelta la vuelve a su frente
 addEventListener("pointerdown", e => { if (!e.target.closest?.(".loc")) $$(".loc.flip", cf).forEach(x => x.classList.remove("flip")); });
@@ -220,7 +224,6 @@ function coverflow() {
 }
 cf.addEventListener("scroll", () => requestAnimationFrame(coverflow), { passive: true });
 addEventListener("resize", coverflow);
-$$(".cf-nav button").forEach(b => b.onclick = () => cf.scrollBy({ left: b.dataset.d * ($(".loc", cf)?.offsetWidth + 20 || 300), behavior: "smooth" }));
 
 /* ================= visor ================= */
 function openLB(w) {
@@ -255,8 +258,10 @@ function renderMap() {
   pins.forEach(p => p.remove()); pinByOp.clear();
   pins = state.ops.filter(o => o.lat != null && o.lng != null).map(o => {
     const el = document.createElement("div"); el.className = o.live ? "pin live" : "pin";
+    // tocar el punto abre esa ubicación en Google Maps
+    el.title = o.name || ""; el.onclick = () => open(`https://www.google.com/maps?q=${o.lat},${o.lng}`, "_blank", "noopener");
     const m = new maplibregl.Marker({ element: el }).setLngLat([o.lng, o.lat])
-      .setPopup(new maplibregl.Popup({ offset: 14, closeButton: false }).setHTML(`<b>${esc(o.name)}</b>${esc([o.province, o.year].filter(Boolean).join(" · "))}${o.units ? ` · ${esc(o.units)} ${esc(t("map.units"))}` : ""}`)).addTo(map);
+      .addTo(map);
     pinByOp.set(o, m); return m;
   });
   syncLocPins();
@@ -268,6 +273,7 @@ function syncLocPins() {
   locPins.forEach(p => p.remove());
   locPins = $$(".loc[data-url][data-ll]", cf).map(el => {
     const d = document.createElement("div"); d.className = el.classList.contains("main") ? "pin main" : "pin live";
+    if (el.dataset.url) d.onclick = () => open(el.dataset.url, "_blank", "noopener");
     return new maplibregl.Marker({ element: d }).setLngLat(el.dataset.ll.split(",").map(Number)).addTo(map);
   });
 }
@@ -276,6 +282,8 @@ async function geocode(url, q) {
   const m = /@(-?\d+\.\d+),(-?\d+\.\d+)/.exec(url || "") || /query=(-?\d+\.\d+)(?:,|%2C)\s*(-?\d+\.\d+)/.exec(url || "");
   if (m) return [+m[2], +m[1]];
   if (!q) return null;
+  const xy = /^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/.exec(q); // también acepta "lat, lng"
+  if (xy) return [+xy[2], +xy[1]];
   try { const c = JSON.parse(localStorage.getItem("geo:" + q)); if (c) return c; } catch {}
   try {
     const r = await (await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`)).json();
@@ -310,7 +318,6 @@ scH.addEventListener("pointerup", () => {
 });
 // un clic de mouse o dedo sin arrastrar no envía; Enter (detail 0) sí
 scH.addEventListener("click", e => { if (e.detail > 0) e.preventDefault(); });
-$$(".chips input").forEach(r => r.addEventListener("change", () => sfx("tick")));
 
 $("#leadForm").addEventListener("submit", async e => {
   e.preventDefault();
@@ -318,6 +325,8 @@ $("#leadForm").addEventListener("submit", async e => {
   if (sc.matches(".busy,.done")) return;
   if (f.website.value) return; // honeypot
   if (!f.checkValidity()) { scSet(0); f.reportValidity(); return; }
+  // hace falta un mail o un teléfono para poder responder
+  if (!f.email.value.trim() && !f.phone.value.trim()) { scSet(0); msg.className = "form-msg full err"; msg.textContent = t("fq.need"); f.email.focus(); return; }
   const data = Object.fromEntries(new FormData(f)); delete data.website;
   scSet(1); sc.classList.add("busy"); msg.className = "form-msg full"; msg.textContent = "";
   try {
@@ -393,7 +402,10 @@ if (html.classList.contains("intro")) {
     ov.addEventListener("animationend", e => { if (e.target !== ov) return; ov.remove(); html.classList.remove("opening"); lenis?.start(); });
   };
   evs.forEach(ev => addEventListener(ev, openIntro, { passive: true }));
-  setTimeout(openIntro, 6000); // por si nadie scrollea
+  // se abre sola apenas termina de cargar la página (o antes si el visitante scrollea / toca)
+  const auto = () => setTimeout(openIntro, 600);
+  document.readyState === "complete" ? auto() : addEventListener("load", auto, { once: true });
+  setTimeout(openIntro, 6000); // por si algo tarda demasiado en cargar
 }
 
 /* ================= init ================= */
@@ -401,5 +413,5 @@ $("#yr").textContent = new Date().getFullYear();
 let saved = "es"; try { saved = localStorage.getItem("lang") || (navigator.language?.startsWith("es") ? "es" : "en"); } catch {}
 applyLang(saved); render();
 loadData().catch(er => console.error("Carga de datos:", er)).then(() => editMode
-  ? import("./editor.js?v=23").then(m => m.initEditor({ state, t, I18N, BASE, applyLang }))
+  ? import("./editor.js?v=38").then(m => m.initEditor({ state, t, I18N, BASE, applyLang }))
   : checkAdmin());

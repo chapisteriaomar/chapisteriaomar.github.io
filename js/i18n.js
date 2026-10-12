@@ -71,6 +71,8 @@ export const I18N = {
     "f.need": "¿Qué necesitás?", "f.slide": "Deslizá para enviar", "f.done": "Consulta enviada", "intro.hint": "Deslizá para entrar",
     "pres.title": "Dónde estuvimos y dónde estamos", "loc.past": "Operativo móvil finalizado",
     "cta.short": "Cotizar", "loc.ask": "¿Ir a la ubicación?", "loc.again": "Tocá de nuevo para abrir Google Maps",
+    "proc.1n": "1", "proc.2n": "2", "proc.3n": "3", "proc.4n": "4", "proc.5n": "5",
+    "fq.name": "Nombre / Razón social", "fq.place": "Localidad", "fq.email": "Mail", "fq.phone": "Teléfono", "fq.ins": "Compañía de seguro (si tiene)", "fq.msg": "Detalle del caso", "fq.need": "Dejanos un mail o un teléfono para responderte.",
     "close": "Cerrar", "before": "Antes", "after": "Después",
     "ticker.1": "Desabollado sin pintura", "ticker.2": "Granizo", "ticker.3": "Operativos móviles", "ticker.4": "Aseguradoras", "ticker.5": "Flotas", "ticker.6": "Argentina y exterior"
   },
@@ -146,6 +148,8 @@ export const I18N = {
     "f.need": "What do you need?", "f.slide": "Slide to send", "f.done": "Request sent", "intro.hint": "Scroll to enter",
     "pres.title": "Where we've been and where we are", "loc.past": "Mobile operation completed",
     "cta.short": "Get a quote", "loc.ask": "Go to this location?", "loc.again": "Tap again to open Google Maps",
+    "proc.1n": "1", "proc.2n": "2", "proc.3n": "3", "proc.4n": "4", "proc.5n": "5",
+    "fq.name": "Name / Company name", "fq.place": "City", "fq.email": "Email", "fq.phone": "Phone", "fq.ins": "Insurance company (if any)", "fq.msg": "Case details", "fq.need": "Leave an email or a phone so we can reply.",
     "close": "Close", "before": "Before", "after": "After",
     "ticker.1": "Paintless Dent Repair", "ticker.2": "Hail Damage", "ticker.3": "Mobile Operations", "ticker.4": "Insurers", "ticker.5": "Fleets", "ticker.6": "Argentina & abroad"
   }

@@ -79,7 +79,7 @@ export function initEditor(ctx) {
     box.querySelector('[data-a="reset"]').onclick = () => save(null);
     function save(value) {
       const v = value == null ? null : value.trim();
-      if (v === "") return toast("El texto no puede quedar vacío");
+      if (v === "" && !/^proc\.\dn$/.test(key)) return toast("El texto no puede quedar vacío"); // los números de los pasos sí pueden quedar vacíos
       box.querySelectorAll("button").forEach(b => b.disabled = true);
       pending = { lang, key, value: v };
       parent.postMessage({ type: "cms-save", lang, key, value: v }, location.origin);
