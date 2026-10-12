@@ -146,8 +146,29 @@ function render() {
   if (wa) { $("#waLink").href = `https://wa.me/${wa}?text=${encodeURIComponent("Hola, los contacto desde chapisteriaomar.com")}`; $("#waText").textContent = "+" + wa; $("#fWa").innerHTML = `<a href="https://wa.me/${wa}">+${wa}</a>`; }
   if (cfg.email) { $("#mailLink").href = "mailto:" + cfg.email; $("#mailText").textContent = cfg.email; $("#fMail").innerHTML = `<a href="mailto:${esc(cfg.email)}">${esc(cfg.email)}</a>`; }
   $("#fIg").href = cfg.instagramUrl || `https://instagram.com/${cfg.instagram}`;
-  renderMap(); reveal(); onScroll();
+  renderLocs(); renderMap(); reveal(); onScroll();
 }
+
+/* ================= ubicaciones: taller + operativos en curso, en carrusel con profundidad ================= */
+const cf = $("#cf");
+function renderLocs() {
+  const c = state.cfg, card = (cls, tag, name, desc, url) => `<a class="loc glass${cls}" href="${esc(url || "#")}" target="_blank" rel="noopener"><span class="loc-tag"><i></i>${tag}</span><h3>${name}</h3><p>${desc}</p><span class="link" data-i18n="loc.go">${esc(t("loc.go"))}</span></a>`;
+  cf.innerHTML = card("", `<span data-i18n="loc.main">${esc(t("loc.main"))}</span>`, esc(c.tallerNombre || "Chapistería Omar"), `<span data-i18n="loc.mainD">${esc(t("loc.mainD"))}</span>`, c.tallerMaps)
+    + (c.bases || []).filter(b => b.nombre).map(b => card(" live", `<span data-i18n="loc.base">${esc(t("loc.base"))}</span>`, esc(b.nombre), b.detalle ? esc(b.detalle) : `<span data-i18n="loc.baseD">${esc(t("loc.baseD"))}</span>`, b.maps)).join("");
+  coverflow();
+}
+// cada tarjeta gira y se aleja según su distancia al centro
+function coverflow() {
+  const mid = cf.scrollLeft + cf.clientWidth / 2;
+  $$(".loc", cf).forEach(el => {
+    const d = Math.max(-2, Math.min(2, (el.offsetLeft + el.offsetWidth / 2 - mid) / (el.offsetWidth + 20))), a = Math.abs(d);
+    el.style.transform = `rotateY(${-d * 32}deg) translateZ(${-a * 130}px) scale(${1 - a * .06})`;
+    el.style.opacity = 1 - a * .35;
+  });
+}
+cf.addEventListener("scroll", () => requestAnimationFrame(coverflow), { passive: true });
+addEventListener("resize", coverflow);
+$$(".cf-nav button").forEach(b => b.onclick = () => cf.scrollBy({ left: b.dataset.d * ($(".loc", cf)?.offsetWidth + 20 || 300), behavior: "smooth" }));
 
 /* ================= visor ================= */
 function openLB(w) {
@@ -258,8 +279,10 @@ async function loadData() {
   ]);
   if (cfgSnap?.exists()) { const d = cfgSnap.data(); state.cfg = { ...DEFAULTS, ...d, stats: { ...DEFAULTS.stats, ...(d.stats || {}) } }; }
   // opciones del panel: sin botón de idioma la web queda en español; sin botón de tema, en oscuro
-  const { showLang, showTheme } = state.cfg;
+  const { showLang, showTheme, showKicker, dcLen } = state.cfg;
   $(".lang").hidden = showLang === false; $("#themeBtn").hidden = showTheme === false;
+  $("#xpText .kicker").hidden = showKicker === false;
+  if (dcLen) dc.style.setProperty("--dcl", dcLen + "vh");
   if (showLang === false) state.lang = "es";
   if (showTheme === false) delete document.documentElement.dataset.theme;
   Object.assign(state, { works, ops, clients, reviews });
@@ -273,7 +296,7 @@ async function checkAdmin() {
   if (!FIREBASE_CONFIG.apiKey) { alert("Falta completar FIREBASE_CONFIG en js/config.js"); return; }
   try {
     await Promise.all([initFirebase(), loadLeaflet().catch(console.warn)]); // el panel usa Leaflet para los operativos
-    const m = await import("./admin.js?v=24");
+    const m = await import("./admin.js?v=25");
     await m.openAdmin(state, { reload: loadData, cld, esc });
   } catch (er) {
     console.error(er);
@@ -286,7 +309,7 @@ addEventListener("hashchange", checkAdmin);
 let lenis = null;
 const html = document.documentElement;
 if (!editMode && !calm)
-  import("https://cdn.jsdelivr.net/npm/lenis@1.3.25/dist/lenis.mjs").then(m => { lenis = new m.default({ autoRaf: true, anchors: true }); if (html.classList.contains("intro")) lenis.stop(); }).catch(console.warn);
+  import("https://cdn.jsdelivr.net/npm/lenis@1.3.25/dist/lenis.mjs").then(m => { lenis = new m.default({ autoRaf: true, anchors: true }); if (/intro|opening/.test(html.className)) lenis.stop(); }).catch(console.warn);
 
 /* ================= intro: aurora hasta el primer scroll; ahí la web se abre desde el medio ================= */
 if (html.classList.contains("intro")) {
@@ -295,8 +318,9 @@ if (html.classList.contains("intro")) {
     if (!html.classList.contains("intro")) return;
     evs.forEach(ev => removeEventListener(ev, openIntro));
     try { sessionStorage.setItem("intro", "1"); } catch {}
-    ov.classList.add("out"); html.classList.remove("intro"); lenis?.start(); onScroll();
-    ov.addEventListener("animationend", e => { if (e.target === ov) ov.remove(); });
+    // la página queda quieta hasta que termina de abrirse, así el mismo scroll no se saltea los textos del video
+    scrollTo(0, 0); ov.classList.add("out"); html.classList.replace("intro", "opening"); onScroll();
+    ov.addEventListener("animationend", e => { if (e.target !== ov) return; ov.remove(); html.classList.remove("opening"); lenis?.start(); });
   };
   evs.forEach(ev => addEventListener(ev, openIntro, { passive: true }));
   setTimeout(openIntro, 6000); // por si nadie scrollea

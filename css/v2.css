@@ -89,7 +89,7 @@ button{background:none;border:0;cursor:pointer}
 .dc-sub{margin:0}
 
 /* cómo funciona: depth carousel al scrollear entre los 5 pasos */
-.dc{position:relative;height:420vh}
+.dc{position:relative;height:var(--dcl,260vh)}
 .dc-stick{position:sticky;top:0;height:100vh;height:100svh;display:grid;grid-template-rows:auto 1fr;padding-top:clamp(90px,14vh,140px);overflow:hidden}
 .dc-head{width:100%}
 .dc-stage{position:relative;list-style:none;perspective:1100px;perspective-origin:50% 40%}
@@ -200,10 +200,10 @@ button{background:none;border:0;cursor:pointer}
 /* intro: aurora suave; al scrollear se abre la web desde el medio */
 @property --hole{syntax:"<length-percentage>";inherits:false;initial-value:0%}
 .intro-ov{display:none}
-html.intro,html.intro body{overflow:hidden}
+html.intro,html.intro body,html.opening,html.opening body{overflow:hidden}
 html.intro .intro-ov,.intro-ov.out{display:grid;position:fixed;inset:0;z-index:120;place-items:center;align-content:center;gap:28px;background:var(--aur);overflow:hidden}
-.intro-ov.out{pointer-events:none;-webkit-mask:radial-gradient(circle at 50% 50%,transparent var(--hole),#000 calc(var(--hole) + 1px));mask:radial-gradient(circle at 50% 50%,transparent var(--hole),#000 calc(var(--hole) + 1px));animation:open 1.1s cubic-bezier(.7,0,.2,1) forwards}
-@keyframes open{to{--hole:150%}}
+.intro-ov.out{pointer-events:none;-webkit-mask:radial-gradient(circle at 50% 50%,transparent var(--hole),#000 calc(var(--hole) + 22%));mask:radial-gradient(circle at 50% 50%,transparent var(--hole),#000 calc(var(--hole) + 22%));animation:open 1.1s cubic-bezier(.7,0,.2,1) forwards}
+@keyframes open{to{--hole:150%;filter:blur(14px)}}
 .intro-ov img{position:relative;width:min(340px,64vw);animation:blurIn 1.2s cubic-bezier(.2,.7,.2,1) both}
 .intro-hint{position:relative;font:500 12px var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);animation:blurIn 1.2s .5s both,hint 2s 1.7s ease-in-out infinite}
 @keyframes hint{50%{transform:translateY(6px);opacity:.6}}
@@ -275,3 +275,18 @@ html.intro .xp-text .kicker{opacity:0}
 /* scroll reveal: las palabras de los títulos se aclaran a medida que bajás */
 .sr .sw{display:inline-block;white-space:pre;transition:opacity .2s,filter .2s}
 .sr{transform-origin:0 50%}
+
+/* ubicaciones: carrusel con profundidad (el del centro adelante, los costados girados hacia atrás) */
+.cf{display:flex;gap:20px;overflow-x:auto;scroll-snap-type:x mandatory;padding:44px calc(50% - min(190px,39vw));margin-top:24px;perspective:1200px;scrollbar-width:none}
+.cf::-webkit-scrollbar{display:none}
+.loc{flex:0 0 min(380px,78vw);scroll-snap-align:center;display:flex;flex-direction:column;gap:10px;padding:30px;border-radius:24px;transition:transform .15s linear,opacity .15s linear;will-change:transform}
+.loc-tag{display:inline-flex;align-items:center;gap:8px;font:600 12px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.loc-tag i{width:8px;height:8px;border-radius:50%;background:var(--red)}
+.loc.live .loc-tag{color:#3ddc84}
+.loc.live .loc-tag i{background:#3ddc84;animation:ping2 1.6s infinite}
+@keyframes ping2{0%{box-shadow:0 0 0 0 rgba(61,220,132,.7)}100%{box-shadow:0 0 0 10px rgba(61,220,132,0)}}
+.loc h3{font:700 clamp(26px,2.6vw,34px)/1.05 var(--body);letter-spacing:-.03em}
+.loc p{color:var(--muted);flex:1}
+.loc .link{align-self:flex-start;margin-top:10px}
+.cf-nav{display:flex;justify-content:center;gap:10px}
+.cf-nav button{width:46px;height:46px;border-radius:50%;font-size:18px}
