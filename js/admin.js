@@ -605,7 +605,7 @@ async function config() {
       </div>
       <div>
         <div class="pn-card"><h2>Videos del inicio</h2><p class="sub">El video de fondo de la portada. Si no subís el de celular, se usa el de compu.</p>
-          <div class="pn-fields" style="grid-template-columns:1.6fr 1fr;align-items:start"><div id="hvD" style="aspect-ratio:16/9"></div><div id="hvM" style="aspect-ratio:9/16"></div></div></div>
+          <div style="display:flex;gap:14px;align-items:flex-start"><div id="hvD" style="flex:1;min-width:0;min-height:0;aspect-ratio:16/9"></div><div id="hvM" style="flex:0 0 30%;min-width:0;min-height:0;aspect-ratio:9/16"></div></div></div>
         <div class="pn-card"><h2>Foto de "Ambiente"</h2><p class="sub">Se ve al lado del texto sobre el cuidado del ambiente.</p>
           <div id="az" style="aspect-ratio:4/3"></div></div>
       </div>
@@ -629,14 +629,24 @@ async function config() {
   $("#bases").onclick = ev => { if (ev.target.classList.contains("b-x")) ev.target.closest(".base-row").remove(); };
   $("#addBase").onclick = () => $("#bases").insertAdjacentHTML("beforeend", baseRow());
   imgPick($("#az"), "Foto de la empresa", fl => aboutFile = fl, c.aboutImg ? H.cld(c.aboutImg, 800) : null);
-  let vidD = null, vidM = null;
-  imgPick($("#hvD"), "Video compu", fl => vidD = fl, c.heroVideo || null, "video");
-  imgPick($("#hvM"), "Video celular", fl => vidM = fl, c.heroVideoM || null, "video");
+  // los videos se suben apenas se eligen, con barra de avance (son pesados y tardan)
+  const vidUp = (el, label, existing) => {
+    let p = null;
+    imgPick(el, label, fl => {
+      const bar = document.createElement("div"); bar.className = "upbar"; bar.innerHTML = "<i></i><span>Subiendo… 0%</span>"; el.append(bar);
+      p = upload(fl, f => { bar.firstChild.style.width = f * 100 + "%"; bar.lastChild.textContent = `Subiendo… ${Math.round(f * 100)}%`; })
+        .then(u => { bar.firstChild.style.width = "100%"; bar.lastChild.textContent = "Subido ✓ · tocá Guardar cambios"; return u; })
+        .catch(er => { bar.classList.add("err"); bar.lastChild.textContent = "No se pudo subir: " + er.message; throw er; });
+    }, existing || null, "video");
+    return () => p;
+  };
+  const vidD = vidUp($("#hvD"), "Video compu", c.heroVideo), vidM = vidUp($("#hvM"), "Video celular", c.heroVideoM);
 
   $("#cs").onclick = ev => busy(ev.currentTarget, async () => {
     const v = id => $("#" + id).value.trim();
     const aboutImg = aboutFile ? await upload(aboutFile) : (c.aboutImg || "");
-    const heroVideo = vidD ? await upload(vidD) : (c.heroVideo || ""), heroVideoM = vidM ? await upload(vidM) : (c.heroVideoM || "");
+    if ((vidD() || vidM()) && !(await Promise.allSettled([vidD(), vidM()])).every(r => r.status === "fulfilled")) throw new Error("Un video no se pudo subir; elegilo de nuevo.");
+    const heroVideo = (await vidD()) || c.heroVideo || "", heroVideoM = (await vidM()) || c.heroVideoM || "";
     await fs.setDoc(ref, {
       whatsapp: v("cw").replace(/\D/g, ""), email: v("ce"), instagram: v("ci").replace("@", ""), instagramUrl: v("ciu"),
       tallerNombre: v("tn"), tallerMaps: v("tm"), tallerDir: v("tg"), heroVideo, heroVideoM,

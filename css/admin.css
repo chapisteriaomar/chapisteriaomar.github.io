@@ -164,3 +164,8 @@
   .sticky-act{margin:14px -16px -16px;padding:12px 16px}
   .rw{flex-wrap:wrap}
 }
+/* barra de avance al subir videos */
+.upbar{position:absolute;left:10px;right:10px;bottom:10px;z-index:2;height:28px;border-radius:14px;background:rgba(0,0,0,.7);overflow:hidden}
+.upbar i{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--red);transition:width .2s}
+.upbar span{position:relative;display:block;text-align:center;font:600 12px/28px var(--body);color:#fff}
+.upbar.err i{background:#7a1f1a;width:100%!important}

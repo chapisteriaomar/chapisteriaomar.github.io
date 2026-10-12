@@ -370,3 +370,4 @@ html{scroll-padding-top:90px}
   .dc + .sec{padding-top:var(--sy)}
 }
 .pres-box #map{touch-action:pan-y}
+.form textarea{resize:none}
