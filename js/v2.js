@@ -22,6 +22,8 @@ function applyLang(lang) {
   splitHero(); renderStats();
 }
 $$(".lang button").forEach(b => b.onclick = () => applyLang(b.dataset.l));
+// globo de la barra (celular): alterna entre español e inglés
+$("#globeBtn").onclick = () => applyLang(state.lang === "es" ? "en" : "es");
 
 /* ================= modo claro / oscuro ================= */
 const isLight = () => document.documentElement.dataset.theme === "light";
@@ -381,7 +383,7 @@ async function loadData() {
   const { showLang, showTheme, showKicker, dcLen } = state.cfg;
   // pasos de "Lo que resolvemos": cada uno se puede ocultar entero desde el panel
   $$("#dcStage li").forEach((li, i) => li.hidden = state.cfg["showP" + (i + 1)] === false);
-  $(".lang").hidden = showLang === false; $("#themeBtn").hidden = showTheme === false;
+  $(".lang").hidden = $("#globeBtn").hidden = showLang === false; $("#themeBtn").hidden = showTheme === false;
   $("#xpText .kicker").hidden = showKicker === false;
   if (dcLen) dc.style.setProperty("--dcl", dcLen + "vh");
   if (showLang === false) state.lang = "es";

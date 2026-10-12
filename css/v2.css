@@ -375,3 +375,8 @@ html{scroll-padding-top:90px}
 
 /* los textos editados respetan los saltos de línea que se escriben en el editor */
 [data-i18n]{white-space:pre-line}
+
+/* globo de idioma: solo en celular, al lado de Instagram (ahí no va "Cotizar" ni el ES/EN de abajo) */
+.globe{display:none;width:36px;height:36px;border-radius:50%;place-items:center;color:var(--ink)}
+.globe svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8}
+@media(max-width:600px){.globe:not([hidden]){display:grid}.hdr .btn.cta-top,.lang-fab{display:none}}
