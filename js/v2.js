@@ -1,5 +1,5 @@
-import { FIREBASE_CONFIG, DEFAULTS } from "./config.js?v=22";
-import { I18N } from "./i18n.js?v=22";
+import { FIREBASE_CONFIG, DEFAULTS } from "./config.js?v=23";
+import { I18N } from "./i18n.js?v=23";
 // Textos originales (los editados desde el panel se guardan en Firestore: site/texts)
 const BASE = JSON.parse(JSON.stringify(I18N));
 function applyTexts(over) { for (const l of Object.keys(BASE)) I18N[l] = { ...BASE[l], ...(over?.[l] || {}) }; }
@@ -19,9 +19,19 @@ function applyLang(lang) {
   $$("[data-i18n]").forEach(el => el.textContent = t(el.dataset.i18n));
   $$(".lang button").forEach(b => b.classList.toggle("on", b.dataset.l === lang));
   $("#mq").innerHTML = [1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5, 6].map(i => t("ticker." + i)).filter(Boolean).map(s => `<span>${esc(s)}</span>`).join("");
+  $$(".chips input").forEach(r => r.value = r.nextElementSibling.textContent);
   splitHero(); renderStats();
 }
 $$(".lang button").forEach(b => b.onclick = () => applyLang(b.dataset.l));
+
+/* ================= modo claro / oscuro ================= */
+const isLight = () => document.documentElement.dataset.theme === "light";
+$("#themeBtn").onclick = () => {
+  const next = isLight() ? "dark" : "light";
+  document.documentElement.dataset.theme = next;
+  try { localStorage.setItem("theme", next); } catch {}
+  tiles?.setUrl(tileURL());
+};
 
 // blur + stroke: parte los textos del video en palabras (no en el editor, que necesita el texto plano)
 function splitHero() {
@@ -54,7 +64,7 @@ function renderStats() {
 }
 
 /* ================= scroll: video que se expande, logo que se achica, pasos en profundidad ================= */
-const xp = $("#top"), frame = $("#xpFrame"), txt = $("#xpText"), hdr = $("#hdr");
+const xp = $("#top"), frame = $("#xpFrame"), txt = $("#xpText"), hdr = $("#hdr"), gb = $(".gblur");
 const dc = $("#operativo"), steps = $$("#dcStage li");
 const prog = el => Math.min(Math.max(-el.getBoundingClientRect().top / (el.offsetHeight - innerHeight), 0), 1);
 function onScroll() {
@@ -63,6 +73,10 @@ function onScroll() {
   frame.style.setProperty("--s", side * k + "px"); frame.style.setProperty("--r", 28 * k + "px");
   txt.style.opacity = Math.max(1 - e * 1.6, 0); txt.style.transform = `translateY(${-e * 70}px)`;
   hdr.style.setProperty("--lg", Math.max(1 - e * 2.5, 0));
+  // barra de arriba: 0% arriba de todo, 100% al llegar a Contacto
+  hdr.style.setProperty("--pg", Math.min(Math.max(scrollY / Math.max($("#contacto").offsetTop - innerHeight * .4, 1), 0), 1));
+  // el desenfoque de abajo se apaga al final para no tapar el pie
+  gb.style.opacity = Math.min((document.documentElement.scrollHeight - innerHeight - scrollY) / 160, 1);
   // depth carousel: el paso activo adelante, los demás se alejan en profundidad
   const f = prog(dc) * (steps.length - 1);
   steps.forEach((li, i) => {
@@ -94,13 +108,13 @@ function render() {
   const hero = media.find(w => w.type === "video") || media.find(w => w.featured) || media[0];
   $("#heroBg").innerHTML = hero ? pic(hero, 1800, true) : "";
   renderStats();
-  // drift wall: tres filas de fotos (repetidas para que el loop no tenga cortes)
-  $("#trabajos").hidden = !media.length;
-  if (media.length) {
-    const rows = [0, 1, 2].map(r => media.filter((_, i) => i % 3 === r)).map((r, i) => r.length ? r : media);
+  // drift wall: tres filas de fotos repetidas para que el loop no corte (sin videos: decenas repetidos traban la página)
+  $("#trabajos").hidden = !photos.length;
+  if (photos.length) {
+    const rows = [0, 1, 2].map(r => photos.filter((_, i) => i % 3 === r)).map(r => r.length ? r : photos);
     $("#dw").innerHTML = `<div class="dw-in">${rows.map((r, i) => { const fill = Array.from({ length: Math.max(2, Math.ceil(8 / r.length)) }, () => r).flat();
-      return `<div class="dw-row${i % 2 ? " rev" : ""}" style="--d:${60 + i * 15}s">${[...fill, ...fill].map(w => `<div class="media" data-i="${media.indexOf(w)}">${pic(w, 600)}</div>`).join("")}</div>`; }).join("")}</div>`;
-    $$("#dw .media").forEach(el => el.onclick = () => openLB(media[+el.dataset.i]));
+      return `<div class="dw-row${i % 2 ? " rev" : ""}" style="--d:${60 + i * 15}s">${[...fill, ...fill].map(w => `<div class="media" data-i="${photos.indexOf(w)}">${pic(w, 600)}</div>`).join("")}</div>`; }).join("")}</div>`;
+    $$("#dw .media").forEach(el => el.onclick = () => openLB(photos[+el.dataset.i]));
   }
   $("#companias").hidden = !clients.length;
   $("#logos").innerHTML = clients.map(c => `<div class="glass">${c.logo ? `<img src="${esc(cld(c.logo, 300))}" alt="${esc(c.name)}" loading="lazy">` : esc(c.name)}</div>`).join("");
@@ -127,12 +141,20 @@ $("#lbX").onclick = closeLB; $("#lb").onclick = e => { if (e.target.id === "lb")
 addEventListener("keydown", e => { if (e.key === "Escape" && !$("#lb").hidden) closeLB(); });
 
 /* ================= mapa de operativos ================= */
-let map, layer;
+let map, layer, tiles;
+const tileURL = () => `https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_${isLight() ? "Light" : "Dark"}_Gray_Base/MapServer/tile/{z}/{y}/{x}`;
+// Leaflet se baja recién cuando el mapa está por aparecer, así la entrada a la web no se traba
+let leafP;
+const loadLeaflet = () => leafP ||= new Promise((ok, ko) => {
+  document.head.insertAdjacentHTML("beforeend", '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">');
+  const s = document.createElement("script"); s.src = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"; s.onload = ok; s.onerror = ko; document.head.append(s);
+});
+new IntersectionObserver(([e], o) => { if (e.isIntersecting) { o.disconnect(); loadLeaflet().then(renderMap, console.warn); } }, { rootMargin: "800px" }).observe($("#map"));
 function renderMap() {
   if (!window.L) return;
   if (!map) {
     map = L.map("map", { scrollWheelZoom: false }).setView([-36.5, -63.5], 4);
-    const tiles = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}", { attribution: "Tiles &copy; Esri &middot; &copy; OpenStreetMap", maxZoom: 16 }).addTo(map);
+    tiles = L.tileLayer(tileURL(), { attribution: "Tiles &copy; Esri &middot; &copy; OpenStreetMap", maxZoom: 16 }).addTo(map);
     let fails = 0; tiles.on("tileerror", () => { if (++fails === 4) tiles.setUrl("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"); });
     layer = L.layerGroup().addTo(map);
     map.on("click", () => map.scrollWheelZoom.enable());
@@ -144,26 +166,40 @@ function renderMap() {
 }
 
 /* ================= formulario ================= */
+// slide commit: se arrastra la manija hasta el final para enviar; con teclado, Enter envía directo
+const sc = $("#sc"), scH = $("#scH");
+const scMax = () => sc.clientWidth - scH.offsetWidth - 10;
+const scSet = r => { sc.style.setProperty("--x", r); sc.style.setProperty("--hx", r * scMax() + "px"); };
+let dragX = null;
+scH.addEventListener("pointerdown", e => { if (sc.matches(".busy,.done")) return; dragX = e.clientX; sc.classList.add("drag"); scH.setPointerCapture(e.pointerId); scH.style.transform = ""; });
+scH.addEventListener("pointermove", e => { if (dragX != null) scSet(Math.min(Math.max((e.clientX - dragX) / scMax(), 0), 1)); });
+scH.addEventListener("pointerup", () => {
+  if (dragX == null) return; dragX = null; sc.classList.remove("drag");
+  if (+sc.style.getPropertyValue("--x") > .85) { scSet(1); $("#leadForm").requestSubmit(); } else scSet(0);
+});
+// un clic de mouse o dedo sin arrastrar no envía; Enter (detail 0) sí
+scH.addEventListener("click", e => { if (e.detail > 0) e.preventDefault(); });
+
 $("#leadForm").addEventListener("submit", async e => {
   e.preventDefault();
-  const f = e.target, msg = $("#formMsg"), btn = f.querySelector("button[type=submit]");
+  const f = e.target, msg = $("#formMsg");
+  if (sc.matches(".busy,.done")) return;
   if (f.website.value) return; // honeypot
-  if (!f.checkValidity()) { f.reportValidity(); return; }
+  if (!f.checkValidity()) { scSet(0); f.reportValidity(); return; }
   const data = Object.fromEntries(new FormData(f)); delete data.website;
-  btn.disabled = true; btn.textContent = t("f.sending"); msg.className = "form-msg full"; msg.textContent = "";
+  scSet(1); sc.classList.add("busy"); msg.className = "form-msg full"; msg.textContent = "";
   try {
     if (!state.db) throw new Error("no-db");
     const { fs } = state.fb;
     await fs.addDoc(fs.collection(state.db, "leads"), { ...data, lang: state.lang, createdAt: fs.serverTimestamp(), read: false });
-    msg.textContent = t("f.ok"); msg.classList.add("ok"); f.reset();
+    sc.classList.replace("busy", "done"); msg.textContent = t("f.ok"); msg.classList.add("ok"); f.reset();
   } catch (err) {
     console.warn(err);
     // respaldo: abrir WhatsApp con los datos
     const wa = String(state.cfg.whatsapp || "").replace(/\D/g, "");
     if (wa) open(`https://wa.me/${wa}?text=${encodeURIComponent(Object.entries(data).filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`).join("\n"))}`, "_blank");
-    msg.textContent = t("f.err"); msg.classList.add("err");
+    sc.classList.remove("busy"); scSet(0); msg.textContent = t("f.err"); msg.classList.add("err");
   }
-  btn.disabled = false; btn.textContent = t("f.send");
 });
 
 /* ================= Firebase ================= */
@@ -201,8 +237,8 @@ async function checkAdmin() {
   if (location.hash !== "#admin") return;
   if (!FIREBASE_CONFIG.apiKey) { alert("Falta completar FIREBASE_CONFIG en js/config.js"); return; }
   try {
-    await initFirebase();
-    const m = await import("./admin.js?v=22");
+    await Promise.all([initFirebase(), loadLeaflet().catch(console.warn)]); // el panel usa Leaflet para los operativos
+    const m = await import("./admin.js?v=23");
     await m.openAdmin(state, { reload: loadData, cld, esc });
   } catch (er) {
     console.error(er);
@@ -213,13 +249,28 @@ addEventListener("hashchange", checkAdmin);
 
 /* ================= Lenis (si el CDN falla, queda el scroll normal) ================= */
 let lenis = null;
+const html = document.documentElement;
 if (!editMode && !calm)
-  import("https://cdn.jsdelivr.net/npm/lenis@1.3.25/dist/lenis.mjs").then(m => lenis = new m.default({ autoRaf: true, anchors: true })).catch(console.warn);
+  import("https://cdn.jsdelivr.net/npm/lenis@1.3.25/dist/lenis.mjs").then(m => { lenis = new m.default({ autoRaf: true, anchors: true }); if (html.classList.contains("intro")) lenis.stop(); }).catch(console.warn);
+
+/* ================= intro: aurora hasta el primer scroll; ahí la web se abre desde el medio ================= */
+if (html.classList.contains("intro")) {
+  const ov = $("#intro"), evs = ["wheel", "touchmove", "keydown", "pointerdown"];
+  const openIntro = () => {
+    if (!html.classList.contains("intro")) return;
+    evs.forEach(ev => removeEventListener(ev, openIntro));
+    try { sessionStorage.setItem("intro", "1"); } catch {}
+    ov.classList.add("out"); html.classList.remove("intro"); lenis?.start(); onScroll();
+    ov.addEventListener("animationend", e => { if (e.target === ov) ov.remove(); });
+  };
+  evs.forEach(ev => addEventListener(ev, openIntro, { passive: true }));
+  setTimeout(openIntro, 6000); // por si nadie scrollea
+}
 
 /* ================= init ================= */
 $("#yr").textContent = new Date().getFullYear();
 let saved = "es"; try { saved = localStorage.getItem("lang") || (navigator.language?.startsWith("es") ? "es" : "en"); } catch {}
 applyLang(saved); render();
 loadData().catch(er => console.error("Carga de datos:", er)).then(() => editMode
-  ? import("./editor.js?v=22").then(m => m.initEditor({ state, t, I18N, BASE, applyLang }))
+  ? import("./editor.js?v=23").then(m => m.initEditor({ state, t, I18N, BASE, applyLang }))
   : checkAdmin());
