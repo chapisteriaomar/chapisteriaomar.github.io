@@ -1,5 +1,5 @@
-import { FIREBASE_CONFIG, DEFAULTS } from "./config.js?v=18";
-import { I18N } from "./i18n.js?v=18";
+import { FIREBASE_CONFIG, DEFAULTS } from "./config.js?v=19";
+import { I18N } from "./i18n.js?v=19";
 // Textos originales (los editados desde el panel se guardan en Firestore: site/texts)
 const BASE = JSON.parse(JSON.stringify(I18N));
 function applyTexts(over) { for (const l of Object.keys(BASE)) I18N[l] = { ...BASE[l], ...(over?.[l] || {}) }; }
@@ -55,43 +55,56 @@ $$("section[id]").forEach(s => secObs.observe(s));
 const rev = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); rev.unobserve(e.target); } }), { threshold: .12 });
 const observeReveal = () => $$(".reveal:not(.in)").forEach(el => rev.observe(el));
 
-/* ================= hero: reflejo de tablero PDR ================= */
-(function reflection() {
-  const c = $("#reflect"), x = c.getContext("2d");
-  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  let W, H, dpr, running = true, t0 = performance.now();
-  const mouse = { x: .68, y: .5, tx: .68, ty: .5 };
-  const dents = Array.from({ length: 6 }, (_, i) => ({ x: Math.random(), y: Math.random(), s: 20 + Math.random() * 26, a: 6 + Math.random() * 8, p: i * 1.7 }));
-  function size() { dpr = Math.min(devicePixelRatio || 1, 2); W = c.clientWidth; H = c.clientHeight; c.width = W * dpr; c.height = H * dpr; x.setTransform(dpr, 0, 0, dpr, 0, 0); }
+/* ================= hero: varilla de sacabollos 3D ================= */
+// three.js se carga aparte: si el CDN falla, el hero queda sin la varilla y la web sigue andando
+import("https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js").then(T => {
+  const c = $("#hero3d"), reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const r = new T.WebGLRenderer({ canvas: c, alpha: true, antialias: true });
+  r.toneMapping = T.ACESFilmicToneMapping;
+  const scene = new T.Scene(), cam = new T.PerspectiveCamera(30, 1, .1, 50);
+  cam.position.z = 9;
+
+  // entorno: tiras LED como las de un tablero PDR, para que el acero las refleje
+  const env = new T.Scene(), led = new T.MeshBasicMaterial({ color: 0xffffff }), red = new T.MeshBasicMaterial({ color: 0xdd3c33 });
+  for (let i = 0; i < 8; i++) {
+    const s = new T.Mesh(new T.BoxGeometry(.25, 12, .25), i === 3 ? red : led);
+    const a = i / 8 * Math.PI * 2; s.position.set(Math.cos(a) * 6, 0, Math.sin(a) * 6); env.add(s);
+  }
+  const pm = new T.PMREMGenerator(r);
+  scene.environment = pm.fromScene(env, .02).texture;
+
+  // varilla: eje largo con la punta doblada + mango de goma
+  const rod = new T.Group(), steel = new T.MeshStandardMaterial({ color: 0xdddddd, metalness: 1, roughness: .18 });
+  const shaft = new T.CatmullRomCurve3([[0, -1.6, 0], [0, 1.3, 0], [0, 1.62, .06], [0, 1.8, .28], [0, 1.84, .5]].map(p => new T.Vector3(...p)));
+  rod.add(new T.Mesh(new T.TubeGeometry(shaft, 160, .045, 20), steel));
+  const tip = new T.Mesh(new T.SphereGeometry(.06, 24, 16), steel); tip.position.set(0, 1.84, .5); rod.add(tip);
+  const grip = new T.Mesh(new T.CylinderGeometry(.13, .14, 1.1, 40), new T.MeshStandardMaterial({ color: 0xdd3c33, roughness: .55 }));
+  grip.position.y = -2.15; rod.add(grip);
+  const ring = new T.Mesh(new T.CylinderGeometry(.08, .13, .16, 40), steel); ring.position.y = -1.56; rod.add(ring);
+  rod.rotation.z = -.55; scene.add(rod);
+
+  const mouse = { x: 0, y: 0 };
+  addEventListener("pointermove", e => { mouse.x = e.clientX / innerWidth - .5; mouse.y = e.clientY / innerHeight - .5; }, { passive: true });
+  function size() {
+    const w = c.clientWidth, h = c.clientHeight, a = w / h;
+    r.setPixelRatio(Math.min(devicePixelRatio || 1, 2)); r.setSize(w, h, false);
+    cam.aspect = a; cam.updateProjectionMatrix();
+    // compu: a la derecha del texto · celu: arriba y más chica
+    const vh = 2 * cam.position.z * Math.tan(15 * Math.PI / 180);
+    a > 1 ? (rod.position.set(vh * a * .2, 0, 0), rod.scale.setScalar(.95)) : (rod.position.set(0, vh * .22, 0), rod.scale.setScalar(.6));
+  }
+  let running = true, t0 = performance.now();
   function draw(now) {
-    const tm = (now - t0) / 1000;
-    mouse.x += (mouse.tx - mouse.x) * .05; mouse.y += (mouse.ty - mouse.y) * .05;
-    x.clearRect(0, 0, W, H);
-    const gap = W < 700 ? 12 : 15, step = 8;
-    const list = [{ x: mouse.x * W, y: mouse.y * H, s: Math.min(W, H) * .16, a: 34 }].concat(
-      dents.map(d => ({ x: ((d.x + tm * .006) % 1) * W, y: d.y * H, s: d.s, a: d.a * (.6 + .4 * Math.sin(tm * .8 + d.p)) })));
-    for (let i = 0, y0 = -gap; y0 < H + gap; i++, y0 += gap) {
-      const hl = i % 6 === 0;
-      x.beginPath();
-      for (let px = 0; px <= W + step; px += step) {
-        let dy = 0;
-        for (const d of list) {
-          const ddx = px - d.x, ddy = y0 - d.y, r2 = ddx * ddx + ddy * ddy, s2 = d.s * d.s;
-          if (r2 < s2 * 9) dy += d.a * (ddy / d.s) * Math.exp(-r2 / (2 * s2));
-        }
-        px ? x.lineTo(px, y0 + dy) : x.moveTo(px, y0 + dy);
-      }
-      x.strokeStyle = hl ? "rgba(221,60,51,.75)" : (isLight() ? "rgba(17,17,19,.2)" : "rgba(255,255,255,.22)");
-      x.lineWidth = hl ? 1.4 : 1;
-      x.stroke();
-    }
+    const t = (now - t0) / 1000;
+    rod.rotation.y = t * .35 + mouse.x * .6;
+    rod.rotation.x = mouse.y * .25;
+    r.render(scene, cam);
     if (running && !reduce) requestAnimationFrame(draw);
   }
   size(); addEventListener("resize", size);
-  addEventListener("pointermove", e => { if (scrollY < H) { mouse.tx = e.clientX / W; mouse.ty = (e.clientY + scrollY) / H; } }, { passive: true });
   new IntersectionObserver(([e]) => { const was = running; running = e.isIntersecting; if (running && !was) requestAnimationFrame(draw); }).observe(c);
   requestAnimationFrame(draw);
-})();
+}).catch(console.warn);
 
 /* ================= render ================= */
 const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -343,7 +356,7 @@ async function checkAdmin() {
   if (!FIREBASE_CONFIG.apiKey) { alert("Falta completar FIREBASE_CONFIG en js/config.js"); return; }
   try {
     await initFirebase();
-    const m = await import("./admin.js?v=18");
+    const m = await import("./admin.js?v=19");
     await m.openAdmin(state, { reload: loadData, cld, esc });
   } catch (er) {
     console.error(er);
@@ -369,5 +382,5 @@ let lenis = null;
 if (!editMode && !calm)
   import("https://cdn.jsdelivr.net/npm/lenis@1.3.25/dist/lenis.mjs").then(m => lenis = new m.default({ autoRaf: true, anchors: true })).catch(console.warn);
 loadData().catch(er => console.error("Carga de datos:", er)).then(() => editMode
-  ? import("./editor.js?v=18").then(m => m.initEditor({ state, t, I18N, BASE, applyLang }))
+  ? import("./editor.js?v=19").then(m => m.initEditor({ state, t, I18N, BASE, applyLang }))
   : checkAdmin());
