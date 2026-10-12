@@ -32,10 +32,23 @@ async function start(state, helpers) {
   S = state; H = helpers; fs = state.fb.fs; db = state.db;
   if (!$("#admCss")) document.head.insertAdjacentHTML("beforeend", '<link id="admCss" rel="stylesheet" href="css/admin.css">');
   if (!$(".toasts")) document.body.insertAdjacentHTML("beforeend", '<div class="toasts"></div>');
+  // se muestra algo enseguida; antes quedaba en negro mientras cargaba (o para siempre si algo fallaba)
+  const el = $("#adm"); el.hidden = false; document.body.style.overflow = "hidden";
+  el.innerHTML = `<div class="ad ad-login" style="display:grid;place-items:center;color:var(--muted)">Cargando panel…</div>`;
+  const slow = setTimeout(() => fail(new Error("Firebase no respondió en 12 segundos. Revisá la conexión.")), 12000);
   A = await import(FB + "firebase-auth.js");
   auth = A.getAuth(state.fb.app);
-  const el = $("#adm"); el.hidden = false; document.body.style.overflow = "hidden";
-  unsub = A.onAuthStateChanged(auth, u => { if (open) u ? shell() : login(); });
+  unsub = A.onAuthStateChanged(auth, async u => {
+    clearTimeout(slow); if (!open) return;
+    try { u ? await shell() : login(); } catch (er) { fail(er); }
+  }, er => { clearTimeout(slow); fail(er); });
+}
+function fail(er) {
+  console.error(er);
+  $("#adm").innerHTML = `<div class="ad ad-login" style="display:grid;place-items:center;text-align:center;padding:24px"><div>
+    <p style="margin-bottom:8px">No se pudo abrir el panel.</p><p style="color:var(--muted);font-size:13px;margin-bottom:18px">${e(er?.message || String(er))}</p>
+    <button class="b red" onclick="location.reload()">Reintentar</button> <button class="b ghost" id="fx">Volver al sitio</button></div></div>`;
+  $("#fx").onclick = close;
 }
 function close() {
   open = false; unsub?.(); unsub = null;
