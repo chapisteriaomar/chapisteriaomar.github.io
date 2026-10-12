@@ -48,7 +48,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lenis@1.3.25/dist/lenis.css">
-<link rel="stylesheet" href="css/v2.css?v=39">
+<link rel="stylesheet" href="css/v2.css?v=40">
 <script>if(location.hash==="#admin")location.replace("/admin/");
 try{var d=document.documentElement,th=localStorage.getItem("theme");if(th)d.dataset.theme=th;
 // intro con aurora: una vez por visita, nunca en el panel ni en el editor
@@ -87,7 +87,6 @@ if(!sessionStorage.getItem("intro")&&!/edit|admin/.test(location.search+location
       <div><span class="eyebrow" data-i18n="meth.kicker">El método PDR</span><h2 class="h2" data-i18n="meth.title">Sin masilla. Sin repintado. Sin perder valor.</h2></div>
       <div>
         <p class="lead" data-i18n="meth.text"></p>
-        <p style="margin-top:32px"><a class="link" href="#servicios" data-i18n="meth.link">Conocé nuestros servicios</a></p>
       </div>
     </div>
     <div class="stats" id="stats"></div>
@@ -124,7 +123,6 @@ if(!sessionStorage.getItem("intro")&&!/edit|admin/.test(location.search+location
 <section class="sec pres" id="presencia">
   <div class="wrap pres-head rv">
     <div><span class="eyebrow" data-i18n="map.kicker">Presencia</span><h2 class="h2" data-i18n="pres.title">Dónde estuvimos y dónde estamos</h2></div>
-    <p class="lead" data-i18n="map.sub"></p>
   </div>
   <div class="wrap"><div class="pres-box rv">
     <div id="map"></div>
@@ -188,9 +186,10 @@ if(!sessionStorage.getItem("intro")&&!/edit|admin/.test(location.search+location
 </footer>
 
 <div class="lb" id="lb" hidden data-lenis-prevent><button class="lb-x" id="lbX" aria-label="Cerrar">×</button><div id="lbIn"></div></div>
+<a class="ig-fab glass" id="igFab" href="https://www.instagram.com/chapisteriaomarsolutions/" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".6" fill="currentColor"/></svg></a>
 <div class="focus-ov" aria-hidden="true"></div>
 <div class="gblur" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
 
-<script type="module" src="js/v2.js?v=39"></script>
+<script type="module" src="js/v2.js?v=40"></script>
 </body>
 </html>

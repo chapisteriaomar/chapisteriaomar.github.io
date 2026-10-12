@@ -36,7 +36,7 @@ export const I18N = {
     "work.all": "Todos", "work.hail": "Granizo", "work.pdr": "PDR", "work.ba": "Antes / Después", "work.shop": "Taller",
     "work.empty": "Pronto vas a ver acá nuestros trabajos.", "work.more": "Ver todos", "work.less": "Ver menos",
     "map.kicker": "Presencia", "map.title": "Donde estuvimos",
-    "map.sub": "Deslizá las tarjetas y el mapa te lleva a cada lugar.",
+    
     "map.empty": "Los operativos aparecerán aquí.",
     "map.units": "unidades",
     "clients.kicker": "Confianza", "clients.title": "Trabajamos con",
@@ -63,7 +63,7 @@ export const I18N = {
     "mob.wa": "Escribinos por WhatsApp", "mob.ig": "Ver Instagram", "mob.copy": "Copiar link para la compu", "mob.copied": "¡Link copiado!",
     "meth.kicker": "El método PDR", "meth.title": "Sin masilla. Sin repintado. Sin perder valor.",
     "meth.text": "Con varillas y luz LED empujamos la chapa desde adentro hasta su forma original. La pintura de fábrica queda intacta, el auto conserva su valor y su garantía, y la reparación lleva horas, no semanas.",
-    "meth.link": "Conocé nuestros servicios",
+    
     "proc.sub": "De la alerta a la entrega documentada, cada unidad con control de calidad.",
     "clients.sub": "Aseguradoras, liquidadores, flotas y concesionarias de Argentina y el exterior.",
     "sust.kicker": "Responsabilidad", "sust.title": "Reparar sin repintar también cuida el ambiente",
@@ -113,7 +113,7 @@ export const I18N = {
     "work.all": "All", "work.hail": "Hail", "work.pdr": "PDR", "work.ba": "Before / After", "work.shop": "Shop",
     "work.empty": "Our work will be shown here soon.", "work.more": "View all", "work.less": "Show less",
     "map.kicker": "Footprint", "map.title": "Where we've been",
-    "map.sub": "Swipe the cards and the map takes you to each place.",
+    
     "map.empty": "Operations will appear here.",
     "map.units": "units",
     "clients.kicker": "Trust", "clients.title": "We work with",
@@ -140,7 +140,7 @@ export const I18N = {
     "mob.wa": "Message us on WhatsApp", "mob.ig": "View Instagram", "mob.copy": "Copy link for desktop", "mob.copied": "Link copied!",
     "meth.kicker": "The PDR method", "meth.title": "No filler. No repaint. No lost value.",
     "meth.text": "Using rods and LED light we push the panel from behind back to its original shape. Factory paint stays intact, the car keeps its value and warranty, and the repair takes hours, not weeks.",
-    "meth.link": "Explore our services",
+    
     "proc.sub": "From alert to documented delivery, every unit quality-checked.",
     "clients.sub": "Insurers, adjusters, fleets and dealerships in Argentina and abroad.",
     "sust.kicker": "Responsibility", "sust.title": "Repairing without repainting is kinder to the environment",

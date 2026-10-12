@@ -1,5 +1,5 @@
 import { FIREBASE_CONFIG, DEFAULTS } from "./config.js?v=38";
-import { I18N } from "./i18n.js?v=39";
+import { I18N } from "./i18n.js?v=40";
 // Textos originales (los editados desde el panel se guardan en Firestore: site/texts)
 const BASE = JSON.parse(JSON.stringify(I18N));
 function applyTexts(over) { for (const l of Object.keys(BASE)) I18N[l] = { ...BASE[l], ...(over?.[l] || {}) }; }
@@ -178,6 +178,7 @@ function render() {
   if (wa) { $("#waLink").href = `https://wa.me/${wa}?text=${encodeURIComponent("Hola, los contacto desde chapisteriaomar.com")}`; $("#waText").textContent = "+" + wa; $("#fWa").innerHTML = `<a href="https://wa.me/${wa}">+${wa}</a>`; }
   if (cfg.email) { $("#mailLink").href = "mailto:" + cfg.email; $("#mailText").textContent = cfg.email; $("#fMail").innerHTML = `<a href="mailto:${esc(cfg.email)}">${esc(cfg.email)}</a>`; }
   $("#fIg").href = cfg.instagramUrl || `https://instagram.com/${cfg.instagram}`; $("#fIg").textContent = "@" + cfg.instagram;
+  $("#igFab").href = $("#fIg").href;
   renderLocs(); renderMap(); reveal(); onScroll();
 }
 
@@ -352,6 +353,8 @@ async function loadData() {
   if (cfgSnap?.exists()) { const d = cfgSnap.data(); state.cfg = { ...DEFAULTS, ...d, stats: { ...DEFAULTS.stats, ...(d.stats || {}) } }; }
   // opciones del panel: sin botón de idioma la web queda en español; sin botón de tema, en oscuro
   const { showLang, showTheme, showKicker, dcLen } = state.cfg;
+  // subtextos de los 5 pasos: cada uno se puede ocultar desde el panel
+  $$("#dcStage li p").forEach((p, i) => p.hidden = state.cfg["showP" + (i + 1)] === false);
   $(".lang").hidden = showLang === false; $("#themeBtn").hidden = showTheme === false;
   $("#xpText .kicker").hidden = showKicker === false;
   if (dcLen) dc.style.setProperty("--dcl", dcLen + "vh");

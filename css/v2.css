@@ -319,3 +319,9 @@ html{scroll-padding-top:90px}
 }
 @media(max-height:560px) and (orientation:landscape){.xp{height:200vh}.hero-title{font-size:clamp(34px,7vh,56px)}.dc-stick{padding-top:70px}}
 .step-n:empty{display:none}
+
+/* botón flotante de Instagram, siempre abajo a la derecha */
+.ig-fab{position:fixed;right:max(18px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom));z-index:55;width:54px;height:54px;border-radius:50%;display:grid;place-items:center;color:var(--ink);transition:transform .25s,background .25s}
+.ig-fab:hover{transform:scale(1.08);background:linear-gradient(135deg,#f58529,#dd2a7b 50%,#8134af);color:#fff}
+.ig-fab svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.9}
+.cms .ig-fab{display:none}
