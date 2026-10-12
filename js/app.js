@@ -1,5 +1,5 @@
-import { FIREBASE_CONFIG, DEFAULTS } from "./config.js?v=18";
-import { I18N } from "./i18n.js?v=18";
+import { FIREBASE_CONFIG, DEFAULTS } from "./config.js?v=20";
+import { I18N } from "./i18n.js?v=20";
 // Textos originales (los editados desde el panel se guardan en Firestore: site/texts)
 const BASE = JSON.parse(JSON.stringify(I18N));
 function applyTexts(over) { for (const l of Object.keys(BASE)) I18N[l] = { ...BASE[l], ...(over?.[l] || {}) }; }
@@ -89,6 +89,38 @@ const observeReveal = () => $$(".reveal:not(.in)").forEach(el => rev.observe(el)
   }
   size(); addEventListener("resize", size);
   addEventListener("pointermove", e => { if (scrollY < H) { mouse.tx = e.clientX / W; mouse.ty = (e.clientY + scrollY) / H; } }, { passive: true });
+  new IntersectionObserver(([e]) => { const was = running; running = e.isIntersecting; if (running && !was) requestAnimationFrame(draw); }).observe(c);
+  requestAnimationFrame(draw);
+})();
+
+/* ================= hero: esfera de partículas (solo vista previa ?tema=auros) ================= */
+if (document.documentElement.classList.contains("auros")) (function orb() {
+  const c = document.createElement("canvas"), x = c.getContext("2d");
+  c.className = "orb"; c.setAttribute("aria-hidden", "true"); $(".hero-shade").after(c);
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches, N = 700, ga = Math.PI * (3 - Math.sqrt(5));
+  // puntos repartidos parejo sobre la esfera (espiral de Fibonacci)
+  const pts = Array.from({ length: N }, (_, i) => { const y = 1 - 2 * (i + .5) / N, r = Math.sqrt(1 - y * y); return [Math.cos(i * ga) * r, y, Math.sin(i * ga) * r, i % 7 === 0]; });
+  let W, H, cx, cy, R, running = true, mx = 0, m = 0, t0 = performance.now();
+  function size() {
+    const dpr = Math.min(devicePixelRatio || 1, 2); W = c.clientWidth; H = c.clientHeight;
+    c.width = W * dpr; c.height = H * dpr; x.setTransform(dpr, 0, 0, dpr, 0, 0);
+    // compu: a la derecha del texto · celu: arriba, centrada
+    W > H ? (cx = W * .72, cy = H * .46, R = Math.min(W, H) * .27) : (cx = W / 2, cy = H * .24, R = W * .3);
+  }
+  function draw(now) {
+    m += (mx - m) * .05;
+    const a = (now - t0) / 1000 * .22 + m, ca = Math.cos(a), sa = Math.sin(a), ct = Math.cos(.35), st = Math.sin(.35), dark = !isLight();
+    x.clearRect(0, 0, W, H);
+    for (const [px, py, pz, hot] of pts) {
+      const x1 = px * ca + pz * sa, z1 = -px * sa + pz * ca, y1 = py * ct - z1 * st, z2 = py * st + z1 * ct;
+      const k = 2.6 / (2.6 - z2), al = .15 + .7 * (z2 + 1) / 2;
+      x.fillStyle = hot ? `rgba(221,60,51,${al})` : dark ? `rgba(255,255,255,${al * .8})` : `rgba(17,17,19,${al * .7})`;
+      x.beginPath(); x.arc(cx + x1 * R * k, cy + y1 * R * k, (hot ? 1.8 : 1.2) * k, 0, 6.283); x.fill();
+    }
+    if (running && !reduce) requestAnimationFrame(draw);
+  }
+  size(); addEventListener("resize", size);
+  addEventListener("pointermove", e => { mx = (e.clientX / innerWidth - .5) * .6; }, { passive: true });
   new IntersectionObserver(([e]) => { const was = running; running = e.isIntersecting; if (running && !was) requestAnimationFrame(draw); }).observe(c);
   requestAnimationFrame(draw);
 })();
@@ -343,7 +375,7 @@ async function checkAdmin() {
   if (!FIREBASE_CONFIG.apiKey) { alert("Falta completar FIREBASE_CONFIG en js/config.js"); return; }
   try {
     await initFirebase();
-    const m = await import("./admin.js?v=18");
+    const m = await import("./admin.js?v=20");
     await m.openAdmin(state, { reload: loadData, cld, esc });
   } catch (er) {
     console.error(er);
@@ -369,5 +401,5 @@ let lenis = null;
 if (!editMode && !calm)
   import("https://cdn.jsdelivr.net/npm/lenis@1.3.25/dist/lenis.mjs").then(m => lenis = new m.default({ autoRaf: true, anchors: true })).catch(console.warn);
 loadData().catch(er => console.error("Carga de datos:", er)).then(() => editMode
-  ? import("./editor.js?v=18").then(m => m.initEditor({ state, t, I18N, BASE, applyLang }))
+  ? import("./editor.js?v=20").then(m => m.initEditor({ state, t, I18N, BASE, applyLang }))
   : checkAdmin());
