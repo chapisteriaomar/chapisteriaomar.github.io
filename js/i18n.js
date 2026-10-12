@@ -69,6 +69,7 @@ export const I18N = {
     "sust.kicker": "Responsabilidad", "sust.title": "Reparar sin repintar también cuida el ambiente",
     "sust.text": "Al no usar masilla, pintura ni solventes, el PDR evita residuos y emisiones de la reparación tradicional, y el auto vuelve a la calle antes.",
     "f.need": "¿Qué necesitás?", "f.slide": "Deslizá para enviar", "f.done": "Consulta enviada", "intro.hint": "Deslizá para entrar",
+    "pres.title": "Dónde estuvimos y dónde estamos", "loc.past": "Operativo móvil finalizado",
     "close": "Cerrar", "before": "Antes", "after": "Después",
     "ticker.1": "Desabollado sin pintura", "ticker.2": "Granizo", "ticker.3": "Operativos móviles", "ticker.4": "Aseguradoras", "ticker.5": "Flotas", "ticker.6": "Argentina y exterior"
   },
@@ -142,6 +143,7 @@ export const I18N = {
     "sust.kicker": "Responsibility", "sust.title": "Repairing without repainting is kinder to the environment",
     "sust.text": "With no filler, paint or solvents, PDR avoids the waste and emissions of conventional repair, and the car is back on the road sooner.",
     "f.need": "What do you need?", "f.slide": "Slide to send", "f.done": "Request sent", "intro.hint": "Scroll to enter",
+    "pres.title": "Where we've been and where we are", "loc.past": "Mobile operation completed",
     "close": "Close", "before": "Before", "after": "After",
     "ticker.1": "Paintless Dent Repair", "ticker.2": "Hail Damage", "ticker.3": "Mobile Operations", "ticker.4": "Insurers", "ticker.5": "Fleets", "ticker.6": "Argentina & abroad"
   }

@@ -83,10 +83,6 @@ button{background:none;border:0;cursor:pointer}
 .stat b{display:block;font:700 clamp(40px,4.4vw,64px)/1 var(--body);letter-spacing:-.04em}
 .stat span{display:block;margin-top:10px;color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:.08em}
 
-/* servicios: solo los títulos, como chips arriba de los pasos */
-.svc-chips{list-style:none;display:flex;flex-wrap:wrap;gap:8px;margin:-4px 0 22px}
-.svc-chips li{padding:9px 15px;border-radius:999px;font-size:15px;font-weight:500}
-.dc-sub{margin:0}
 
 /* cómo funciona: depth carousel al scrollear entre los 5 pasos */
 .dc{position:relative;height:var(--dcl,260vh)}
@@ -113,11 +109,10 @@ button{background:none;border:0;cursor:pointer}
 .logos img{max-height:50px;width:auto;filter:var(--logos);opacity:.8;transition:.3s}
 .logos>div:hover img{filter:none;opacity:1}
 
-/* presencia + mapa */
-.map-box{display:grid;grid-template-columns:1fr 1.4fr;gap:clamp(32px,5vw,72px);align-items:center}
 #map{position:relative;z-index:0;isolation:isolate;height:min(520px,60vh);border-radius:20px;overflow:hidden;border:1px solid var(--edge);background:var(--card)}
-.pin{width:14px;height:14px;background:var(--red);border:2.5px solid #fff;border-radius:50%;cursor:pointer;animation:ping 2s infinite}
-@keyframes ping{0%{box-shadow:0 0 0 0 rgba(221,60,51,.6)}100%{box-shadow:0 0 0 16px rgba(221,60,51,0)}}
+.pin{width:14px;height:14px;background:#f0a04b;border:2.5px solid #fff;border-radius:50%;cursor:pointer;animation:ping 2s infinite}
+.pin.live{background:#3ddc84}
+@keyframes ping{0%{box-shadow:0 0 0 0 rgba(240,160,75,.6)}100%{box-shadow:0 0 0 16px rgba(240,160,75,0)}}
 .maplibregl-popup-content{background:var(--bg2)!important;color:var(--ink);border-radius:12px!important;font:14px/1.4 var(--body);padding:12px 14px!important;box-shadow:0 10px 30px rgba(0,0,0,.3)!important}
 .maplibregl-popup-content b{display:block;font-size:16px}
 .maplibregl-popup-tip{border-top-color:var(--bg2)!important;border-bottom-color:var(--bg2)!important}
@@ -175,7 +170,7 @@ button{background:none;border:0;cursor:pointer}
 .rv{opacity:0;transform:translateY(32px);transition:opacity .7s,transform .7s cubic-bezier(.2,.7,.2,1)}
 .rv.in{opacity:1;transform:none}
 @media(prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}.marquee-t,.dw-row{animation:none}html{scroll-behavior:auto}}
-@media(max-width:900px){.method,.sust,.contact,.map-box,.foot-g{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.dc-stage li{grid-template-columns:1fr}.step-n{grid-row:auto;margin-bottom:8px}}
+@media(max-width:900px){.method,.sust,.contact,.foot-g{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.dc-stage li{grid-template-columns:1fr}.step-n{grid-row:auto;margin-bottom:8px}}
 @media(max-width:560px){.form{grid-template-columns:1fr}.lang{display:none}}
 
 /* dentro del editor de textos del panel */
@@ -276,17 +271,28 @@ html.intro .xp-text .kicker{opacity:0}
 .sr .sw{display:inline-block;white-space:pre;transition:opacity .2s,filter .2s}
 .sr{transform-origin:0 50%}
 
-/* ubicaciones: carrusel con profundidad (el del centro adelante, los costados girados hacia atrás) */
-.cf{display:flex;gap:20px;overflow-x:auto;scroll-snap-type:x mandatory;padding:44px calc(50% - min(190px,39vw));margin-top:24px;perspective:1200px;scrollbar-width:none}
+
+/* presencia: mapa + tarjetas en una sola pantalla; las tarjetas flotan sobre el mapa en carrusel con profundidad */
+.pres-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px 48px;flex-wrap:wrap;margin-bottom:28px}
+.pres-head .h2{margin:0}
+.pres-head .lead{max-width:42ch;font-size:17px}
+.pres-box{position:relative;border-radius:24px;overflow:hidden;border:1px solid var(--edge)}
+.pres-box #map{height:clamp(420px,62vh,640px);border:0;border-radius:0}
+.pres-box::after{content:"";position:absolute;left:0;right:0;bottom:0;height:46%;pointer-events:none;background:linear-gradient(transparent,color-mix(in srgb,var(--bg) 85%,transparent))}
+.cf{position:absolute;left:0;right:0;bottom:0;z-index:2;display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;padding:30px calc(50% - 150px) 22px;perspective:1100px;scrollbar-width:none}
 .cf::-webkit-scrollbar{display:none}
-.loc{flex:0 0 min(380px,78vw);scroll-snap-align:center;display:flex;flex-direction:column;gap:10px;padding:30px;border-radius:24px;transition:transform .15s linear,opacity .15s linear;will-change:transform}
-.loc-tag{display:inline-flex;align-items:center;gap:8px;font:600 12px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.loc-tag i{width:8px;height:8px;border-radius:50%;background:var(--red)}
-.loc.live .loc-tag{color:#3ddc84}
-.loc.live .loc-tag i{background:#3ddc84;animation:ping2 1.6s infinite}
+.loc{flex:0 0 300px;scroll-snap-align:center;display:flex;flex-direction:column;gap:6px;padding:20px 22px;border-radius:20px;text-align:left;will-change:transform}
+.loc-tag{display:inline-flex;align-items:center;gap:8px;font:600 11.5px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--c,var(--red))}
+.loc-tag i{width:8px;height:8px;border-radius:50%;background:currentColor}
+.loc.main{--c:#ff6b5f}
+.loc.live{--c:#3ddc84}
+.loc.live .loc-tag i{animation:ping2 1.6s infinite}
+.loc.past{--c:#f0a04b}
 @keyframes ping2{0%{box-shadow:0 0 0 0 rgba(61,220,132,.7)}100%{box-shadow:0 0 0 10px rgba(61,220,132,0)}}
-.loc h3{font:700 clamp(26px,2.6vw,34px)/1.05 var(--body);letter-spacing:-.03em}
-.loc p{color:var(--muted);flex:1}
-.loc .link{align-self:flex-start;margin-top:10px}
-.cf-nav{display:flex;justify-content:center;gap:10px}
-.cf-nav button{width:46px;height:46px;border-radius:50%;font-size:18px}
+.loc h3{font:700 22px/1.1 var(--body);letter-spacing:-.025em}
+.loc p{color:var(--muted);font-size:14.5px;flex:1}
+.loc .link{align-self:flex-start;margin-top:6px;font-size:14px}
+.cf-nav{position:absolute;top:14px;right:14px;z-index:2;display:flex;gap:8px}
+.cf-nav button{width:42px;height:42px;border-radius:50%;font-size:17px}
+@media(min-width:1024px){.pres{min-height:100svh;display:flex;flex-direction:column;justify-content:center;padding:clamp(90px,12vh,120px) 0 clamp(28px,4vh,48px)}.pres-box #map{height:clamp(380px,calc(100svh - 300px),720px)}}
+@media(max-width:700px){.cf{position:static;padding:22px calc(50% - 140px)}.loc{flex-basis:280px}.pres-box{overflow:visible;border:0}.pres-box #map{border-radius:20px;border:1px solid var(--edge)}.pres-box::after{display:none}.cf-nav{position:static;justify-content:center}}

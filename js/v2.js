@@ -1,5 +1,5 @@
 import { FIREBASE_CONFIG, DEFAULTS } from "./config.js?v=23";
-import { I18N } from "./i18n.js?v=23";
+import { I18N } from "./i18n.js?v=26";
 // Textos originales (los editados desde el panel se guardan en Firestore: site/texts)
 const BASE = JSON.parse(JSON.stringify(I18N));
 function applyTexts(over) { for (const l of Object.keys(BASE)) I18N[l] = { ...BASE[l], ...(over?.[l] || {}) }; }
@@ -152,9 +152,18 @@ function render() {
 /* ================= ubicaciones: taller + operativos en curso, en carrusel con profundidad ================= */
 const cf = $("#cf");
 function renderLocs() {
-  const c = state.cfg, card = (cls, tag, name, desc, url) => `<a class="loc glass${cls}" href="${esc(url || "#")}" target="_blank" rel="noopener"><span class="loc-tag"><i></i>${tag}</span><h3>${name}</h3><p>${desc}</p><span class="link" data-i18n="loc.go">${esc(t("loc.go"))}</span></a>`;
-  cf.innerHTML = card("", `<span data-i18n="loc.main">${esc(t("loc.main"))}</span>`, esc(c.tallerNombre || "Chapistería Omar"), `<span data-i18n="loc.mainD">${esc(t("loc.mainD"))}</span>`, c.tallerMaps)
-    + (c.bases || []).filter(b => b.nombre).map(b => card(" live", `<span data-i18n="loc.base">${esc(t("loc.base"))}</span>`, esc(b.nombre), b.detalle ? esc(b.detalle) : `<span data-i18n="loc.baseD">${esc(t("loc.baseD"))}</span>`, b.maps)).join("");
+  const c = state.cfg, tag = k => `<span class="loc-tag"><i></i><span data-i18n="${k}">${esc(t(k))}</span></span>`;
+  const link = (cls, name, desc, url) => `<a class="loc glass ${cls}" href="${esc(url || "#")}" target="_blank" rel="noopener">${tag(cls === "main" ? "loc.main" : "loc.base")}<h3>${name}</h3><p>${desc}</p><span class="link" data-i18n="loc.go">${esc(t("loc.go"))}</span></a>`;
+  // operativos terminados (los del mapa): al tocarlos, el mapa vuela hasta ese punto
+  const past = state.ops.filter(o => !o.live && o.lat != null && o.lng != null);
+  cf.innerHTML = link("main", esc(c.tallerNombre || "Chapistería Omar"), `<span data-i18n="loc.mainD">${esc(t("loc.mainD"))}</span>`, c.tallerMaps)
+    + (c.bases || []).filter(b => b.nombre).map(b => link("live", esc(b.nombre), b.detalle ? esc(b.detalle) : `<span data-i18n="loc.baseD">${esc(t("loc.baseD"))}</span>`, b.maps)).join("")
+    + past.map(o => `<button class="loc glass past" data-op="${state.ops.indexOf(o)}">${tag("loc.past")}<h3>${esc(o.name)}</h3><p>${esc([o.province, o.year].filter(Boolean).join(" · "))}${o.units ? ` · ${esc(o.units)} <span data-i18n="map.units">${esc(t("map.units"))}</span>` : ""}</p></button>`).join("");
+  $$("[data-op]", cf).forEach(b => b.onclick = () => {
+    const m = pinByOp.get(state.ops[+b.dataset.op]); if (!m) return;
+    map.flyTo({ center: m.getLngLat(), zoom: 8, pitch: 50, duration: calm ? 0 : 1800 });
+    if (!m.getPopup().isOpen()) m.togglePopup();
+  });
   coverflow();
 }
 // cada tarjeta gira y se aleja según su distancia al centro
@@ -182,13 +191,13 @@ addEventListener("keydown", e => { if (e.key === "Escape" && !$("#lb").hidden) c
 /* ================= mapa de operativos (MapLibre, vectorial y con animación) ================= */
 // estilos de OpenFreeMap: gratis y sin API key
 let map, pins = [];
+const pinByOp = new Map();
 const mapStyle = () => `https://tiles.openfreemap.org/styles/${isLight() ? "positron" : "dark"}`;
 const loadScript = (js, css) => new Promise((ok, ko) => {
   document.head.insertAdjacentHTML("beforeend", `<link rel="stylesheet" href="${css}">`);
   const s = document.createElement("script"); s.src = js; s.onload = ok; s.onerror = ko; document.head.append(s);
 });
 // se baja recién cuando el mapa está por aparecer, así la entrada a la web no se traba
-
 new IntersectionObserver(([e], o) => {
   if (!e.isIntersecting) return; o.disconnect();
   loadScript("https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js", "https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css").then(renderMap, console.warn);
@@ -201,14 +210,15 @@ function renderMap() {
   if (!map) {
     // arranca lejos y vuela hasta los operativos cuando el mapa entra en pantalla
     map = new maplibregl.Map({ container: "map", style: mapStyle(), center: [-63.5, -30], zoom: 1.6, attributionControl: { compact: true }, cooperativeGestures: true });
-    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-left");
     new IntersectionObserver(([e], o) => { if (e.isIntersecting) { o.disconnect(); fly(); } }, { threshold: .5 }).observe($("#map"));
   }
-  pins.forEach(p => p.remove());
+  pins.forEach(p => p.remove()); pinByOp.clear();
   pins = state.ops.filter(o => o.lat != null && o.lng != null).map(o => {
-    const el = document.createElement("div"); el.className = "pin";
-    return new maplibregl.Marker({ element: el }).setLngLat([o.lng, o.lat])
+    const el = document.createElement("div"); el.className = o.live ? "pin live" : "pin";
+    const m = new maplibregl.Marker({ element: el }).setLngLat([o.lng, o.lat])
       .setPopup(new maplibregl.Popup({ offset: 14, closeButton: false }).setHTML(`<b>${esc(o.name)}</b>${esc([o.province, o.year].filter(Boolean).join(" · "))}${o.units ? ` · ${esc(o.units)} ${esc(t("map.units"))}` : ""}`)).addTo(map);
+    pinByOp.set(o, m); return m;
   });
 }
 function fly() {
@@ -296,7 +306,7 @@ async function checkAdmin() {
   if (!FIREBASE_CONFIG.apiKey) { alert("Falta completar FIREBASE_CONFIG en js/config.js"); return; }
   try {
     await Promise.all([initFirebase(), loadLeaflet().catch(console.warn)]); // el panel usa Leaflet para los operativos
-    const m = await import("./admin.js?v=25");
+    const m = await import("./admin.js?v=26");
     await m.openAdmin(state, { reload: loadData, cld, esc });
   } catch (er) {
     console.error(er);

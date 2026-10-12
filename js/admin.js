@@ -603,7 +603,7 @@ async function config() {
 /* ================= TEXTOS DE LA WEB ================= */
 // Los originales están en js/i18n.js (BASE, sin modificar); lo editado se guarda en site/texts { es: {clave: texto}, en: {...} }
 let BASE_TX = null;
-async function loadBase() { if (!BASE_TX) BASE_TX = (await import("./i18n.js?v=23&base=1")).I18N; return BASE_TX; }
+async function loadBase() { if (!BASE_TX) BASE_TX = (await import("./i18n.js?v=26&base=1")).I18N; return BASE_TX; }
 async function saveText(lang, key, value) {
   await fs.setDoc(fs.doc(db, "site", "texts"), { [lang]: { [key]: value == null ? fs.deleteField() : value } }, { merge: true });
 }
@@ -618,7 +618,7 @@ addEventListener("message", async ev => {
 let txMode = "v", txW = "100%";
 const GROUPS = { nav: "Menú", cta: "Botones", hero: "Portada", stat: "Cifras", ticker: "Cinta roja", about: "La empresa", svc: "Servicios",
   proc: "Cómo funciona", work: "Trabajos", map: "Mapa", clients: "Compañías", rev: "Referencias", loc: "Ubicaciones", ig: "Instagram",
-  contact: "Contacto", f: "Formulario", foot: "Pie de página", meth: "Método", sust: "Ambiente" };
+  contact: "Contacto", f: "Formulario", foot: "Pie de página", meth: "Método", sust: "Ambiente", pres: "Presencia" };
 function texts() {
   $("#vc").innerHTML = `<div class="bar" style="justify-content:space-between;margin-bottom:14px">
       <div class="seg" id="tm"><button data-m="v">Vista de la web</button><button data-m="l">Lista de textos (ES / EN)</button></div>
