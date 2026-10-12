@@ -1,5 +1,5 @@
 import { FIREBASE_CONFIG, DEFAULTS } from "./config.js?v=23";
-import { I18N } from "./i18n.js?v=26";
+import { I18N } from "./i18n.js?v=28";
 // Textos originales (los editados desde el panel se guardan en Firestore: site/texts)
 const BASE = JSON.parse(JSON.stringify(I18N));
 function applyTexts(over) { for (const l of Object.keys(BASE)) I18N[l] = { ...BASE[l], ...(over?.[l] || {}) }; }
@@ -179,19 +179,32 @@ function render() {
 const cf = $("#cf");
 function renderLocs() {
   const c = state.cfg, tag = k => `<span class="loc-tag"><i></i><span data-i18n="${k}">${esc(t(k))}</span></span>`;
-  const link = (cls, name, desc, url) => `<a class="loc glass ${cls}" href="${esc(url || "#")}" target="_blank" rel="noopener">${tag(cls === "main" ? "loc.main" : "loc.base")}<h3>${name}</h3><p>${desc}</p><span class="link" data-i18n="loc.go">${esc(t("loc.go"))}</span></a>`;
+  // taller y operativos en curso: al tocar se dan vuelta preguntando "¿Ir a la ubicación?"; el segundo toque abre Google Maps
+  const flip = (cls, name, desc, url) => `<div class="loc ${cls}" role="button" tabindex="0" data-url="${esc(url || "")}"><div class="loc-in">
+    <div class="loc-f glass">${tag(cls === "main" ? "loc.main" : "loc.base")}<h3>${name}</h3><p>${desc}</p></div>
+    <div class="loc-b glass"><b data-i18n="loc.ask">${esc(t("loc.ask"))}</b><small data-i18n="loc.again">${esc(t("loc.again"))}</small></div></div></div>`;
   // operativos terminados (los del mapa): al tocarlos, el mapa vuela hasta ese punto
   const past = state.ops.filter(o => !o.live && o.lat != null && o.lng != null);
-  cf.innerHTML = link("main", esc(c.tallerNombre || "Chapistería Omar"), `<span data-i18n="loc.mainD">${esc(t("loc.mainD"))}</span>`, c.tallerMaps)
-    + (c.bases || []).filter(b => b.nombre).map(b => link("live", esc(b.nombre), b.detalle ? esc(b.detalle) : `<span data-i18n="loc.baseD">${esc(t("loc.baseD"))}</span>`, b.maps)).join("")
-    + past.map(o => `<button class="loc glass past" data-op="${state.ops.indexOf(o)}">${tag("loc.past")}<h3>${esc(o.name)}</h3><p>${esc([o.province, o.year].filter(Boolean).join(" · "))}${o.units ? ` · ${esc(o.units)} <span data-i18n="map.units">${esc(t("map.units"))}</span>` : ""}</p></button>`).join("");
+  cf.innerHTML = flip("main", esc(c.tallerNombre || "Chapistería Omar"), `<span data-i18n="loc.mainD">${esc(t("loc.mainD"))}</span>`, c.tallerMaps)
+    + (c.bases || []).filter(b => b.nombre).map(b => flip("live", esc(b.nombre), b.detalle ? esc(b.detalle) : `<span data-i18n="loc.baseD">${esc(t("loc.baseD"))}</span>`, b.maps)).join("")
+    + past.map(o => `<button class="loc past" data-op="${state.ops.indexOf(o)}"><div class="loc-in"><div class="loc-f glass">${tag("loc.past")}<h3>${esc(o.name)}</h3><p>${esc([o.province, o.year].filter(Boolean).join(" · "))}${o.units ? ` · ${esc(o.units)} <span data-i18n="map.units">${esc(t("map.units"))}</span>` : ""}</p></div></div></button>`).join("");
   $$("[data-op]", cf).forEach(b => b.onclick = () => {
     const m = pinByOp.get(state.ops[+b.dataset.op]); if (!m) return;
     map.flyTo({ center: m.getLngLat(), zoom: 8, pitch: 50, duration: calm ? 0 : 1800 });
     if (!m.getPopup().isOpen()) m.togglePopup();
   });
+  $$("[data-url]", cf).forEach(el => {
+    const go = () => {
+      if (!el.classList.contains("flip")) { $$(".loc.flip", cf).forEach(x => x.classList.remove("flip")); el.classList.add("flip"); sfx("tick"); return; }
+      el.classList.remove("flip"); if (el.dataset.url) open(el.dataset.url, "_blank", "noopener");
+    };
+    el.onclick = go;
+    el.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } };
+  });
   coverflow();
 }
+// tocar fuera de una tarjeta dada vuelta la vuelve a su frente
+addEventListener("pointerdown", e => { if (!e.target.closest?.(".loc")) $$(".loc.flip", cf).forEach(x => x.classList.remove("flip")); });
 // cada tarjeta gira y se aleja según su distancia al centro
 function coverflow() {
   const mid = cf.scrollLeft + cf.clientWidth / 2;
@@ -333,7 +346,7 @@ async function checkAdmin() {
   if (!FIREBASE_CONFIG.apiKey) { alert("Falta completar FIREBASE_CONFIG en js/config.js"); return; }
   try {
     await Promise.all([initFirebase(), loadLeaflet().catch(console.warn)]); // el panel usa Leaflet para los operativos
-    const m = await import("./admin.js?v=27");
+    const m = await import("./admin.js?v=28");
     await m.openAdmin(state, { reload: loadData, cld, esc });
   } catch (er) {
     console.error(er);
