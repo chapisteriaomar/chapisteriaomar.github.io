@@ -35,16 +35,30 @@ async function start(state, helpers) {
   // se muestra algo enseguida; antes quedaba en negro mientras cargaba (o para siempre si algo fallaba)
   const el = $("#adm"); el.hidden = false; document.body.style.overflow = "hidden";
   // cualquier error, aunque pase fuera del armado del panel, se muestra abajo en rojo (sin tapar el panel)
-  addEventListener("error", ev => open && note(ev.error || ev.message));
-  addEventListener("unhandledrejection", ev => open && note(ev.reason));
+  addEventListener("error", ev => { dbg("error: " + (ev.error?.stack || ev.message)); open && note(ev.error || ev.message); });
+  addEventListener("unhandledrejection", ev => { dbg("rejection: " + (ev.reason?.stack || ev.reason)); open && note(ev.reason); });
   el.innerHTML = `<div class="ad ad-login" style="display:grid;place-items:center;color:var(--muted)">Cargando panel…</div>`;
   const slow = setTimeout(() => fail(new Error("Firebase no respondió en 12 segundos. Revisá la conexión.")), 12000);
   A = await import(FB + "firebase-auth.js");
   auth = A.getAuth(state.fb.app);
   unsub = A.onAuthStateChanged(auth, async u => {
     clearTimeout(slow); if (!open) return;
-    try { u ? await shell() : login(); } catch (er) { fail(er); }
+    dbg("auth: " + (u ? "con sesión" : "sin sesión"));
+    try { u ? await shell() : login(); } catch (er) { dbg("fail: " + (er?.stack || er)); fail(er); }
+    // diagnóstico temporal: qué quedó en pantalla 3 s después
+    setTimeout(() => {
+      const a = $("#adm"), r = $(".ad-main")?.getBoundingClientRect();
+      dbg(`pantalla: adm=${a.hidden ? "oculto" : getComputedStyle(a).display} html=${a.innerHTML.length} main=${r ? Math.round(r.width) + "x" + Math.round(r.height) : "no"} css=${!!$("#admCss")?.sheet} bg=${getComputedStyle(a).backgroundColor} texto="${(a.innerText || "").slice(0, 80).replace(/\s+/g, " ")}"`);
+    }, 3000);
   }, er => { clearTimeout(slow); fail(er); });
+}
+// DIAGNÓSTICO TEMPORAL: guarda en Firestore (site/debug) los pasos al abrir el panel; se quita cuando se resuelva el negro
+const dlog = [];
+function dbg(msg) {
+  dlog.push(new Date().toISOString().slice(11, 19) + " " + String(msg).slice(0, 600));
+  if (!fs || !db || !auth?.currentUser) return;
+  clearTimeout(dbg.t);
+  dbg.t = setTimeout(() => fs.setDoc(fs.doc(db, "site", "debug"), { log: dlog.slice(-40), ua: navigator.userAgent, vp: innerWidth + "x" + innerHeight, at: new Date().toISOString() }).catch(() => {}), 400);
 }
 function note(er) {
   const d = document.createElement("div"); d.textContent = "Error: " + (er?.message || String(er));
@@ -179,8 +193,8 @@ async function shell() {
   $("#ax").onclick = close;
   $("#ao").onclick = () => A.signOut(auth);
   $$(".ad-nav[data-v]").forEach(b => b.onclick = () => go(b.dataset.v));
-  await refresh();
-  go(view);
+  dbg("shell: armado"); await refresh(); dbg("shell: datos ok");
+  go(view); dbg("shell: vista " + view);
   checkImport();
 }
 
