@@ -17,12 +17,10 @@ function applyLang(lang) {
   state.lang = lang; document.documentElement.lang = lang;
   try { localStorage.setItem("lang", lang); } catch {}
   $$("[data-i18n]").forEach(el => el.textContent = t(el.dataset.i18n));
-  $$(".lang button").forEach(b => b.classList.toggle("on", b.dataset.l === lang));
   $("#mq").innerHTML = [1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5, 6].map(i => t("ticker." + i)).filter(Boolean).map(s => `<span>${esc(s)}</span>`).join("");
   splitHero(); renderStats();
 }
-$$(".lang button").forEach(b => b.onclick = () => applyLang(b.dataset.l));
-// globo de la barra (celular): alterna entre español e inglés
+// botón de idioma de la barra: alterna entre español e inglés
 $("#globeBtn").onclick = () => applyLang(state.lang === "es" ? "en" : "es");
 
 /* ================= modo claro / oscuro ================= */
@@ -383,7 +381,10 @@ async function loadData() {
   const { showLang, showTheme, showKicker, dcLen } = state.cfg;
   // pasos de "Lo que resolvemos": cada uno se puede ocultar entero desde el panel
   $$("#dcStage li").forEach((li, i) => li.hidden = state.cfg["showP" + (i + 1)] === false);
-  $(".lang").hidden = $("#globeBtn").hidden = showLang === false; $("#themeBtn").hidden = showTheme === false;
+  $("#globeBtn").hidden = showLang === false; $("#themeBtn").hidden = showTheme === false;
+  // se guardan para ocultar los botones desde el arranque en la próxima visita (sin que aparezcan medio segundo)
+  try { localStorage.setItem("opts", JSON.stringify({ showLang, showTheme })); } catch {}
+  document.documentElement.classList.toggle("no-lang", showLang === false); document.documentElement.classList.toggle("no-theme", showTheme === false);
   $("#xpText .kicker").hidden = showKicker === false;
   if (dcLen) dc.style.setProperty("--dcl", dcLen + "vh");
   if (showLang === false) state.lang = "es";

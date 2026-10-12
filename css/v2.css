@@ -43,11 +43,7 @@ button{background:none;border:0;cursor:pointer}
 .hdr{position:fixed;top:14px;left:var(--gut);right:var(--gut);z-index:50;display:flex;justify-content:space-between;align-items:center;padding:10px 10px 10px 20px;border-radius:999px}
 .logo img{height:calc(34px + 22px * var(--lg,1));width:auto;transition:height .1s linear}
 .hdr-r{display:flex;align-items:center;gap:10px}
-.hdr .btn{padding:12px 22px;font-size:15px}
-.lang{display:flex;border-radius:999px;padding:3px}
-.lang button{font:600 12px/1 var(--body);letter-spacing:.06em;padding:8px 10px;border-radius:999px;color:var(--muted)}
-.lang button.on{background:var(--glass2);color:var(--ink)}
-@media(max-width:560px){.hdr .btn::after{display:none}.hdr .btn{padding:11px 16px;font-size:14px}.logo img{height:calc(28px + 12px * var(--lg,1))}.hdr{padding-left:14px}}
+@media(max-width:560px){.logo img{height:calc(28px + 12px * var(--lg,1))}.hdr{padding-left:14px}}
 
 /* hero con scroll expand: el video arranca enmarcado y se agranda hasta ocupar toda la pantalla */
 .xp{position:relative;height:230vh}
@@ -291,12 +287,9 @@ html.intro .xp-text .kicker{opacity:0}
 
 /* ---------- celular: compacto, sin desbordes, todo centrado al ancho real ---------- */
 html{scroll-padding-top:90px}
-.cta-sm{display:none}
 @media(max-width:600px){
   :root{--gut:18px;--sy:64px}
-  .cta-lg{display:none}.cta-sm{display:inline}
   .hdr{top:10px;padding:7px 7px 7px 14px}
-  .hdr .btn{padding:10px 16px;font-size:14px}
   .theme{width:36px;height:36px}
   .xp-text{left:calc(var(--gut) + 14px);right:calc(var(--gut) + 14px);bottom:clamp(36px,8svh,72px)}
   .kicker{font-size:10.5px;letter-spacing:.06em;padding:8px 12px;margin-bottom:16px}
@@ -354,9 +347,6 @@ html{scroll-padding-top:90px}
 .ig-top{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:var(--ink)}
 .ig-top svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.9}
 /* idioma ES / EN flotando abajo a la derecha */
-.lang-fab{position:fixed;right:max(18px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom));z-index:55;padding:4px}
-.lang-fab button{padding:9px 12px}
-.cms .lang-fab{position:absolute}
 @media(max-width:600px){.ig-top{width:36px;height:36px}}
 
 /* botón de deslizar: el texto se centra en el espacio libre a la derecha de la manija */
@@ -377,6 +367,11 @@ html{scroll-padding-top:90px}
 [data-i18n]{white-space:pre-line}
 
 /* globo de idioma: solo en celular, al lado de Instagram (ahí no va "Cotizar" ni el ES/EN de abajo) */
-.globe{display:none;width:36px;height:36px;border-radius:50%;place-items:center;color:var(--ink)}
-.globe svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8}
-@media(max-width:600px){.globe:not([hidden]){display:grid}.hdr .btn.cta-top,.lang-fab{display:none}}
+
+/* botón de idioma: "A" grande y "a" chica, alterna ES / EN */
+.globe{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:var(--ink)}
+.globe .aa{font:700 17px/1 var(--body);letter-spacing:-.02em}
+.globe .aa small{font-size:11px;font-weight:600;margin-left:1px}
+@media(max-width:600px){.globe{width:36px;height:36px}}
+/* ocultos desde el arranque según las opciones del panel (sin parpadeo) */
+.no-theme #themeBtn,.no-lang #globeBtn{display:none!important}
