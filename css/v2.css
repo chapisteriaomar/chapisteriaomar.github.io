@@ -286,7 +286,8 @@ html.intro .xp-text .kicker{opacity:0}
 .loc h3{font:700 22px/1.1 var(--body);letter-spacing:-.025em}
 .loc p{color:var(--muted);font-size:14.5px;flex:1}
 @media(min-width:1024px){.pres{min-height:100svh;display:flex;flex-direction:column;justify-content:center;padding:clamp(90px,12vh,120px) 0 clamp(28px,4vh,48px)}.pres-box #map{height:clamp(360px,calc(100svh - 390px),700px)}}
-@media(max-width:700px){.cf{position:static;padding:22px calc(50% - 140px)}.loc{flex-basis:280px}.pres-box{overflow:visible;border:0}.pres-box #map{border-radius:20px;border:1px solid var(--edge)}.pres-box::after{display:none}}
+/* celular: la tarjeta flota sobre el mapa como en compu, una sola a la vez y siempre centrada */
+@media(max-width:700px){.cf{padding:24px calc(50% - min(150px,39vw)) 18px;gap:12px}.loc{flex-basis:min(300px,78vw);scroll-snap-stop:always}}
 
 /* ---------- celular: compacto, sin desbordes, todo centrado al ancho real ---------- */
 html{scroll-padding-top:90px}
