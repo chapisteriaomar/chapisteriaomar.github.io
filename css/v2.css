@@ -325,3 +325,13 @@ html{scroll-padding-top:90px}
 .ig-fab:hover{transform:scale(1.08);background:linear-gradient(135deg,#f58529,#dd2a7b 50%,#8134af);color:#fff}
 .ig-fab svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.9}
 .cms .ig-fab{display:none}
+
+/* flechas del carrusel de ubicaciones: solo indican que se puede deslizar (no se tocan) */
+.cf-hint{position:absolute;bottom:88px;z-index:3;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;pointer-events:none;color:#fff;background:rgba(0,0,0,.35);border:1px solid var(--edge);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:opacity .3s}
+.cf-hint svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.cf-hint.l{left:12px}.cf-hint.r{right:12px}
+.at-start .cf-hint.l,.at-end .cf-hint.r{opacity:0}
+@media(prefers-reduced-motion:no-preference){.cf-hint.l svg{animation:nudgeL 1.6s ease-in-out infinite}.cf-hint.r svg{animation:nudgeR 1.6s ease-in-out infinite}}
+@keyframes nudgeL{50%{transform:translateX(-4px)}}
+@keyframes nudgeR{50%{transform:translateX(4px)}}
+@media(max-width:700px){.cf-hint{bottom:auto;top:calc(clamp(420px,62vh,640px) + 95px);width:34px;height:34px}}

@@ -188,10 +188,13 @@ function renderLocs() {
   const c = state.cfg, tag = k => `<span class="loc-tag"><i></i><span data-i18n="${k}">${esc(t(k))}</span></span>`;
   // las tarjetas solo se deslizan (no se tocan); el punto del mapa es el que abre Google Maps
   const card = (cls, name, desc, attrs) => `<div class="loc ${cls}" ${attrs}><div class="loc-in"><div class="loc-f glass">${tag(cls === "main" ? "loc.main" : cls === "live" ? "loc.base" : "loc.past")}<h3>${name}</h3><p>${desc}</p></div></div></div>`;
-  const past = state.ops.filter(o => !o.live && o.lat != null && o.lng != null);
-  cf.innerHTML = card("main", esc(c.tallerNombre || "Chapistería Omar"), `<span data-i18n="loc.mainD">${esc(t("loc.mainD"))}</span>`, `data-url="${esc(c.tallerMaps || "")}" data-q="${esc(c.tallerDir || DEFAULTS.tallerDir)}"`)
-    + (c.bases || []).filter(b => b.nombre).map(b => card("live", esc(b.nombre), b.detalle ? esc(b.detalle) : `<span data-i18n="loc.baseD">${esc(t("loc.baseD"))}</span>`, `data-url="${esc(b.maps || "")}" data-q="${esc(b.nombre)}"`)).join("")
-    + past.map(o => card("past", esc(o.name), `${esc([o.province, o.year].filter(Boolean).join(" · "))}${o.units ? ` · ${esc(o.units)} <span data-i18n="map.units">${esc(t("map.units"))}</span>` : ""}`, `data-ll="${o.lng},${o.lat}"`)).join("");
+  // operativos del mapa: los en curso que no estén ya como base en Config (ej: Paraná) y después los finalizados
+  const bases = (c.bases || []).filter(b => b.nombre), norm = s => String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  const ops = state.ops.filter(o => o.lat != null && o.lng != null && !(o.live && bases.some(b => norm(b.nombre).startsWith(norm(o.name)))));
+  const opCards = [...ops.filter(o => o.live), ...ops.filter(o => !o.live)];
+  cf.innerHTML =card("main", esc(c.tallerNombre || "Chapistería Omar"), `<span data-i18n="loc.mainD">${esc(t("loc.mainD"))}</span>`, `data-url="${esc(c.tallerMaps || "")}" data-q="${esc(c.tallerDir || DEFAULTS.tallerDir)}"`)
+    + bases.map(b => card("live", esc(b.nombre), b.detalle ? esc(b.detalle) : `<span data-i18n="loc.baseD">${esc(t("loc.baseD"))}</span>`, `data-url="${esc(b.maps || "")}" data-q="${esc(b.nombre)}"`)).join("")
+    + opCards.map(o => card(o.live ? "live" : "past", esc(o.name), `${esc([o.province, o.year].filter(Boolean).join(" · "))}${o.units ? ` · ${esc(o.units)} <span data-i18n="map.units">${esc(t("map.units"))}</span>` : ""}`, `data-ll="${o.lng},${o.lat}"`)).join("");
   coverflow();
   // ubica taller y operativos en curso para los pines y para que el mapa vuele hasta ellos
   // si la dirección del taller no se encuentra, se usan sus coordenadas fijas (config.js)
@@ -200,6 +203,8 @@ function renderLocs() {
 // cada tarjeta gira y se aleja según su distancia al centro
 function coverflow() {
   const mid = cf.scrollLeft + cf.clientWidth / 2;
+  // las flechas (solo visuales) se apagan en los extremos del carrusel
+  cf.parentNode.classList.toggle("at-start", cf.scrollLeft < 20); cf.parentNode.classList.toggle("at-end", cf.scrollLeft > cf.scrollWidth - cf.clientWidth - 20);
   $$(".loc", cf).forEach(el => {
     const d = Math.max(-2, Math.min(2, (el.offsetLeft + el.offsetWidth / 2 - mid) / (el.offsetWidth + 20))), a = Math.abs(d);
     el.style.transform = `rotateY(${-d * 32}deg) translateZ(${-a * 130}px) scale(${1 - a * .06})`;
