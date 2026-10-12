@@ -25,7 +25,7 @@ const ico = n => `<svg viewBox="0 0 24 24">${I[n]}</svg>`;
 
 /* ---------------- abrir / cerrar ---------------- */
 export async function openAdmin(state, helpers) {
-  if (open && $("#adm").innerHTML) return; open = true;
+  if (open && $("#pnl").innerHTML) return; open = true;
   try { await start(state, helpers); } catch (er) { open = false; throw er; }
 }
 async function start(state, helpers) {
@@ -33,11 +33,11 @@ async function start(state, helpers) {
   if (!$("#admCss")) document.head.insertAdjacentHTML("beforeend", '<link id="admCss" rel="stylesheet" href="/css/admin.css">');
   if (!$(".toasts")) document.body.insertAdjacentHTML("beforeend", '<div class="toasts"></div>');
   // se muestra algo enseguida; antes quedaba en negro mientras cargaba (o para siempre si algo fallaba)
-  const el = $("#adm"); el.hidden = false; document.body.style.overflow = "hidden";
+  const el = $("#pnl"); el.hidden = false; document.body.style.overflow = "hidden";
   // cualquier error, aunque pase fuera del armado del panel, se muestra abajo en rojo (sin tapar el panel)
   addEventListener("error", ev => { dbg("error: " + (ev.error?.stack || ev.message)); open && note(ev.error || ev.message); });
   addEventListener("unhandledrejection", ev => { dbg("rejection: " + (ev.reason?.stack || ev.reason)); open && note(ev.reason); });
-  el.innerHTML = `<div class="ad ad-login" style="display:grid;place-items:center;color:var(--muted)">Cargando panel…</div>`;
+  el.innerHTML = `<div class="pn pn-login" style="display:grid;place-items:center;color:var(--muted)">Cargando panel…</div>`;
   const slow = setTimeout(() => fail(new Error("Firebase no respondió en 12 segundos. Revisá la conexión.")), 12000);
   dbg("panel: iniciando"); A = await import(FB + "firebase-auth.js"); dbg("panel: módulo de sesión cargado");
   auth = A.getAuth(state.fb.app);
@@ -47,7 +47,7 @@ async function start(state, helpers) {
     try { u ? await shell() : login(); } catch (er) { dbg("fail: " + (er?.stack || er)); fail(er); }
     // diagnóstico temporal: qué quedó en pantalla 3 s después
     setTimeout(() => {
-      const a = $("#adm"), r = $(".ad-main")?.getBoundingClientRect();
+      const a = $("#pnl"), r = $(".pn-main")?.getBoundingClientRect();
       dbg(`pantalla: adm=${a.hidden ? "oculto" : getComputedStyle(a).display} html=${a.innerHTML.length} main=${r ? Math.round(r.width) + "x" + Math.round(r.height) : "no"} css=${!!$("#admCss")?.sheet} bg=${getComputedStyle(a).backgroundColor} texto="${(a.innerText || "").slice(0, 80).replace(/\s+/g, " ")}"`);
     }, 3000);
   }, er => { clearTimeout(slow); fail(er); });
@@ -56,13 +56,14 @@ async function start(state, helpers) {
 const dlog = [];
 function dbg(msg) {
   dlog.push(new Date().toISOString().slice(11, 19) + " " + String(msg).slice(0, 600));
-  // también en pantalla, arriba de todo, para poder sacarle una captura
+  // también en pantalla (solo con ?debug en la dirección), para poder sacarle una captura
   let box = document.getElementById("dbgBox");
+  if (!/debug/.test(location.search)) box = { set textContent(v) {} };
   if (!box) { box = document.createElement("pre"); box.id = "dbgBox"; box.style.cssText = "position:fixed;top:0;left:0;right:0;z-index:99999;margin:0;max-height:45vh;overflow:auto;background:#222;color:#fff;font:12px/1.4 monospace;padding:8px 10px;white-space:pre-wrap;opacity:.95"; document.documentElement.append(box); }
   box.textContent = "DIAGNÓSTICO (sacale una captura)\n" + dlog.join("\n");
   if (!fs || !db || !auth?.currentUser) return;
   clearTimeout(dbg.t);
-  dbg.t = setTimeout(() => fs.setDoc(fs.doc(db, "site", "debug"), { log: dlog.slice(-40), ua: navigator.userAgent, vp: innerWidth + "x" + innerHeight, at: new Date().toISOString() }).catch(er => { document.getElementById("dbgBox").textContent += "\n(no se pudo guardar el registro: " + (er.code || er.message) + ")"; }), 400);
+  dbg.t = setTimeout(() => fs.setDoc(fs.doc(db, "site", "debug"), { log: dlog.slice(-40), ua: navigator.userAgent, vp: innerWidth + "x" + innerHeight, at: new Date().toISOString() }).catch(er => document.getElementById("dbgBox")?.append("\n(no se pudo guardar el registro: " + (er.code || er.message) + ")")), 400);
 }
 function note(er) {
   const d = document.createElement("div"); d.textContent = "Error: " + (er?.message || String(er));
@@ -71,14 +72,14 @@ function note(er) {
 }
 function fail(er) {
   console.error(er);
-  $("#adm").innerHTML = `<div class="ad ad-login" style="display:grid;place-items:center;text-align:center;padding:24px"><div>
+  $("#pnl").innerHTML = `<div class="pn pn-login" style="display:grid;place-items:center;text-align:center;padding:24px"><div>
     <p style="margin-bottom:8px">No se pudo abrir el panel.</p><p style="color:var(--muted);font-size:13px;margin-bottom:18px">${e(er?.message || String(er))}</p>
     <button class="b red" onclick="location.reload()">Reintentar</button> <button class="b ghost" id="fx">Volver al sitio</button></div></div>`;
   $("#fx").onclick = close;
 }
 function close() {
   open = false; unsub?.(); unsub = null;
-  $("#adm").hidden = true; $("#adm").innerHTML = ""; document.body.style.overflow = "";
+  $("#pnl").hidden = true; $("#pnl").innerHTML = ""; document.body.style.overflow = "";
   history.replaceState(null, "", location.pathname); H.reload();
 }
 
@@ -165,7 +166,7 @@ function imgPick(el, label, onFile, existing, kind = "image") {
 
 /* ---------------- login ---------------- */
 function login() {
-  $("#adm").innerHTML = `<div class="ad ad-login" style="display:grid"><form id="lf">
+  $("#pnl").innerHTML = `<div class="pn pn-login" style="display:grid"><form id="lf">
       <img src="${document.documentElement.dataset.theme === "light" ? "/assets/logo-chico-dark.svg" : "/assets/logo-chico.svg"}" alt="">
       <label class="f"><span>Email</span><input name="e" type="email" required autocomplete="username"></label>
       <label class="f"><span>Contraseña</span><input name="p" type="password" required autocomplete="current-password"></label>
@@ -184,19 +185,19 @@ function login() {
 const NAV = [["home", "Inicio", "home"], ["texts", "Textos de la web", "pen"], ["works", "Trabajos", "img"], ["ops", "Operativos", "pin"], ["leads", "Consultas", "inbox"],
   ["clients", "Compañías", "shield"], ["reviews", "Referencias", "quote"], ["config", "Config", "gear"]];
 async function shell() {
-  $("#adm").innerHTML = `<div class="ad">
-    <aside class="ad-side">
-      <div class="ad-logo"><img src="${document.documentElement.dataset.theme === "light" ? "/assets/logo-chico-dark.svg" : "/assets/logo-chico.svg"}" alt=""></div>
-      ${NAV.map(([k, l, i]) => `<button class="ad-nav" data-v="${k}">${ico(i)}<span>${l}</span>${k === "leads" ? '<span class="badge" id="unread" hidden></span>' : ""}</button>`).join("")}
+  $("#pnl").innerHTML = `<div class="pn">
+    <aside class="pn-side">
+      <div class="pn-logo"><img src="${document.documentElement.dataset.theme === "light" ? "/assets/logo-chico-dark.svg" : "/assets/logo-chico.svg"}" alt=""></div>
+      ${NAV.map(([k, l, i]) => `<button class="pn-nav" data-v="${k}">${ico(i)}<span>${l}</span>${k === "leads" ? '<span class="badge" id="unread" hidden></span>' : ""}</button>`).join("")}
       <div class="grow"></div>
-      <button class="ad-nav side-only" id="ax">${ico("eye")}<span>Ver sitio</span></button>
-      <button class="ad-nav side-only" id="ao">${ico("out")}<span>Salir</span></button>
+      <button class="pn-nav side-only" id="ax">${ico("eye")}<span>Ver sitio</span></button>
+      <button class="pn-nav side-only" id="ao">${ico("out")}<span>Salir</span></button>
     </aside>
-    <main class="ad-main"><header class="ad-head"><h1 id="vt"></h1><div class="bar" id="va"></div></header><div class="ad-content" id="imp" style="padding-bottom:0" hidden></div><div class="ad-content" id="vc"></div></main>
+    <main class="pn-main"><header class="pn-head"><h1 id="vt"></h1><div class="bar" id="va"></div></header><div class="pn-content" id="imp" style="padding-bottom:0" hidden></div><div class="pn-content" id="vc"></div></main>
   </div>`;
   $("#ax").onclick = close;
   $("#ao").onclick = () => A.signOut(auth);
-  $$(".ad-nav[data-v]").forEach(b => b.onclick = () => go(b.dataset.v));
+  $$(".pn-nav[data-v]").forEach(b => b.onclick = () => go(b.dataset.v));
   dbg("shell: armado"); await refresh(); dbg("shell: datos ok");
   go(view); dbg("shell: vista " + view);
   checkImport();
@@ -214,7 +215,7 @@ async function checkImport() {
   const box = $("#imp");
   if (!todo.length) { box.hidden = true; return; }
   box.hidden = false;
-  box.innerHTML = `<div class="ad-card" style="border-color:var(--red);display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin:0">
+  box.innerHTML = `<div class="pn-card" style="border-color:var(--red);display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin:0">
     <div><h2 style="font:700 19px var(--disp);text-transform:uppercase;letter-spacing:.06em">Contenido nuevo para publicar</h2>
     ${todo.map(p => `<p style="color:var(--muted);font-size:14px">• ${e(p.titulo || p.id)}</p>`).join("")}</div>
     <button class="b red big" id="impGo">${ico("up")} Publicar ahora</button></div>`;
@@ -254,11 +255,11 @@ async function refresh() {
 }
 function go(v) {
   view = v;
-  $$(".ad-nav[data-v]").forEach(b => b.classList.toggle("on", b.dataset.v === v));
+  $$(".pn-nav[data-v]").forEach(b => b.classList.toggle("on", b.dataset.v === v));
   $("#vt").textContent = NAV.find(n => n[0] === v)[1];
   $("#va").innerHTML = innerWidth > 860 ? "" : `<button class="b sm ghost" id="ax2">Ver sitio</button>`;
   if ($("#ax2")) $("#ax2").onclick = close;
-  $(".ad-main").scrollTop = 0;
+  $(".pn-main").scrollTop = 0;
   ({ home, texts, works, ops, leads, clients, reviews, config })[v]();
 }
 
@@ -277,7 +278,7 @@ function home() {
       <button class="qa" data-go="ops">${ico("pin")}<b>Nuevo operativo</b><small>Marcá la localidad en el mapa y subí las fotos.</small></button>
       <button class="qa" data-go="leads">${ico("inbox")}<b>Ver consultas</b><small>Lo que mandaron las compañías desde la web.</small></button>
     </div>
-    <div class="ad-card"><h2>Últimas consultas</h2><p class="sub">Las 3 más recientes.</p><div class="rows" id="hl"></div></div>`;
+    <div class="pn-card"><h2>Últimas consultas</h2><p class="sub">Las 3 más recientes.</p><div class="rows" id="hl"></div></div>`;
   $$("[data-go]").forEach(b => b.onclick = () => go(b.dataset.go));
   $("#hl").innerHTML = cache.leads.slice(0, 3).map(leadRow).join("") || `<div class="empty-s">Todavía no llegaron consultas.</div>`;
   bindLeads($("#hl"));
@@ -287,19 +288,19 @@ function home() {
 let mode = "files", queue = [], libFilter = "all";
 function works() {
   $("#vc").innerHTML = `
-    <div class="ad-card">
+    <div class="pn-card">
       <div class="bar" style="justify-content:space-between;margin-bottom:16px">
         <div><h2 style="font:700 19px var(--disp);text-transform:uppercase;letter-spacing:.06em">Subir trabajos</h2></div>
         <div class="seg"><button data-m="files">Fotos y videos</button><button data-m="ba">Antes / Después</button></div>
       </div>
-      <div class="ad-fields" style="margin-bottom:16px">
+      <div class="pn-fields" style="margin-bottom:16px">
         <label class="f"><span>Título</span><input id="dT" placeholder="Ej: Hilux – granizo Monte (opcional)"></label>
         <label class="f"><span>Categoría</span><select id="dC">${catOpts("granizo")}</select></label>
         <label class="f"><span>Operativo</span><select id="dO">${opOpts("")}</select></label>
       </div>
       <div id="up"></div>
     </div>
-    <div class="ad-card">
+    <div class="pn-card">
       <div class="bar" style="justify-content:space-between;margin-bottom:16px">
         <h2 style="font:700 19px var(--disp);text-transform:uppercase;letter-spacing:.06em">Publicados <span style="color:var(--muted)">(${cache.works.length})</span></h2>
         <div class="chips" id="lf">${[["all", "Todos"], ...CATS, ["ba", "Antes/Después"]].map(([k, l]) => `<button data-f="${k}" class="${k === libFilter ? "on" : ""}">${l}</button>`).join("")}</div>
@@ -412,9 +413,9 @@ function renderLib() {
 /* ================= OPERATIVOS ================= */
 let edit = null, admMap, mk, newPhotos = [];
 function ops() {
-  $("#vc").innerHTML = `<div class="ad-cols">
-    <div class="ad-card" id="of"></div>
-    <div class="ad-card"><h2>Operativos (${cache.ops.length})</h2><p class="sub">Los "en curso" titilan en el mapa de la web.</p><div class="rows" id="ol"></div></div>
+  $("#vc").innerHTML = `<div class="pn-cols">
+    <div class="pn-card" id="of"></div>
+    <div class="pn-card"><h2>Operativos (${cache.ops.length})</h2><p class="sub">Los "en curso" titilan en el mapa de la web.</p><div class="rows" id="ol"></div></div>
   </div>`;
   opForm(); opList();
 }
@@ -424,7 +425,7 @@ function opForm() {
   $("#of").innerHTML = `<h2>${edit ? "Editar: " + e(o.name) : "Nuevo operativo"}</h2><p class="sub">Buscá la localidad o tocá el mapa.</p>
     <div class="geo"><input id="gq" placeholder="Buscar localidad… ej: Posadas" autocomplete="off"><div class="geo-res" id="gr" hidden></div></div>
     <div id="admMap"></div>
-    <div class="ad-fields">
+    <div class="pn-fields">
       <label class="f"><span>Localidad / nombre</span><input id="on" value="${e(o.name || "")}"></label>
       <label class="f"><span>Provincia / país</span><input id="op" value="${e(o.province || "")}"></label>
       <label class="f"><span>Año</span><input id="oy" inputmode="numeric" value="${e(o.year || new Date().getFullYear())}"></label>
@@ -508,7 +509,7 @@ function opList() {
   $$("#ol .rw").forEach(el => {
     const o = cache.ops.find(x => x.id === el.dataset.id);
     $(".lv", el).onchange = async ev => { await upd("ops", o.id, { live: ev.target.checked }); o.live = ev.target.checked; toast(o.live ? "Marcado en curso" : "Finalizado"); opList(); };
-    $(".ed", el).onclick = () => { edit = o; opForm(); $(".ad-main").scrollTo({ top: 0, behavior: "smooth" }); };
+    $(".ed", el).onclick = () => { edit = o; opForm(); $(".pn-main").scrollTo({ top: 0, behavior: "smooth" }); };
     $(".dl", el).onclick = async () => { if (!confirm(`¿Borrar el operativo ${o.name}?`)) return; await del("ops", o.id); await refresh(); ops(); toast("Borrado"); };
   });
 }
@@ -540,12 +541,12 @@ function leads() {
 async function clients() {
   const items = await list("clients").catch(() => []);
   let logo = null;
-  $("#vc").innerHTML = `<div class="ad-cols">
-    <div class="ad-card"><h2>Agregar compañía</h2><p class="sub">Solo las que autorizaron mostrar su nombre o logo.</p>
+  $("#vc").innerHTML = `<div class="pn-cols">
+    <div class="pn-card"><h2>Agregar compañía</h2><p class="sub">Solo las que autorizaron mostrar su nombre o logo.</p>
       <label class="f" style="margin-bottom:14px"><span>Nombre</span><input id="cn"></label>
       <div id="cz" style="aspect-ratio:3/1"></div>
       <div class="bar end" style="margin-top:16px"><button class="b red big" id="cs">Agregar</button></div></div>
-    <div class="ad-card"><h2>Compañías (${items.length})</h2><p class="sub">Se muestran en "Trabajamos con".</p><div class="rows" id="cl"></div></div></div>`;
+    <div class="pn-card"><h2>Compañías (${items.length})</h2><p class="sub">Se muestran en "Trabajamos con".</p><div class="rows" id="cl"></div></div></div>`;
   imgPick($("#cz"), "Logo (opcional)", f => logo = f);
   $("#cs").onclick = ev => busy(ev.currentTarget, async () => {
     const name = $("#cn").value.trim(); if (!name) throw new Error("Falta el nombre.");
@@ -559,12 +560,12 @@ async function clients() {
 /* ================= REFERENCIAS ================= */
 async function reviews() {
   const items = await list("reviews").catch(() => []);
-  $("#vc").innerHTML = `<div class="ad-cols">
-    <div class="ad-card"><h2>Agregar referencia</h2><p class="sub">Comentario de un cliente o compañía.</p>
-      <div class="ad-fields"><label class="f"><span>Nombre</span><input id="rn"></label><label class="f"><span>Cargo / empresa</span><input id="rr"></label></div>
+  $("#vc").innerHTML = `<div class="pn-cols">
+    <div class="pn-card"><h2>Agregar referencia</h2><p class="sub">Comentario de un cliente o compañía.</p>
+      <div class="pn-fields"><label class="f"><span>Nombre</span><input id="rn"></label><label class="f"><span>Cargo / empresa</span><input id="rr"></label></div>
       <label class="f" style="margin-top:14px"><span>Texto</span><textarea id="rt" rows="4"></textarea></label>
       <div class="bar end" style="margin-top:16px"><button class="b red big" id="rs">Agregar</button></div></div>
-    <div class="ad-card"><h2>Referencias (${items.length})</h2><p class="sub">&nbsp;</p><div class="rows" id="rl"></div></div></div>`;
+    <div class="pn-card"><h2>Referencias (${items.length})</h2><p class="sub">&nbsp;</p><div class="rows" id="rl"></div></div></div>`;
   $("#rs").onclick = ev => busy(ev.currentTarget, async () => {
     if (!$("#rn").value.trim() || !$("#rt").value.trim()) throw new Error("Completá nombre y texto.");
     await add("reviews", { name: $("#rn").value.trim(), role: $("#rr").value.trim(), text: $("#rt").value.trim() }); toast("Agregada ✓"); reviews();
@@ -582,34 +583,34 @@ async function config() {
   let aboutFile = null;
   const f = (id, label, v, ph = "") => `<label class="f"><span>${label}</span><input id="${id}" value="${e(v ?? "")}" placeholder="${e(ph)}"></label>`;
   $("#vc").innerHTML = `
-    <div class="ad-card"><h2>Opciones de la web</h2><p class="sub">Se guardan al tocarlas. Los visitantes las ven al recargar.</p>
+    <div class="pn-card"><h2>Opciones de la web</h2><p class="sub">Se guardan al tocarlas. Los visitantes las ven al recargar.</p>
       ${[["showLang", "Botón de idioma (ES / EN)", "Apagado: la web queda en español."], ["showTheme", "Botón de modo claro / oscuro", "Apagado: la web queda en modo oscuro."], ["rolling", "Cifras con rodillo (Counter)", "Apagado: los números cuentan de 0 al valor (Count up)."], ["showKicker", "Etiqueta arriba del título del video", "La de \"PDR · Granizo · Operativos móviles\"."], ["sounds", "Sonidos", "Suaves: al abrir la web, al elegir el tipo de consulta y al enviarla."]]
         .map(([k, h, d]) => `<div style="display:flex;justify-content:space-between;align-items:center;gap:16px;padding:10px 0;border-top:1px solid var(--line)"><div><b>${h}</b><p class="sub" style="margin:0">${d}</p></div>
         <label class="switch"><input type="checkbox" data-opt="${k}"${(c[k] ?? k !== "rolling") ? " checked" : ""}><i></i></label></div>`).join("")}
       <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;padding:10px 0;border-top:1px solid var(--line)"><div><b>Largo de "Cómo funciona un operativo"</b><p class="sub" style="margin:0">Cuánto hay que scrollear para pasar los 5 pasos.</p></div>
         <select id="dcLen" style="width:auto">${[[200, "Corto"], [260, "Medio"], [420, "Largo"]].map(([v, l]) => `<option value="${v}"${(c.dcLen || 260) == v ? " selected" : ""}>${l}</option>`).join("")}</select></div></div>
-    <div class="ad-card"><h2>Operativos móviles en curso</h2><p class="sub">Uno por cada localidad donde estén trabajando ahora. Aparecen todos en "Dónde encontrarnos".</p>
+    <div class="pn-card"><h2>Operativos móviles en curso</h2><p class="sub">Uno por cada localidad donde estén trabajando ahora. Aparecen todos en "Dónde encontrarnos".</p>
       <div id="bases"></div><button type="button" class="b ghost" id="addBase">+ Agregar operativo móvil</button></div>
-    <div class="ad-cols">
+    <div class="pn-cols">
       <div>
-        <div class="ad-card"><h2>Contacto y redes</h2><p class="sub">Botones de WhatsApp, email e Instagram.</p><div class="ad-fields">
+        <div class="pn-card"><h2>Contacto y redes</h2><p class="sub">Botones de WhatsApp, email e Instagram.</p><div class="pn-fields">
           ${f("cw", "WhatsApp (con código país)", c.whatsapp, "5491100000000")}${f("ce", "Email", c.email)}
           ${f("ci", "Instagram (usuario)", c.instagram)}${f("ciu", "Instagram (link)", c.instagramUrl)}</div></div>
-        <div class="ad-card"><h2>Taller principal</h2><p class="sub">&nbsp;</p><div class="ad-fields">
+        <div class="pn-card"><h2>Taller principal</h2><p class="sub">&nbsp;</p><div class="pn-fields">
           ${f("tn", "Nombre", c.tallerNombre)}${f("tm", "Link Google Maps", c.tallerMaps)}
           ${f("tg", "Dirección o ciudad (para ubicarlo en el mapa)", c.tallerDir, "Ej: Av. San Martín 1234, Paraná")}</div></div>
-        <div class="ad-card"><h2>Cifras del inicio</h2><p class="sub">Las vacías no se muestran.</p><div class="ad-fields">
+        <div class="pn-card"><h2>Cifras del inicio</h2><p class="sub">Las vacías no se muestran.</p><div class="pn-fields">
           ${f("s1", "Años de oficio", st.years, "Ej: 25+")}${f("s2", "Vehículos reparados", st.vehicles, "Ej: 8.000+")}
           ${f("s3", "Provincias / países", st.provinces, "Ej: 10")}${f("s4", "Operativos realizados", st.ops, "Ej: 30+")}</div></div>
       </div>
       <div>
-        <div class="ad-card"><h2>Videos del inicio</h2><p class="sub">El video de fondo de la portada. Si no subís el de celular, se usa el de compu.</p>
-          <div class="ad-fields" style="grid-template-columns:1.6fr 1fr;align-items:start"><div id="hvD" style="aspect-ratio:16/9"></div><div id="hvM" style="aspect-ratio:9/16"></div></div></div>
-        <div class="ad-card"><h2>Foto de "Ambiente"</h2><p class="sub">Se ve al lado del texto sobre el cuidado del ambiente.</p>
+        <div class="pn-card"><h2>Videos del inicio</h2><p class="sub">El video de fondo de la portada. Si no subís el de celular, se usa el de compu.</p>
+          <div class="pn-fields" style="grid-template-columns:1.6fr 1fr;align-items:start"><div id="hvD" style="aspect-ratio:16/9"></div><div id="hvM" style="aspect-ratio:9/16"></div></div></div>
+        <div class="pn-card"><h2>Foto de "Ambiente"</h2><p class="sub">Se ve al lado del texto sobre el cuidado del ambiente.</p>
           <div id="az" style="aspect-ratio:4/3"></div></div>
       </div>
     </div>
-    <div class="ad-card" style="position:sticky;bottom:12px;margin:0;display:flex;justify-content:space-between;align-items:center;gap:12px">
+    <div class="pn-card" style="position:sticky;bottom:12px;margin:0;display:flex;justify-content:space-between;align-items:center;gap:12px">
       <span style="color:var(--muted);font-size:14px">Los cambios se ven en la web al recargar.</span><button class="b red big" id="cs">Guardar cambios</button></div>`;
   $$("[data-opt]").forEach(inp => inp.onchange = async () => {
     try { await fs.setDoc(ref, { [inp.dataset.opt]: inp.checked }, { merge: true }); S.cfg[inp.dataset.opt] = inp.checked; toast("Guardado ✓"); }
@@ -619,7 +620,7 @@ async function config() {
     try { await fs.setDoc(ref, { dcLen: +ev.target.value }, { merge: true }); S.cfg.dcLen = +ev.target.value; toast("Guardado ✓"); }
     catch (er) { toast(er.message, true); }
   };
-  const baseRow = (b = {}) => `<div class="ad-fields base-row" style="margin-bottom:12px;align-items:end;grid-template-columns:1fr 1.2fr 1fr auto">
+  const baseRow = (b = {}) => `<div class="pn-fields base-row" style="margin-bottom:12px;align-items:end;grid-template-columns:1fr 1.2fr 1fr auto">
       <label class="f"><span>Localidad / nombre</span><input class="b-n" value="${e(b.nombre || "")}" placeholder="Ej: Posadas, Misiones"></label>
       <label class="f"><span>Link Google Maps</span><input class="b-m" value="${e(b.maps || "")}"></label>
       <label class="f"><span>Detalle (opcional)</span><input class="b-d" value="${e(b.detalle || "")}" placeholder="Ej: Nave Ruta 12 km 5"></label>
@@ -690,7 +691,7 @@ async function txList() {
   const byGroup = {};
   keys.forEach(k => (byGroup[k.split(".")[0]] ||= []).push(k));
   $("#tb").innerHTML = `<input id="tq" placeholder="Buscar texto…" style="margin-bottom:16px">` + Object.entries(byGroup).map(([g, ks]) =>
-    `<div class="ad-card tx-g"><h2>${e(GROUPS[g] || g)}</h2><p class="sub">&nbsp;</p>${ks.map(k => `<div class="tx-r" data-k="${k}" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+    `<div class="pn-card tx-g"><h2>${e(GROUPS[g] || g)}</h2><p class="sub">&nbsp;</p>${ks.map(k => `<div class="tx-r" data-k="${k}" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
       ${["es", "en"].map(l => { const v = over[l]?.[k] ?? base[l][k] ?? ""; const long = v.length > 70;
         return `<label class="f"><span>${l.toUpperCase()}${over[l]?.[k] != null ? ' · <b style="color:var(--red)">editado</b>' : ""}</span>${long
           ? `<textarea data-l="${l}" rows="3">${e(v)}</textarea>` : `<input data-l="${l}" value="${e(v)}">`}</label>`; }).join("")}</div>`).join("")}</div>`).join("");

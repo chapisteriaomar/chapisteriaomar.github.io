@@ -23,7 +23,7 @@ img,video{display:block;max-width:100%}
 </style>
 </head>
 <body>
-<div class="adm" id="adm"><div style="display:grid;place-items:center;height:100vh;color:var(--muted)">Cargando panel…</div></div>
+<div class="pnl" id="pnl"><div style="display:grid;place-items:center;height:100vh;color:var(--muted)">Cargando panel…</div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script type="module">
 import { FIREBASE_CONFIG, DEFAULTS } from "/js/config.js?v=33";
@@ -41,7 +41,7 @@ try {
   await m.openAdmin(state, { reload: () => location.href = "/", cld, esc });
 } catch (er) {
   console.error(er);
-  document.getElementById("adm").innerHTML = `<div style="display:grid;place-items:center;height:100vh;text-align:center;padding:24px">No se pudo abrir el panel.<br><small style="color:var(--muted)">${esc(er?.message || er)}</small></div>`;
+  document.getElementById("pnl").innerHTML = `<div style="display:grid;place-items:center;height:100vh;text-align:center;padding:24px">No se pudo abrir el panel.<br><small style="color:var(--muted)">${esc(er?.message || er)}</small></div>`;
 }
 </script>
 </body>
