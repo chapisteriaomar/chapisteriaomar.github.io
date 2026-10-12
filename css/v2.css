@@ -371,3 +371,6 @@ html{scroll-padding-top:90px}
 }
 .pres-box #map{touch-action:pan-y}
 .form textarea{resize:none}
+
+/* los textos editados respetan los saltos de línea que se escriben en el editor */
+[data-i18n]{white-space:pre-line}
