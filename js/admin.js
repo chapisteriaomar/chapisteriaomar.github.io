@@ -662,7 +662,7 @@ async function config() {
 /* ================= TEXTOS DE LA WEB ================= */
 // Los originales están en js/i18n.js (BASE, sin modificar); lo editado se guarda en site/texts { es: {clave: texto}, en: {...} }
 let BASE_TX = null;
-async function loadBase() { if (!BASE_TX) BASE_TX = (await import("./i18n.js?v=45&base=1")).I18N; return BASE_TX; }
+async function loadBase() { if (!BASE_TX) BASE_TX = (await import("./i18n.js?v=49&base=1")).I18N; return BASE_TX; }
 async function saveText(lang, key, value) {
   await fs.setDoc(fs.doc(db, "site", "texts"), { [lang]: { [key]: value == null ? fs.deleteField() : value } }, { merge: true });
 }
