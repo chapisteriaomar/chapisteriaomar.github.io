@@ -273,14 +273,9 @@ html.intro .xp-text .kicker{opacity:0}
 .pres-box::after{content:"";position:absolute;left:0;right:0;bottom:0;height:46%;pointer-events:none;background:linear-gradient(transparent,color-mix(in srgb,var(--bg) 85%,transparent))}
 .cf{position:absolute;left:0;right:0;bottom:0;z-index:2;display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;padding:30px calc(50% - 150px) 22px;perspective:1100px;scrollbar-width:none}
 .cf::-webkit-scrollbar{display:none}
-.loc{flex:0 0 300px;scroll-snap-align:center;cursor:pointer;color:inherit;font:inherit;text-align:left;background:none;border:0;padding:0;will-change:transform}
-.loc-in{position:relative;height:100%;transform-style:preserve-3d;transition:transform .6s cubic-bezier(.2,.7,.2,1)}
-.loc.flip .loc-in{transform:rotateY(180deg)}
-.loc-f,.loc-b{display:flex;flex-direction:column;gap:6px;height:100%;padding:20px 22px;border-radius:20px;backface-visibility:hidden;-webkit-backface-visibility:hidden}
-.loc-b{position:absolute;inset:0;transform:rotateY(180deg);background:color-mix(in srgb,var(--bg2) 88%,transparent);justify-content:center;align-items:center;text-align:center;border-color:color-mix(in srgb,var(--c,var(--red)) 45%,transparent)}
-.loc-b b{font:700 21px/1.15 var(--body);letter-spacing:-.02em;color:var(--c,var(--red))}
-.loc-b small{color:var(--muted);font-size:13.5px}
-.loc:focus-visible{outline:none}.loc:focus-visible .loc-f{outline:2px solid var(--red);outline-offset:2px}
+.loc{flex:0 0 300px;scroll-snap-align:center;color:inherit;font:inherit;text-align:left;background:none;border:0;padding:0;will-change:transform}
+.loc-in{height:100%}
+.loc-f{display:flex;flex-direction:column;gap:6px;height:100%;padding:20px 22px;border-radius:20px;backface-visibility:hidden;-webkit-backface-visibility:hidden}
 .loc-tag{display:inline-flex;align-items:center;gap:8px;font:600 11.5px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--c,var(--red))}
 .loc-tag i{width:8px;height:8px;border-radius:50%;background:currentColor}
 .loc.main{--c:#ff6b5f}

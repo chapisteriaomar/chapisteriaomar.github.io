@@ -1,5 +1,5 @@
 import { FIREBASE_CONFIG, DEFAULTS } from "./config.js?v=38";
-import { I18N } from "./i18n.js?v=38";
+import { I18N } from "./i18n.js?v=39";
 // Textos originales (los editados desde el panel se guardan en Firestore: site/texts)
 const BASE = JSON.parse(JSON.stringify(I18N));
 function applyTexts(over) { for (const l of Object.keys(BASE)) I18N[l] = { ...BASE[l], ...(over?.[l] || {}) }; }
@@ -185,34 +185,17 @@ function render() {
 const cf = $("#cf");
 function renderLocs() {
   const c = state.cfg, tag = k => `<span class="loc-tag"><i></i><span data-i18n="${k}">${esc(t(k))}</span></span>`;
-  // taller y operativos en curso: al tocar se dan vuelta preguntando "¿Ir a la ubicación?"; el segundo toque abre Google Maps
-  const flip = (cls, name, desc, url, q) => `<div class="loc ${cls}" role="button" tabindex="0" data-url="${esc(url || "")}" data-q="${esc(q || "")}"><div class="loc-in">
-    <div class="loc-f glass">${tag(cls === "main" ? "loc.main" : "loc.base")}<h3>${name}</h3><p>${desc}</p></div>
-    <div class="loc-b glass"><b data-i18n="loc.ask">${esc(t("loc.ask"))}</b><small data-i18n="loc.again">${esc(t("loc.again"))}</small></div></div></div>`;
-  // operativos terminados (los del mapa): al tocarlos, el mapa vuela hasta ese punto
+  // las tarjetas solo se deslizan (no se tocan); el punto del mapa es el que abre Google Maps
+  const card = (cls, name, desc, attrs) => `<div class="loc ${cls}" ${attrs}><div class="loc-in"><div class="loc-f glass">${tag(cls === "main" ? "loc.main" : cls === "live" ? "loc.base" : "loc.past")}<h3>${name}</h3><p>${desc}</p></div></div></div>`;
   const past = state.ops.filter(o => !o.live && o.lat != null && o.lng != null);
-  cf.innerHTML = flip("main", esc(c.tallerNombre || "Chapistería Omar"), `<span data-i18n="loc.mainD">${esc(t("loc.mainD"))}</span>`, c.tallerMaps, c.tallerDir || DEFAULTS.tallerDir)
-    + (c.bases || []).filter(b => b.nombre).map(b => flip("live", esc(b.nombre), b.detalle ? esc(b.detalle) : `<span data-i18n="loc.baseD">${esc(t("loc.baseD"))}</span>`, b.maps, b.nombre)).join("")
-    + past.map(o => `<button class="loc past" data-op="${state.ops.indexOf(o)}" data-ll="${o.lng},${o.lat}"><div class="loc-in"><div class="loc-f glass">${tag("loc.past")}<h3>${esc(o.name)}</h3><p>${esc([o.province, o.year].filter(Boolean).join(" · "))}${o.units ? ` · ${esc(o.units)} <span data-i18n="map.units">${esc(t("map.units"))}</span>` : ""}</p></div></div></button>`).join("");
-  $$("[data-op]", cf).forEach(b => b.onclick = () => {
-    const m = pinByOp.get(state.ops[+b.dataset.op]); if (!m) return;
-    map.flyTo({ center: m.getLngLat(), zoom: 8, pitch: 50, duration: calm ? 0 : 1800 });
-  });
-  $$("[data-url]", cf).forEach(el => {
-    const go = () => {
-      if (!el.classList.contains("flip")) { $$(".loc.flip", cf).forEach(x => x.classList.remove("flip")); el.classList.add("flip"); sfx("tick"); return; }
-      el.classList.remove("flip"); if (el.dataset.url) open(el.dataset.url, "_blank", "noopener");
-    };
-    el.onclick = go;
-    el.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } };
-  });
+  cf.innerHTML = card("main", esc(c.tallerNombre || "Chapistería Omar"), `<span data-i18n="loc.mainD">${esc(t("loc.mainD"))}</span>`, `data-url="${esc(c.tallerMaps || "")}" data-q="${esc(c.tallerDir || DEFAULTS.tallerDir)}"`)
+    + (c.bases || []).filter(b => b.nombre).map(b => card("live", esc(b.nombre), b.detalle ? esc(b.detalle) : `<span data-i18n="loc.baseD">${esc(t("loc.baseD"))}</span>`, `data-url="${esc(b.maps || "")}" data-q="${esc(b.nombre)}"`)).join("")
+    + past.map(o => card("past", esc(o.name), `${esc([o.province, o.year].filter(Boolean).join(" · "))}${o.units ? ` · ${esc(o.units)} <span data-i18n="map.units">${esc(t("map.units"))}</span>` : ""}`, `data-ll="${o.lng},${o.lat}"`)).join("");
   coverflow();
   // ubica taller y operativos en curso para los pines y para que el mapa vuele hasta ellos
   // si la dirección del taller no se encuentra, se usan sus coordenadas fijas (config.js)
   $$("[data-url]", cf).forEach(async el => { const ll = await geocode(el.dataset.url, el.dataset.q) || (el.classList.contains("main") ? await geocode("", DEFAULTS.tallerDir) : null); if (ll) { el.dataset.ll = ll.join(","); syncLocPins(); follow(); } });
 }
-// tocar fuera de una tarjeta dada vuelta la vuelve a su frente
-addEventListener("pointerdown", e => { if (!e.target.closest?.(".loc")) $$(".loc.flip", cf).forEach(x => x.classList.remove("flip")); });
 // cada tarjeta gira y se aleja según su distancia al centro
 function coverflow() {
   const mid = cf.scrollLeft + cf.clientWidth / 2;
@@ -237,7 +220,6 @@ addEventListener("keydown", e => { if (e.key === "Escape" && !$("#lb").hidden) c
 /* ================= mapa de operativos (MapLibre, vectorial y con animación) ================= */
 // estilos de OpenFreeMap: gratis y sin API key
 let map, pins = [];
-const pinByOp = new Map();
 const mapStyle = () => `https://tiles.openfreemap.org/styles/${isLight() ? "positron" : "dark"}`;
 const loadScript = (js, css) => new Promise((ok, ko) => {
   document.head.insertAdjacentHTML("beforeend", `<link rel="stylesheet" href="${css}">`);
@@ -255,14 +237,14 @@ function renderMap() {
     map = new maplibregl.Map({ container: "map", style: mapStyle(), center: [-63.5, -30], zoom: 1.6, attributionControl: { compact: true }, interactive: false });
     new IntersectionObserver(([e], o) => { if (e.isIntersecting) { o.disconnect(); follow(0); } }, { threshold: .5 }).observe($("#map"));
   }
-  pins.forEach(p => p.remove()); pinByOp.clear();
+  pins.forEach(p => p.remove());
   pins = state.ops.filter(o => o.lat != null && o.lng != null).map(o => {
     const el = document.createElement("div"); el.className = o.live ? "pin live" : "pin";
     // tocar el punto abre esa ubicación en Google Maps
     el.title = o.name || ""; el.onclick = () => open(`https://www.google.com/maps?q=${o.lat},${o.lng}`, "_blank", "noopener");
     const m = new maplibregl.Marker({ element: el }).setLngLat([o.lng, o.lat])
       .addTo(map);
-    pinByOp.set(o, m); return m;
+    return m;
   });
   syncLocPins();
 }
