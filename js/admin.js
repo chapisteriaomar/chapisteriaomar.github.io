@@ -39,7 +39,7 @@ async function start(state, helpers) {
   addEventListener("unhandledrejection", ev => { dbg("rejection: " + (ev.reason?.stack || ev.reason)); open && note(ev.reason); });
   el.innerHTML = `<div class="ad ad-login" style="display:grid;place-items:center;color:var(--muted)">Cargando panel…</div>`;
   const slow = setTimeout(() => fail(new Error("Firebase no respondió en 12 segundos. Revisá la conexión.")), 12000);
-  A = await import(FB + "firebase-auth.js");
+  dbg("panel: iniciando"); A = await import(FB + "firebase-auth.js"); dbg("panel: módulo de sesión cargado");
   auth = A.getAuth(state.fb.app);
   unsub = A.onAuthStateChanged(auth, async u => {
     clearTimeout(slow); if (!open) return;
@@ -56,9 +56,14 @@ async function start(state, helpers) {
 const dlog = [];
 function dbg(msg) {
   dlog.push(new Date().toISOString().slice(11, 19) + " " + String(msg).slice(0, 600));
+  // también en pantalla, arriba de todo, para poder sacarle una captura
+  let box = document.getElementById("dbgBox");
+  if (!box) { box = document.createElement("pre"); box.id = "dbgBox"; box.style.cssText = "position:fixed;top:0;left:0;right:0;z-index:99999;margin:0;max-height:45vh;overflow:auto;background:#222;color:#fff;font:12px/1.4 monospace;padding:8px 10px;white-space:pre-wrap;opacity:.95"; document.documentElement.append(box); }
+  box.textContent = "DIAGNÓSTICO (sacale una captura)\n" + dlog.join("\n");
   if (!fs || !db || !auth?.currentUser) return;
   clearTimeout(dbg.t);
-  dbg.t = setTimeout(() => fs.setDoc(fs.doc(db, "site", "debug"), { log: dlog.slice(-40), ua: navigator.userAgent, vp: innerWidth + "x" + innerHeight, at: new Date().toISOString() }).catch(() => {}), 400);
+  dbg.t = setTimeout(() => fs.setDoc(fs.doc(db, "site", "debug"), { log: dlog.slice(-40), ua: navigator.userAgent, vp: innerWidth + "x" + innerHeight, at: new Date().toISOString() }).catch(er => { document.getElementById("dbgBox").textContent += "
+(no se pudo guardar el registro: " + (er.code || er.message) + ")"; }), 400);
 }
 function note(er) {
   const d = document.createElement("div"); d.textContent = "Error: " + (er?.message || String(er));
