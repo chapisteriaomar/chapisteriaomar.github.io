@@ -347,10 +347,9 @@ html{scroll-padding-top:90px}
 
 /* globo de idioma: solo en celular, al lado de Instagram (ahí no va "Cotizar" ni el ES/EN de abajo) */
 
-/* botón de idioma: "A" grande y "a" chica, alterna ES / EN */
+/* botón de idioma (ícono de traducción), alterna ES / EN */
 .globe{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:var(--ink)}
-.globe .aa{font:700 17px/1 var(--body);letter-spacing:-.02em}
-.globe .aa small{font-size:11px;font-weight:600;margin-left:1px}
+.globe svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 @media(max-width:600px){.globe{width:36px;height:36px}}
 /* ocultos desde el arranque según las opciones del panel (sin parpadeo) */
 .no-theme #themeBtn,.no-lang #globeBtn{display:none!important}
@@ -366,3 +365,9 @@ html{scroll-padding-top:90px}
 .dcard h3{font:700 clamp(26px,2.4vw,32px)/1.05 var(--body);letter-spacing:-.03em}
 .dcard p{color:var(--muted);font-size:15.5px}
 .dcwrap .cf-hint{top:50%}
+
+/* idioma e Instagram del mismo alto que el logo (y se achican con él al bajar) */
+.hdr .globe,.hdr .ig-top{width:calc(34px + 22px * var(--lg,1));height:calc(34px + 22px * var(--lg,1));transition:width .1s linear,height .1s linear}
+.hdr .ig-top svg{width:46%;height:46%}
+.hdr .globe svg{width:70%;height:70%}
+@media(max-width:560px){.hdr .globe,.hdr .ig-top{width:calc(28px + 12px * var(--lg,1));height:calc(28px + 12px * var(--lg,1))}}
