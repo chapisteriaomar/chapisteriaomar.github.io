@@ -61,6 +61,13 @@ export const I18N = {
     "mob.kicker": "Versión móvil en camino", "mob.title": "Muy pronto\nen celular",
     "mob.text": "Estamos terminando la versión para celulares. Mientras tanto, entrá desde una computadora para vivir la experiencia completa: operativos en el mapa, trabajos antes y después, y mucho más.",
     "mob.wa": "Escribinos por WhatsApp", "mob.ig": "Ver Instagram", "mob.copy": "Copiar link para la compu", "mob.copied": "¡Link copiado!",
+    "meth.kicker": "El método PDR", "meth.title": "Sin masilla. Sin repintado. Sin perder valor.",
+    "meth.text": "Con varillas y luz LED empujamos la chapa desde adentro hasta su forma original. La pintura de fábrica queda intacta, el auto conserva su valor y su garantía, y la reparación lleva horas, no semanas.",
+    "meth.link": "Conocé nuestros servicios",
+    "proc.sub": "De la alerta a la entrega documentada, cada unidad con control de calidad.",
+    "clients.sub": "Aseguradoras, liquidadores, flotas y concesionarias de Argentina y el exterior.",
+    "sust.kicker": "Responsabilidad", "sust.title": "Reparar sin repintar también cuida el ambiente",
+    "sust.text": "Al no usar masilla, pintura ni solventes, el PDR evita residuos y emisiones de la reparación tradicional, y el auto vuelve a la calle antes.",
     "close": "Cerrar", "before": "Antes", "after": "Después",
     "ticker.1": "Desabollado sin pintura", "ticker.2": "Granizo", "ticker.3": "Operativos móviles", "ticker.4": "Aseguradoras", "ticker.5": "Flotas", "ticker.6": "Argentina y exterior"
   },
@@ -126,6 +133,13 @@ export const I18N = {
     "mob.kicker": "Mobile version on the way", "mob.title": "Coming soon\nto mobile",
     "mob.text": "We're finishing the mobile version. In the meantime, visit us from a computer for the full experience: live operations map, before & after work and much more.",
     "mob.wa": "Message us on WhatsApp", "mob.ig": "View Instagram", "mob.copy": "Copy link for desktop", "mob.copied": "Link copied!",
+    "meth.kicker": "The PDR method", "meth.title": "No filler. No repaint. No lost value.",
+    "meth.text": "Using rods and LED light we push the panel from behind back to its original shape. Factory paint stays intact, the car keeps its value and warranty, and the repair takes hours, not weeks.",
+    "meth.link": "Explore our services",
+    "proc.sub": "From alert to documented delivery, every unit quality-checked.",
+    "clients.sub": "Insurers, adjusters, fleets and dealerships in Argentina and abroad.",
+    "sust.kicker": "Responsibility", "sust.title": "Repairing without repainting is kinder to the environment",
+    "sust.text": "With no filler, paint or solvents, PDR avoids the waste and emissions of conventional repair, and the car is back on the road sooner.",
     "close": "Close", "before": "Before", "after": "After",
     "ticker.1": "Paintless Dent Repair", "ticker.2": "Hail Damage", "ticker.3": "Mobile Operations", "ticker.4": "Insurers", "ticker.5": "Fleets", "ticker.6": "Argentina & abroad"
   }
