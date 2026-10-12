@@ -111,6 +111,32 @@ function onScroll() {
 addEventListener("scroll", () => requestAnimationFrame(onScroll), { passive: true });
 addEventListener("resize", onScroll);
 
+/* ================= sonidos suaves (sintetizados, sin archivos); se apagan desde el panel ================= */
+let ac;
+function sfx(kind) {
+  if (state.cfg.sounds === false || editMode) return;
+  try {
+    ac ||= new AudioContext(); if (ac.state === "suspended") ac.resume();
+    const now = ac.currentTime, g = ac.createGain(); g.connect(ac.destination);
+    const tone = (f, t0, dur, vol, type = "sine") => {
+      const o = ac.createOscillator(), v = ac.createGain(); o.type = type; o.frequency.value = f;
+      v.gain.setValueAtTime(0, now + t0); v.gain.linearRampToValueAtTime(vol, now + t0 + .02); v.gain.exponentialRampToValueAtTime(.0001, now + t0 + dur);
+      o.connect(v).connect(g); o.start(now + t0); o.stop(now + t0 + dur);
+    };
+    if (kind === "open") { // soplido: ruido filtrado que sube, como cuando se abre algo
+      const n = ac.createBufferSource(), b = ac.createBuffer(1, ac.sampleRate * 1.2, ac.sampleRate), d = b.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      const fl = ac.createBiquadFilter(); fl.type = "bandpass"; fl.Q.value = .8;
+      fl.frequency.setValueAtTime(300, now); fl.frequency.exponentialRampToValueAtTime(2400, now + 1);
+      g.gain.setValueAtTime(0, now); g.gain.linearRampToValueAtTime(.06, now + .35); g.gain.exponentialRampToValueAtTime(.0001, now + 1.15);
+      n.buffer = b; n.connect(fl).connect(g); n.start(now);
+    }
+    if (kind === "tick") tone(1400, 0, .06, .05, "triangle");
+    if (kind === "done") { tone(659, 0, .5, .08); tone(988, .12, .7, .07); }
+    if (kind === "err") tone(220, 0, .3, .07, "triangle");
+  } catch {}
+}
+
 /* ================= magnet: los botones principales se acercan al cursor ================= */
 if (!calm && matchMedia("(pointer:fine)").matches) $$(".mag").forEach(el => {
   el.addEventListener("pointermove", e => { const r = el.getBoundingClientRect(); el.style.transform = `translate(${(e.clientX - r.left - r.width / 2) * .3}px,${(e.clientY - r.top - r.height / 2) * .4}px)`; });
@@ -236,10 +262,11 @@ scH.addEventListener("pointerdown", e => { if (sc.matches(".busy,.done")) return
 scH.addEventListener("pointermove", e => { if (dragX != null) scSet(Math.min(Math.max((e.clientX - dragX) / scMax(), 0), 1)); });
 scH.addEventListener("pointerup", () => {
   if (dragX == null) return; dragX = null; sc.classList.remove("drag");
-  if (+sc.style.getPropertyValue("--x") > .85) { scSet(1); $("#leadForm").requestSubmit(); } else scSet(0);
+  if (+sc.style.getPropertyValue("--x") > .85) { scSet(1); sfx("tick"); $("#leadForm").requestSubmit(); } else scSet(0);
 });
 // un clic de mouse o dedo sin arrastrar no envía; Enter (detail 0) sí
 scH.addEventListener("click", e => { if (e.detail > 0) e.preventDefault(); });
+$$(".chips input").forEach(r => r.addEventListener("change", () => sfx("tick")));
 
 $("#leadForm").addEventListener("submit", async e => {
   e.preventDefault();
@@ -253,13 +280,13 @@ $("#leadForm").addEventListener("submit", async e => {
     if (!state.db) throw new Error("no-db");
     const { fs } = state.fb;
     await fs.addDoc(fs.collection(state.db, "leads"), { ...data, lang: state.lang, createdAt: fs.serverTimestamp(), read: false });
-    sc.classList.replace("busy", "done"); msg.textContent = t("f.ok"); msg.classList.add("ok"); f.reset();
+    sc.classList.replace("busy", "done"); sfx("done"); msg.textContent = t("f.ok"); msg.classList.add("ok"); f.reset();
   } catch (err) {
     console.warn(err);
     // respaldo: abrir WhatsApp con los datos
     const wa = String(state.cfg.whatsapp || "").replace(/\D/g, "");
     if (wa) open(`https://wa.me/${wa}?text=${encodeURIComponent(Object.entries(data).filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`).join("\n"))}`, "_blank");
-    sc.classList.remove("busy"); scSet(0); msg.textContent = t("f.err"); msg.classList.add("err");
+    sc.classList.remove("busy"); scSet(0); sfx("err"); msg.textContent = t("f.err"); msg.classList.add("err");
   }
 });
 
@@ -306,7 +333,7 @@ async function checkAdmin() {
   if (!FIREBASE_CONFIG.apiKey) { alert("Falta completar FIREBASE_CONFIG en js/config.js"); return; }
   try {
     await Promise.all([initFirebase(), loadLeaflet().catch(console.warn)]); // el panel usa Leaflet para los operativos
-    const m = await import("./admin.js?v=26");
+    const m = await import("./admin.js?v=27");
     await m.openAdmin(state, { reload: loadData, cld, esc });
   } catch (er) {
     console.error(er);
@@ -329,7 +356,7 @@ if (html.classList.contains("intro")) {
     evs.forEach(ev => removeEventListener(ev, openIntro));
     try { sessionStorage.setItem("intro", "1"); } catch {}
     // la página queda quieta hasta que termina de abrirse, así el mismo scroll no se saltea los textos del video
-    scrollTo(0, 0); ov.classList.add("out"); html.classList.replace("intro", "opening"); onScroll();
+    scrollTo(0, 0); sfx("open"); ov.classList.add("out"); html.classList.replace("intro", "opening"); onScroll();
     ov.addEventListener("animationend", e => { if (e.target !== ov) return; ov.remove(); html.classList.remove("opening"); lenis?.start(); });
   };
   evs.forEach(ev => addEventListener(ev, openIntro, { passive: true }));

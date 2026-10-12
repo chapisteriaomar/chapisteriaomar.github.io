@@ -21,7 +21,7 @@ a{color:inherit;text-decoration:none}
 button,input,select,textarea{font:inherit;color:inherit}
 button{background:none;border:0;cursor:pointer}
 [hidden]{display:none!important}
-.wrap{max-width:1280px;margin:0 auto;padding:0 var(--gut)}
+.wrap{width:100%;max-width:1280px;margin:0 auto;padding:0 var(--gut)}
 .sec{padding:var(--sy) 0}
 .glass{background:var(--glass);border:1px solid var(--edge);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur)}
 .eyebrow{font:600 13px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--red);margin-bottom:20px;display:block}
@@ -294,5 +294,5 @@ html.intro .xp-text .kicker{opacity:0}
 .loc .link{align-self:flex-start;margin-top:6px;font-size:14px}
 .cf-nav{position:absolute;top:14px;right:14px;z-index:2;display:flex;gap:8px}
 .cf-nav button{width:42px;height:42px;border-radius:50%;font-size:17px}
-@media(min-width:1024px){.pres{min-height:100svh;display:flex;flex-direction:column;justify-content:center;padding:clamp(90px,12vh,120px) 0 clamp(28px,4vh,48px)}.pres-box #map{height:clamp(380px,calc(100svh - 300px),720px)}}
+@media(min-width:1024px){.pres{min-height:100svh;display:flex;flex-direction:column;justify-content:center;padding:clamp(90px,12vh,120px) 0 clamp(28px,4vh,48px)}.pres-box #map{height:clamp(360px,calc(100svh - 390px),700px)}}
 @media(max-width:700px){.cf{position:static;padding:22px calc(50% - 140px)}.loc{flex-basis:280px}.pres-box{overflow:visible;border:0}.pres-box #map{border-radius:20px;border:1px solid var(--edge)}.pres-box::after{display:none}.cf-nav{position:static;justify-content:center}}
