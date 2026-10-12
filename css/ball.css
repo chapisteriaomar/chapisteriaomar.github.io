@@ -1,0 +1,72 @@
+/* Rediseño en prueba, estilo BallSystem (designpdr.md). Se carga solo con ?tema=ball */
+:root.ball{
+  --bg:#171614; --bg2:#1f1d1a; --card:#23201B; --line:#34312c; --line2:#4a463f;
+  --text:#F7F6F3; --muted:#a8a39b; --dim:#7d7870; --soft:#d9d5ce;
+  --navbg:rgba(23,22,20,.9); --shade:23,22,20; --frame1:#23201B; --frame2:#171614;
+  --disp:Inter,"Helvetica Neue",Helvetica,Arial,sans-serif; --body:var(--disp); --skew:0deg;
+}
+:root.ball[data-theme="light"]{
+  --bg:#F7F6F3; --bg2:#ffffff; --card:#ffffff; --line:#DEDAD5; --line2:#c9c4bd;
+  --text:#23201B; --muted:#716D67; --dim:#9a958e; --soft:#3d3a35;
+  --navbg:rgba(247,246,243,.92); --shade:247,246,243; --frame1:#ffffff; --frame2:#eeebe6;
+}
+
+/* tipografía editorial: títulos firmes, sin itálica ni mayúsculas */
+.ball :is(.h2,.hero-title,.svc h3,.steps h4,.loc h3,.ig-title,.mob-t,.stat b,.feat b,.op b,.rev b,.wk-cap,.lb-cap,.client,.direct b,.ticker-track,.leaflet-popup-content b){font-style:normal;font-weight:600;text-transform:none;letter-spacing:-.025em}
+.ball .hero-title{font-weight:700;line-height:.98;letter-spacing:-.04em}
+.ball .hero-title .l3{font-weight:500;letter-spacing:-.01em}
+.ball .h2{font-weight:700;line-height:1.02;letter-spacing:-.035em}
+.ball .sec-head p,.ball .about-text p{max-width:62ch}
+.ball .kicker{font:600 13px/1 var(--body);letter-spacing:.08em}
+.ball .nav-links a{font:500 14px/1 var(--body);letter-spacing:0;text-transform:none}
+@media(max-width:1080px){.ball .nav-links a{font-size:17px}}
+
+/* botones: rectos y sobrios, con flecha en el principal */
+.ball .btn{font:600 15px/1 var(--body);letter-spacing:0;text-transform:none;padding:16px 26px}
+.ball .btn::before{border-radius:4px}
+.ball .btn-red::after{content:"→";transition:transform .2s}
+.ball .btn-red:hover::after{transform:translateX(4px)}
+.ball .btn-red:hover::before{transform:none}
+.ball .btn-sm{padding:12px 18px;font-size:14px}
+.ball :is(.filters button,.lang,.lang button,.theme-btn,.form input,.form select,.form textarea){border-radius:4px}
+.ball .filters button{font:500 14px/1 var(--body);letter-spacing:0;text-transform:none}
+
+/* hero con foto grande (si hay foto cargada en el panel) */
+.ball .hero::before{content:"";position:absolute;inset:0;background:var(--hero-img,none) center/cover}
+.ball.hero-img #reflect{display:none}
+.ball.hero-img .hero-shade{background:linear-gradient(90deg,rgba(0,0,0,.78),rgba(0,0,0,.35) 60%,rgba(0,0,0,.15)),linear-gradient(to top,rgba(0,0,0,.6),transparent 40%)}
+.ball.hero-img :is(.hero,.nav:not(.solid):not(.open)){--text:#fff;--muted:rgba(255,255,255,.75);--soft:rgba(255,255,255,.88);--line:rgba(255,255,255,.25);--line2:rgba(255,255,255,.45);color:var(--text)}
+.ball.hero-img .nav:not(.solid):not(.open) .logo-dark{display:block}
+.ball.hero-img .nav:not(.solid):not(.open) .logo-light{display:none}
+
+/* franja de beneficios: aireada, texto grande, separadores rojos */
+.ball .ticker{background:none;border-block:1px solid var(--line);padding:22px 0}
+.ball .ticker-track{color:var(--text);font-size:clamp(20px,2.4vw,30px)}
+.ball .ticker-track i{color:var(--red);opacity:1}
+
+/* secciones abiertas: menos cajas, más aire y líneas finas */
+.ball .sec-alt{border:0}
+.ball :is(.svc-grid,.feats,.clients){gap:36px 40px;background:none;border:0}
+.ball :is(.svc,.feat,.client){background:none;border-top:1px solid var(--line);padding-left:0;padding-right:0}
+.ball .svc{padding-top:30px}
+.ball .svc-n{right:0}
+.ball .svc::before{display:none}
+.ball .about-media::before{border-color:var(--red)}
+.ball :is(.rev,.loc,.form,.direct,.map-wrap,.about-frame,.empty){border-radius:8px}
+.ball :is(.map-wrap,.about-frame){overflow:hidden}
+.ball .wk{border-radius:6px}
+.ball .stat b{color:var(--text)}
+
+/* proceso: línea de tiempo vertical con números grandes */
+.ball .steps{grid-template-columns:1fr;gap:0;max-width:880px}
+.ball .steps::before{display:none}
+.ball .steps li{display:grid;grid-template-columns:110px 1fr;column-gap:24px;padding:26px 0;border-top:1px solid var(--line);min-height:0}
+.ball .steps li:last-child{border-bottom:1px solid var(--line)}
+.ball .step-n,.ball .steps li:last-child .step-n{grid-row:span 2;position:static;width:auto;height:auto;margin:0;place-items:start;background:none;border:0;transform:none;color:var(--red);font:700 clamp(40px,5vw,64px)/1 var(--disp);letter-spacing:-.04em}
+.ball .steps h4{margin:4px 0 6px}
+@media(max-width:900px){.ball .steps li{grid-template-columns:64px 1fr;padding-left:0}}
+
+/* footer: banda oscura también en modo claro */
+.ball .foot{background:#171614;color:#F7F6F3;--text:#F7F6F3;--muted:#a8a39b;--dim:#7d7870;--line:#34312c;border:0}
+.ball .foot .logo-dark{display:block}
+.ball .foot .logo-light{display:none}
