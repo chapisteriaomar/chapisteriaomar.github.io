@@ -34,6 +34,11 @@ async function start(state, helpers) {
   if (!$(".toasts")) document.body.insertAdjacentHTML("beforeend", '<div class="toasts"></div>');
   // se muestra algo enseguida; antes quedaba en negro mientras cargaba (o para siempre si algo fallaba)
   const el = $("#adm"); el.hidden = false; document.body.style.overflow = "hidden";
+  // la web de atrás (video, desenfoques) se oculta mientras el panel está abierto: alivia la placa de video
+  document.documentElement.classList.add("adm-open");
+  // cualquier error, aunque pase fuera del armado del panel, se muestra abajo en rojo (sin tapar el panel)
+  addEventListener("error", ev => open && note(ev.error || ev.message));
+  addEventListener("unhandledrejection", ev => open && note(ev.reason));
   el.innerHTML = `<div class="ad ad-login" style="display:grid;place-items:center;color:var(--muted)">Cargando panel…</div>`;
   const slow = setTimeout(() => fail(new Error("Firebase no respondió en 12 segundos. Revisá la conexión.")), 12000);
   A = await import(FB + "firebase-auth.js");
@@ -42,6 +47,11 @@ async function start(state, helpers) {
     clearTimeout(slow); if (!open) return;
     try { u ? await shell() : login(); } catch (er) { fail(er); }
   }, er => { clearTimeout(slow); fail(er); });
+}
+function note(er) {
+  const d = document.createElement("div"); d.textContent = "Error: " + (er?.message || String(er));
+  d.style.cssText = "position:fixed;left:12px;right:12px;bottom:12px;z-index:300;background:#7a1f1a;color:#fff;padding:10px 14px;border-radius:10px;font:13px/1.4 system-ui";
+  document.body.append(d);
 }
 function fail(er) {
   console.error(er);
@@ -52,7 +62,7 @@ function fail(er) {
 }
 function close() {
   open = false; unsub?.(); unsub = null;
-  $("#adm").hidden = true; $("#adm").innerHTML = ""; document.body.style.overflow = "";
+  $("#adm").hidden = true; $("#adm").innerHTML = ""; document.body.style.overflow = ""; document.documentElement.classList.remove("adm-open");
   history.replaceState(null, "", location.pathname); H.reload();
 }
 

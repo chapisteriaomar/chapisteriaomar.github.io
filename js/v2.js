@@ -346,7 +346,7 @@ async function checkAdmin() {
   if (!FIREBASE_CONFIG.apiKey) { alert("Falta completar FIREBASE_CONFIG en js/config.js"); return; }
   try {
     await Promise.all([initFirebase(), loadLeaflet().catch(console.warn)]); // el panel usa Leaflet para los operativos
-    const m = await import("./admin.js?v=29");
+    const m = await import("./admin.js?v=30");
     await m.openAdmin(state, { reload: loadData, cld, esc });
   } catch (er) {
     console.error(er);
