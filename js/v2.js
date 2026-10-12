@@ -20,7 +20,7 @@ function applyLang(lang) {
   $$(".lang button").forEach(b => b.classList.toggle("on", b.dataset.l === lang));
   $("#mq").innerHTML = [1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5, 6].map(i => t("ticker." + i)).filter(Boolean).map(s => `<span>${esc(s)}</span>`).join("");
   $$(".chips input").forEach(r => r.value = r.nextElementSibling.textContent);
-  splitHero(); renderStats();
+  splitHero(); splitReveal(); renderStats();
 }
 $$(".lang button").forEach(b => b.onclick = () => applyLang(b.dataset.l));
 
@@ -30,14 +30,27 @@ $("#themeBtn").onclick = () => {
   const next = isLight() ? "dark" : "light";
   document.documentElement.dataset.theme = next;
   try { localStorage.setItem("theme", next); } catch {}
-  tiles?.setUrl(tileURL());
+  map?.setStyle(mapStyle());
 };
 
-// blur + stroke: parte los textos del video en palabras (no en el editor, que necesita el texto plano)
+// blur text: parte los textos del video en palabras (no en el editor, que necesita el texto plano)
 function splitHero() {
   if (editMode) return;
   let i = 0;
   $$("#xpText .fx").forEach(el => el.innerHTML = el.textContent.split(/(\s+)/).map(w => /^\s*$/.test(w) ? w : `<span class="bw" style="--i:${i++}">${esc(w)}</span>`).join(""));
+}
+// scroll reveal: los títulos de sección se parten en palabras que se aclaran al bajar
+function splitReveal() {
+  if (editMode || calm) return;
+  $$(".h2").forEach(el => { el.classList.add("sr"); el.innerHTML = el.textContent.split(/(\s+)/).map(w => /^\s*$/.test(w) ? w : `<span class="sw">${esc(w)}</span>`).join(""); });
+}
+function updReveal() {
+  $$(".sr").forEach(el => {
+    const r = el.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) return;
+    const ws = el.children, p = Math.min(Math.max((innerHeight - r.top) / (innerHeight * .55), 0), 1) * (ws.length + 1);
+    el.style.transform = `rotate(${(1 - Math.min(p / ws.length, 1)) * 3}deg)`;
+    for (let i = 0; i < ws.length; i++) { const w = Math.min(Math.max(p - i, 0), 1); ws[i].style.opacity = .12 + .88 * w; ws[i].style.filter = `blur(${(1 - w) * 4}px)`; }
+  });
 }
 
 /* ================= animated content ================= */
@@ -55,7 +68,14 @@ function countUp(el) {
   };
   requestAnimationFrame(step);
 }
-const cio = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { countUp(e.target); cio.unobserve(e.target); } }), { threshold: .6 });
+// counter: cada dígito es un rodillo 0-9 que gira hasta su valor
+function roll(el) {
+  if (calm) return;
+  el.innerHTML = [...el.dataset.v].map(c => /\d/.test(c) ? `<span class="roll"><span>${"0123456789".split("").map(d => `<i>${d}</i>`).join("")}</span></span>` : esc(c)).join("");
+  const ds = [...el.dataset.v].filter(c => /\d/.test(c));
+  requestAnimationFrame(() => requestAnimationFrame(() => $$(".roll>span", el).forEach((s, i) => s.style.transform = `translateY(-${ds[i]}em)`)));
+}
+const cio = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { (state.cfg.rolling ? roll : countUp)(e.target); cio.unobserve(e.target); } }), { threshold: .6 });
 function renderStats() {
   const s = state.cfg.stats || {};
   $("#stats").innerHTML = [["years", "stat.years"], ["vehicles", "stat.vehicles"], ["provinces", "stat.provinces"], ["ops", "stat.ops"]].filter(([k]) => s[k])
@@ -86,6 +106,7 @@ function onScroll() {
     li.style.filter = `blur(${Math.min(a * 4, 10)}px)`;
     li.style.zIndex = 10 - Math.round(a);
   });
+  updReveal();
 }
 addEventListener("scroll", () => requestAnimationFrame(onScroll), { passive: true });
 addEventListener("resize", onScroll);
@@ -95,9 +116,6 @@ if (!calm && matchMedia("(pointer:fine)").matches) $$(".mag").forEach(el => {
   el.addEventListener("pointermove", e => { const r = el.getBoundingClientRect(); el.style.transform = `translate(${(e.clientX - r.left - r.width / 2) * .3}px,${(e.clientY - r.top - r.height / 2) * .4}px)`; });
   el.addEventListener("pointerleave", () => el.style.transform = "");
 });
-
-/* ================= spotlight en servicios ================= */
-$$(".svc").forEach(el => el.onpointermove = e => { const r = el.getBoundingClientRect(); el.style.setProperty("--mx", e.clientX - r.left + "px"); el.style.setProperty("--my", e.clientY - r.top + "px"); });
 
 /* ================= contenido desde Firestore ================= */
 const pic = (w, size, auto) => w.type === "video"
@@ -140,31 +158,43 @@ const closeLB = () => { $("#lb").hidden = true; $("#lbIn").innerHTML = ""; lenis
 $("#lbX").onclick = closeLB; $("#lb").onclick = e => { if (e.target.id === "lb") closeLB(); };
 addEventListener("keydown", e => { if (e.key === "Escape" && !$("#lb").hidden) closeLB(); });
 
-/* ================= mapa de operativos ================= */
-let map, layer, tiles;
-const tileURL = () => `https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_${isLight() ? "Light" : "Dark"}_Gray_Base/MapServer/tile/{z}/{y}/{x}`;
-// Leaflet se baja recién cuando el mapa está por aparecer, así la entrada a la web no se traba
-let leafP;
-const loadLeaflet = () => leafP ||= new Promise((ok, ko) => {
-  document.head.insertAdjacentHTML("beforeend", '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">');
-  const s = document.createElement("script"); s.src = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"; s.onload = ok; s.onerror = ko; document.head.append(s);
+/* ================= mapa de operativos (MapLibre, vectorial y con animación) ================= */
+// estilos de OpenFreeMap: gratis y sin API key
+let map, pins = [];
+const mapStyle = () => `https://tiles.openfreemap.org/styles/${isLight() ? "positron" : "dark"}`;
+const loadScript = (js, css) => new Promise((ok, ko) => {
+  document.head.insertAdjacentHTML("beforeend", `<link rel="stylesheet" href="${css}">`);
+  const s = document.createElement("script"); s.src = js; s.onload = ok; s.onerror = ko; document.head.append(s);
 });
-new IntersectionObserver(([e], o) => { if (e.isIntersecting) { o.disconnect(); loadLeaflet().then(renderMap, console.warn); } }, { rootMargin: "800px" }).observe($("#map"));
-function renderMap() {
-  if (!window.L) return;
-  if (!map) {
-    map = L.map("map", { scrollWheelZoom: false }).setView([-36.5, -63.5], 4);
-    tiles = L.tileLayer(tileURL(), { attribution: "Tiles &copy; Esri &middot; &copy; OpenStreetMap", maxZoom: 16 }).addTo(map);
-    let fails = 0; tiles.on("tileerror", () => { if (++fails === 4) tiles.setUrl("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"); });
-    layer = L.layerGroup().addTo(map);
-    map.on("click", () => map.scrollWheelZoom.enable());
-  }
-  layer.clearLayers();
-  const ms = state.ops.filter(o => o.lat != null && o.lng != null).map(o => L.marker([o.lat, o.lng], { icon: L.divIcon({ className: "", html: '<div class="pin"></div>', iconSize: [16, 16], iconAnchor: [8, 8] }) })
-    .bindPopup(`<b>${esc(o.name)}</b>${esc([o.province, o.year].filter(Boolean).join(" · "))}${o.units ? ` · ${esc(o.units)} ${esc(t("map.units"))}` : ""}`).addTo(layer));
-  if (ms.length) map.fitBounds(L.featureGroup(ms).getBounds().pad(.35), { maxZoom: 7 });
-}
+// se baja recién cuando el mapa está por aparecer, así la entrada a la web no se traba
 
+new IntersectionObserver(([e], o) => {
+  if (!e.isIntersecting) return; o.disconnect();
+  loadScript("https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js", "https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css").then(renderMap, console.warn);
+}, { rootMargin: "800px" }).observe($("#map"));
+// el panel admin sigue usando Leaflet para cargar operativos
+let leafP;
+const loadLeaflet = () => leafP ||= loadScript("https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js", "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css");
+function renderMap() {
+  if (!window.maplibregl) return;
+  if (!map) {
+    // arranca lejos y vuela hasta los operativos cuando el mapa entra en pantalla
+    map = new maplibregl.Map({ container: "map", style: mapStyle(), center: [-63.5, -30], zoom: 1.6, attributionControl: { compact: true }, cooperativeGestures: true });
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
+    new IntersectionObserver(([e], o) => { if (e.isIntersecting) { o.disconnect(); fly(); } }, { threshold: .5 }).observe($("#map"));
+  }
+  pins.forEach(p => p.remove());
+  pins = state.ops.filter(o => o.lat != null && o.lng != null).map(o => {
+    const el = document.createElement("div"); el.className = "pin";
+    return new maplibregl.Marker({ element: el }).setLngLat([o.lng, o.lat])
+      .setPopup(new maplibregl.Popup({ offset: 14, closeButton: false }).setHTML(`<b>${esc(o.name)}</b>${esc([o.province, o.year].filter(Boolean).join(" · "))}${o.units ? ` · ${esc(o.units)} ${esc(t("map.units"))}` : ""}`)).addTo(map);
+  });
+}
+function fly() {
+  if (!pins.length) return map.flyTo({ center: [-63.5, -36.5], zoom: 3.6, pitch: 40, duration: calm ? 0 : 2600 });
+  const b = new maplibregl.LngLatBounds(); pins.forEach(p => b.extend(p.getLngLat()));
+  map.fitBounds(b, { padding: 70, maxZoom: 6.5, pitch: 40, bearing: -8, duration: calm ? 0 : 2600 });
+}
 /* ================= formulario ================= */
 // slide commit: se arrastra la manija hasta el final para enviar; con teclado, Enter envía directo
 const sc = $("#sc"), scH = $("#scH");
@@ -227,6 +257,11 @@ async function loadData() {
     fs.getDoc(fs.doc(db, "site", "texts")).catch(() => null)
   ]);
   if (cfgSnap?.exists()) { const d = cfgSnap.data(); state.cfg = { ...DEFAULTS, ...d, stats: { ...DEFAULTS.stats, ...(d.stats || {}) } }; }
+  // opciones del panel: sin botón de idioma la web queda en español; sin botón de tema, en oscuro
+  const { showLang, showTheme } = state.cfg;
+  $(".lang").hidden = showLang === false; $("#themeBtn").hidden = showTheme === false;
+  if (showLang === false) state.lang = "es";
+  if (showTheme === false) delete document.documentElement.dataset.theme;
   Object.assign(state, { works, ops, clients, reviews });
   if (txSnap?.exists()) applyTexts(txSnap.data());
   applyLang(state.lang); render();
@@ -238,7 +273,7 @@ async function checkAdmin() {
   if (!FIREBASE_CONFIG.apiKey) { alert("Falta completar FIREBASE_CONFIG en js/config.js"); return; }
   try {
     await Promise.all([initFirebase(), loadLeaflet().catch(console.warn)]); // el panel usa Leaflet para los operativos
-    const m = await import("./admin.js?v=23");
+    const m = await import("./admin.js?v=24");
     await m.openAdmin(state, { reload: loadData, cld, esc });
   } catch (er) {
     console.error(er);

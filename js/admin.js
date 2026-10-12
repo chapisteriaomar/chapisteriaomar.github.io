@@ -543,9 +543,10 @@ async function config() {
   let aboutFile = null;
   const f = (id, label, v, ph = "") => `<label class="f"><span>${label}</span><input id="${id}" value="${e(v ?? "")}" placeholder="${e(ph)}"></label>`;
   $("#vc").innerHTML = `
-    <div class="ad-card" style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
-      <div><h2>Web en celulares</h2><p class="sub" style="margin:0">Apagada: en el celular se ve el aviso "Muy pronto en tu celular" con el botón de Instagram. En la compu se ve normal.</p></div>
-      <label class="switch"><input type="checkbox" id="mobT"${c.mobileOff ? "" : " checked"}><i></i><span id="mobL">${c.mobileOff ? "Apagada" : "Encendida"}</span></label></div>
+    <div class="ad-card"><h2>Opciones de la web</h2><p class="sub">Se guardan al tocarlas. Los visitantes las ven al recargar.</p>
+      ${[["showLang", "Botón de idioma (ES / EN)", "Apagado: la web queda en español."], ["showTheme", "Botón de modo claro / oscuro", "Apagado: la web queda en modo oscuro."], ["rolling", "Cifras con rodillo (Counter)", "Apagado: los números cuentan de 0 al valor (Count up)."]]
+        .map(([k, h, d]) => `<div style="display:flex;justify-content:space-between;align-items:center;gap:16px;padding:10px 0;border-top:1px solid var(--line)"><div><b>${h}</b><p class="sub" style="margin:0">${d}</p></div>
+        <label class="switch"><input type="checkbox" data-opt="${k}"${(c[k] ?? k !== "rolling") ? " checked" : ""}><i></i></label></div>`).join("")}</div>
     <div class="ad-card"><h2>Operativos móviles en curso</h2><p class="sub">Uno por cada localidad donde estén trabajando ahora. Aparecen todos en "Dónde encontrarnos".</p>
       <div id="bases"></div><button type="button" class="b ghost" id="addBase">+ Agregar operativo móvil</button></div>
     <div class="ad-cols">
@@ -564,12 +565,10 @@ async function config() {
     </div>
     <div class="ad-card" style="position:sticky;bottom:12px;margin:0;display:flex;justify-content:space-between;align-items:center;gap:12px">
       <span style="color:var(--muted);font-size:14px">Los cambios se ven en la web al recargar.</span><button class="b red big" id="cs">Guardar cambios</button></div>`;
-  $("#mobT").onchange = async ev => {
-    const off = !ev.target.checked;
-    try { await fs.setDoc(ref, { mobileOff: off }, { merge: true }); S.cfg.mobileOff = off; $("#mobL").textContent = off ? "Apagada" : "Encendida";
-      toast(off ? "Web apagada en celulares" : "Web encendida en celulares"); }
-    catch (er) { ev.target.checked = !ev.target.checked; toast(er.message, true); }
-  };
+  $$("[data-opt]").forEach(inp => inp.onchange = async () => {
+    try { await fs.setDoc(ref, { [inp.dataset.opt]: inp.checked }, { merge: true }); S.cfg[inp.dataset.opt] = inp.checked; toast("Guardado ✓"); }
+    catch (er) { inp.checked = !inp.checked; toast(er.message, true); }
+  });
   const baseRow = (b = {}) => `<div class="ad-fields base-row" style="margin-bottom:12px;align-items:end;grid-template-columns:1fr 1.2fr 1fr auto">
       <label class="f"><span>Localidad / nombre</span><input class="b-n" value="${e(b.nombre || "")}" placeholder="Ej: Posadas, Misiones"></label>
       <label class="f"><span>Link Google Maps</span><input class="b-m" value="${e(b.maps || "")}"></label>
