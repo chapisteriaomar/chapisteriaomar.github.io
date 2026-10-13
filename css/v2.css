@@ -13,6 +13,8 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 html.lenis{scroll-behavior:auto}
+/* sin barra de scroll a la derecha (compu y celular); se sigue pudiendo scrollear */
+html{scrollbar-width:none}html::-webkit-scrollbar{display:none}
 body{background:var(--bg);color:var(--ink);font:400 17px/1.6 var(--body);-webkit-font-smoothing:antialiased;overflow-x:hidden}
 /* manchas de luz difusas detrás del vidrio */
 body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(40% 35% at 15% 30%,rgba(221,60,51,var(--blob)),transparent 70%),radial-gradient(35% 40% at 85% 70%,rgba(221,60,51,calc(var(--blob) * .65)),transparent 70%),radial-gradient(30% 30% at 60% 10%,rgba(255,255,255,.05),transparent 70%)}
