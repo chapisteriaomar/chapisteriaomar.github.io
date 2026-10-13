@@ -370,6 +370,7 @@ html{scroll-padding-top:90px}
 .dcards::-webkit-scrollbar{display:none}
 /* con WebGL las tarjetas se dibujan en el Flex Carousel; la lista queda solo para lectores de pantalla */
 .fc-on .dcards{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);padding:0;margin:0}
+#operativo{padding-bottom:0}
 .fc{position:relative;height:clamp(300px,40vw,440px);margin-top:20px;overflow:hidden;cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;overscroll-behavior:contain;outline:none}
 .fc[data-hover=open]{cursor:zoom-in}.fc[data-hover=close]{cursor:zoom-out}.fc[data-dragging]{cursor:grabbing}
 .dcards.drag{cursor:grabbing;scroll-snap-type:none}
