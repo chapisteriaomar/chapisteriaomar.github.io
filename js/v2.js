@@ -251,7 +251,7 @@ pres.addEventListener("wheel", e => { if (Math.abs(e.deltaX) > Math.abs(e.deltaY
 
 /* ================= visor ================= */
 function openLB(w) {
-  $("#lbIn").innerHTML = w.type === "video" ? `<video src="${esc(w.url)}" controls autoplay playsinline></video>` : `<img src="${esc(cld(w.type === "ba" ? w.url2 : w.url, 1800))}" alt="${esc(w.title || "")}">`;
+  $("#lbIn").innerHTML = w.type === "video" ? `<video src="${esc(w.url)}" autoplay loop playsinline></video>` : `<img src="${esc(cld(w.type === "ba" ? w.url2 : w.url, 1800))}" alt="${esc(w.title || "")}">`;
   $("#lb").hidden = false; lenis?.stop();
 }
 const closeLB = () => { $("#lb").hidden = true; $("#lbIn").innerHTML = ""; lenis?.start(); };
