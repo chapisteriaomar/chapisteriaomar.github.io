@@ -48,7 +48,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lenis@1.3.25/dist/lenis.css">
-<link rel="stylesheet" href="css/v2.css?v=61">
+<link rel="stylesheet" href="css/v2.css?v=62">
 <script>if(location.hash==="#admin")location.replace("/admin/");
 try{var d=document.documentElement,th=localStorage.getItem("theme");if(th)d.dataset.theme=th;
 // botones de idioma y tema según el panel (guardado de la visita anterior); sin dato, el de tema espera a la config
@@ -98,16 +98,13 @@ if(!sessionStorage.getItem("intro")&&!/edit|admin/.test(location.search+location
 
 <section class="sec" id="operativo">
   <div class="wrap rv" id="servicios"><span class="eyebrow" data-i18n="svc.kicker">Servicios</span><h2 class="h2" data-i18n="svc.title">Lo que resolvemos</h2></div>
-  <div class="dcwrap">
-    <ol class="dcards" id="dcStage">
-      <li class="dcard glass"><span class="step-n" data-i18n="proc.1n">1</span><h3 data-i18n="proc.1t"></h3><p data-i18n="proc.1d"></p></li>
-      <li class="dcard glass"><span class="step-n" data-i18n="proc.2n">2</span><h3 data-i18n="proc.2t"></h3><p data-i18n="proc.2d"></p></li>
-      <li class="dcard glass"><span class="step-n" data-i18n="proc.3n">3</span><h3 data-i18n="proc.3t"></h3><p data-i18n="proc.3d"></p></li>
-      <li class="dcard glass"><span class="step-n" data-i18n="proc.4n">4</span><h3 data-i18n="proc.4t"></h3><p data-i18n="proc.4d"></p></li>
-      <li class="dcard glass"><span class="step-n" data-i18n="proc.5n">5</span><h3 data-i18n="proc.5t"></h3><p data-i18n="proc.5d"></p></li>
-    </ol>
-    <span class="cf-hint l" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></span><span class="cf-hint r" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span>
-  </div>
+  <ol class="dcards" id="dcStage">
+    <li class="dcard" style="--i:0"><span class="step-n" data-i18n="proc.1n">1</span><h3 data-i18n="proc.1t"></h3><p data-i18n="proc.1d"></p></li>
+    <li class="dcard" style="--i:1"><span class="step-n" data-i18n="proc.2n">2</span><h3 data-i18n="proc.2t"></h3><p data-i18n="proc.2d"></p></li>
+    <li class="dcard" style="--i:2"><span class="step-n" data-i18n="proc.3n">3</span><h3 data-i18n="proc.3t"></h3><p data-i18n="proc.3d"></p></li>
+    <li class="dcard" style="--i:3"><span class="step-n" data-i18n="proc.4n">4</span><h3 data-i18n="proc.4t"></h3><p data-i18n="proc.4d"></p></li>
+    <li class="dcard" style="--i:4"><span class="step-n" data-i18n="proc.5n">5</span><h3 data-i18n="proc.5t"></h3><p data-i18n="proc.5d"></p></li>
+  </ol>
 </section>
 
 <section class="sec" id="trabajos" hidden>
@@ -185,6 +182,6 @@ if(!sessionStorage.getItem("intro")&&!/edit|admin/.test(location.search+location
 <div class="focus-ov" aria-hidden="true"></div>
 <div class="gblur" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
 
-<script type="module" src="js/v2.js?v=58"></script>
+<script type="module" src="js/v2.js?v=59"></script>
 </body>
 </html>

@@ -102,26 +102,18 @@ function onScroll() {
 addEventListener("scroll", () => requestAnimationFrame(onScroll), { passive: true });
 addEventListener("resize", onScroll);
 
-/* ================= "Lo que resolvemos": tarjetas en arco (circular gallery) ================= */
+/* ================= "Lo que resolvemos": scroll stack (cada tarjeta se frena arriba y la siguiente la tapa) ================= */
 const dcs = $("#dcStage");
 function dcFlow() {
-  const mid = dcs.scrollLeft + dcs.clientWidth / 2;
-  dcs.parentNode.classList.toggle("at-start", dcs.scrollLeft < 20);
-  dcs.parentNode.classList.toggle("at-end", dcs.scrollLeft > dcs.scrollWidth - dcs.clientWidth - 20);
-  // circular gallery: las tarjetas siguen un arco; R sale para que en el borde bajen ~90px (cabe en el padding de abajo)
-  const W = dcs.clientWidth, R = Math.max(W, W * W / 720);
-  $$("li:not([hidden])", dcs).forEach(li => {
-    const x = Math.max(-R * .95, Math.min(R * .95, li.offsetLeft + li.offsetWidth / 2 - mid));
-    li.style.transform = `translateY(${R - Math.sqrt(R * R - x * x)}px) rotate(${Math.asin(x / R)}rad)`;
+  const cards = $$("li:not([hidden])", dcs), tops = cards.map(li => li.getBoundingClientRect().top);
+  // cada tarjeta que se le apila encima la achica un poco (la siguiente cuenta de a poco mientras sube)
+  cards.forEach((li, i) => {
+    const under = tops.slice(i + 1).reduce((s, t) => s + Math.min(Math.max(1 - (t - tops[i]) / (innerHeight * .5), 0), 1), 0);
+    li.style.transform = `scale(${1 - under * .05})`;
   });
 }
-dcs.addEventListener("scroll", () => requestAnimationFrame(dcFlow), { passive: true });
+addEventListener("scroll", () => requestAnimationFrame(dcFlow), { passive: true });
 addEventListener("resize", dcFlow);
-// con mouse se puede arrastrar el carrusel (en celular se desliza solo con el dedo)
-let dcX = null, dcL = 0;
-dcs.addEventListener("pointerdown", e => { if (e.pointerType !== "mouse") return; dcX = e.clientX; dcL = dcs.scrollLeft; dcs.classList.add("drag"); });
-addEventListener("pointermove", e => { if (dcX != null) dcs.scrollLeft = dcL - (e.clientX - dcX); });
-addEventListener("pointerup", () => { if (dcX == null) return; dcX = null; dcs.classList.remove("drag"); });
 
 /* ================= sonidos suaves (sintetizados, sin archivos); se apagan desde el panel ================= */
 let ac;
@@ -192,7 +184,8 @@ function render() {
   // foto de "Empresa" del panel, o una de los trabajos
   const sw = photos[3], sImg = cfg.aboutImg || (sw && (sw.type === "ba" ? sw.url2 : sw.url));
   $("#sustImg").hidden = !sImg; $("#sust").classList.toggle("solo", !sImg);
-  if (sImg) $("#sustImg").innerHTML = `<img src="${esc(cld(sImg, 1000))}" alt="" loading="lazy">`;
+  if (sImg) $("#sustImg").innerHTML = `<div class="flip-in"><div><img src="${esc(cld(sImg, 1000))}" alt="" loading="lazy"></div><div class="flip-b"><img class="logo-d" src="assets/logo-grande.svg" alt=""><img class="logo-l" src="assets/logo-grande-dark.svg" alt=""></div></div>`;
+  $("#sustImg").onclick = e => e.currentTarget.classList.toggle("on");
   if (cfg.email) { $("#footMail").href = "mailto:" + cfg.email; $("#footMail").textContent = cfg.email; }
   $("#igFab").href = cfg.instagramUrl || `https://instagram.com/${cfg.instagram}`;
   renderLocs(); renderMap(); reveal(); onScroll(); dcFlow();
