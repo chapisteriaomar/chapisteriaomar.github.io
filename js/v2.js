@@ -127,8 +127,8 @@ addEventListener("pointerup", () => { if (dcX == null) return; dcX = null; dcs.c
 function cardTex(li) {
   const c = document.createElement("canvas"), x = c.getContext("2d"), cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
   const font = getComputedStyle($("h3", li)).fontFamily, P = 54, W = 900, H = 600, n = $(".step-n", li).textContent.trim();
-  // se dibuja al doble de resolución para que el texto se vea nítido al achicarse
-  c.width = W * 2; c.height = H * 2; x.scale(2, 2);
+  // se dibuja al triple de resolución para que el texto se vea nítido en pantallas 3x
+  c.width = W * 3; c.height = H * 3; x.scale(3, 3);
   x.fillStyle = v("--card"); x.fillRect(0, 0, W, H);
   const wrapTxt = (s, max) => s.split(/\s+/).reduce((ls, w) => { const t = ls.length ? ls[ls.length - 1] + " " + w : w; if (ls.length && x.measureText(t).width > max) ls.push(w); else ls[ls.length ? ls.length - 1 : 0] = t; return ls; }, []);
   x.font = `400 44px ${font}`; const d = wrapTxt($("p", li).textContent.trim(), W - P * 2);
@@ -142,7 +142,7 @@ function cardTex(li) {
 }
 if (!editMode) new IntersectionObserver(async ([e], io) => {
   if (!e.isIntersecting) return; io.disconnect();
-  const [{ flexCarousel }] = await Promise.all([import("./flexcarousel.js?v=2"), document.fonts.ready]);
+  const [{ flexCarousel }] = await Promise.all([import("./flexcarousel.js?v=3"), document.fonts.ready]);
   const fc = $("#fc"), items = () => $$("li:not([hidden])", dcs).map(cardTex);
   fc.hidden = false;
   const fx = flexCarousel(fc, items(), { cardHeight: .62, gap: 16, radius: 22, captureWheel: false, lensWidth: innerWidth < 700 ? 1.25 : .86, bend: .16, dispersion: .2 }); // en celular la zona plana cubre toda la tarjeta del centro
@@ -481,7 +481,12 @@ if (html.classList.contains("intro")) {
     evs.forEach(ev => removeEventListener(ev, openIntro));
     try { sessionStorage.setItem("intro", "1"); } catch {}
     // la página queda quieta hasta que termina de abrirse, así el mismo scroll no se saltea los textos del video
-    scrollTo(0, 0); sfx("open"); ov.classList.add("out"); html.classList.replace("intro", "opening"); onScroll();
+    // sin un toque/clic/tecla previo el navegador no deja sonar: el soplido espera al primer toque (hasta 5s)
+    if (navigator.userActivation && !navigator.userActivation.hasBeenActive) {
+      const t0 = Date.now(), late = () => { ["pointerdown", "keydown", "touchend"].forEach(ev => removeEventListener(ev, late, true)); if (Date.now() - t0 < 5000) sfx("open"); };
+      ["pointerdown", "keydown", "touchend"].forEach(ev => addEventListener(ev, late, true));
+    } else sfx("open");
+    scrollTo(0, 0); ov.classList.add("out"); html.classList.replace("intro", "opening"); onScroll();
     ov.addEventListener("animationend", e => { if (e.target !== ov) return; ov.remove(); html.classList.remove("opening"); lenis?.start(); });
   };
   evs.forEach(ev => addEventListener(ev, openIntro, { passive: true }));
