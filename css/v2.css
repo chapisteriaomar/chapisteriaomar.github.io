@@ -69,6 +69,10 @@ button{background:none;border:0;cursor:pointer}
 .marquee{overflow:hidden;border-block:1px solid var(--edge);padding:24px 0;margin-top:var(--sy)}
 .marquee-t{display:flex;gap:56px;width:max-content;animation:mq 40s linear infinite}
 .marquee-t span{display:inline-flex;align-items:center;gap:14px;font:600 clamp(20px,2.2vw,30px)/1 var(--body);letter-spacing:-.02em;white-space:nowrap}
+/* shiny text (React Bits): texto algo apagado y un brillo que lo cruza cada 5s */
+.marquee-t span{color:color-mix(in srgb,var(--text) 62%,transparent);background:linear-gradient(120deg,transparent 40%,rgba(255,255,255,.9) 50%,transparent 60%) 0 0/200% 100%;-webkit-background-clip:text;background-clip:text;animation:shine 5s linear infinite}
+@keyframes shine{from{background-position:100% 0}to{background-position:-100% 0}}
+@media(prefers-reduced-motion:reduce){.marquee-t span{animation:none}}
 .marquee-t span::before{content:"";width:11px;height:11px;border-radius:50%;background:var(--red)}
 @keyframes mq{to{transform:translateX(-50%)}}
 
