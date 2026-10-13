@@ -342,7 +342,8 @@ html{scroll-padding-top:90px}
 /* botón de deslizar: el texto se centra en el espacio libre a la derecha de la manija */
 .sc-txt{padding-left:56px}
 
-.pres-box #map{touch-action:pan-y}
+/* con el dedo el carrusel no se arrastra libre: cada deslizada (en mapa o tarjetas) pasa exactamente una tarjeta */
+.pres-box #map,.pres-box .cf{touch-action:pan-y}
 .form textarea{resize:none}
 
 /* los textos editados respetan los saltos de línea que se escriben en el editor */
@@ -360,6 +361,10 @@ html{scroll-padding-top:90px}
 /* "Lo que resolvemos": flex carousel (fila que se dobla en los bordes) */
 .dcards{position:relative;list-style:none;display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;margin-top:28px;padding:20px calc(50% - min(150px,36vw));scrollbar-width:none;cursor:grab;user-select:none}
 .dcards::-webkit-scrollbar{display:none}
+/* con WebGL las tarjetas se dibujan en el Flex Carousel; la lista queda solo para lectores de pantalla */
+.fc-on .dcards{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);padding:0;margin:0}
+.fc{position:relative;height:clamp(300px,40vw,440px);margin-top:20px;overflow:hidden;cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;overscroll-behavior:contain;outline:none}
+.fc[data-hover=open]{cursor:zoom-in}.fc[data-hover=close]{cursor:zoom-out}.fc[data-dragging]{cursor:grabbing}
 .dcards.drag{cursor:grabbing;scroll-snap-type:none}
 .dcard{flex:0 0 min(300px,72vw);min-height:200px;scroll-snap-align:center;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:24px 26px;display:flex;flex-direction:column;justify-content:flex-end;gap:10px;will-change:transform}
 .step-n{font:700 40px/.85 var(--body);letter-spacing:-.06em;color:var(--red)}

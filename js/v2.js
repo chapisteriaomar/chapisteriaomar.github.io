@@ -121,6 +121,34 @@ let dcX = null, dcL = 0;
 dcs.addEventListener("pointerdown", e => { if (e.pointerType !== "mouse") return; dcX = e.clientX; dcL = dcs.scrollLeft; dcs.classList.add("drag"); });
 addEventListener("pointermove", e => { if (dcX != null) dcs.scrollLeft = dcL - (e.clientX - dcX); });
 addEventListener("pointerup", () => { if (dcX == null) return; dcX = null; dcs.classList.remove("drag"); });
+// Flex Carousel de React Bits (WebGL): cada tarjeta se dibuja como imagen; sin WebGL2 queda la fila de arriba
+function cardTex(li) {
+  const c = document.createElement("canvas"), x = c.getContext("2d"), cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
+  const font = getComputedStyle($("h3", li)).fontFamily, P = 54, W = c.width = 900, H = c.height = 600, n = $(".step-n", li).textContent.trim();
+  x.fillStyle = v("--card"); x.fillRect(0, 0, W, H);
+  const wrapTxt = (s, max) => s.split(/\s+/).reduce((ls, w) => { const t = ls.length ? ls[ls.length - 1] + " " + w : w; if (ls.length && x.measureText(t).width > max) ls.push(w); else ls[ls.length ? ls.length - 1 : 0] = t; return ls; }, []);
+  x.font = `400 44px ${font}`; const d = wrapTxt($("p", li).textContent.trim(), W - P * 2);
+  x.font = `700 76px ${font}`; const t = wrapTxt($("h3", li).textContent.trim(), W - P * 2);
+  let y = H - P - (d.length - 1) * 58;
+  x.fillStyle = v("--muted"); x.font = `400 44px ${font}`; d.forEach((l, i) => x.fillText(l, P, y + i * 58));
+  y -= 58 + 22 + (t.length - 1) * 80;
+  x.fillStyle = v("--text"); x.font = `700 76px ${font}`; t.forEach((l, i) => x.fillText(l, P, y + i * 80));
+  if (n) { x.fillStyle = v("--red"); x.font = `700 84px ${font}`; x.fillText(n, P, y - 80 - 16); }
+  return { src: c.toDataURL() };
+}
+if (!editMode) new IntersectionObserver(async ([e], io) => {
+  if (!e.isIntersecting) return; io.disconnect();
+  const [{ flexCarousel }] = await Promise.all([import("./flexcarousel.js?v=1"), document.fonts.ready]);
+  const fc = $("#fc"), items = () => $$("li:not([hidden])", dcs).map(cardTex);
+  fc.hidden = false;
+  const fx = flexCarousel(fc, items(), { cardHeight: .62, gap: 16, radius: 22, captureWheel: false });
+  if (!fx) { fc.hidden = true; return; }
+  dcs.parentNode.classList.add("fc-on");
+  // textos, idioma, tema o pasos ocultos cambian → se redibujan las tarjetas
+  let t; const redo = () => { clearTimeout(t); t = setTimeout(() => fx.setItems(items()), 120); };
+  new MutationObserver(redo).observe(dcs, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ["hidden"] });
+  new MutationObserver(redo).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+}, { rootMargin: "300px" }).observe(dcs);
 
 /* ================= foto de ambiente: se inclina hacia el mouse con un brillo que lo sigue (no se toca) ================= */
 const si = $("#sustImg");
@@ -246,7 +274,8 @@ addEventListener("resize", coverflow);
 // deslizar en cualquier parte del mapa (no solo sobre las tarjetas) mueve el carrusel
 const pres = cf.parentNode;
 let sx = null, dragged = false;
-pres.addEventListener("pointerdown", e => { if (!e.target.closest(".cf")) { sx = e.clientX; dragged = false; } });
+// sobre las tarjetas solo el dedo (el mouse/trackpad ya las mueve nativo y se recentra por scroll-snap)
+pres.addEventListener("pointerdown", e => { if (!e.target.closest(".cf") || e.pointerType === "touch") { sx = e.clientX; dragged = false; } });
 pres.addEventListener("pointermove", e => { if (sx != null && Math.abs(e.clientX - sx) > 8) dragged = true; });
 pres.addEventListener("pointercancel", () => sx = null);
 pres.addEventListener("pointerup", e => {
