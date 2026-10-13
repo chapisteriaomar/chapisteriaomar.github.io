@@ -138,13 +138,12 @@ function cardTex(li) {
   if (n) { x.fillStyle = v("--red"); x.font = `700 84px ${font}`; x.fillText(n, P, y - 80 - 16); }
   return { src: c.toDataURL() };
 }
-// en celular no se usa (deformaba todo): queda la fila plana
-if (!editMode && innerWidth >= 700) new IntersectionObserver(async ([e], io) => {
+if (!editMode) new IntersectionObserver(async ([e], io) => {
   if (!e.isIntersecting) return; io.disconnect();
   const [{ flexCarousel }] = await Promise.all([import("./flexcarousel.js?v=1"), document.fonts.ready]);
   const fc = $("#fc"), items = () => $$("li:not([hidden])", dcs).map(cardTex);
   fc.hidden = false;
-  const fx = flexCarousel(fc, items(), { cardHeight: .62, gap: 16, radius: 22, captureWheel: false, bend: .16, dispersion: .2, lensWidth: .86 });
+  const fx = flexCarousel(fc, items(), { cardHeight: .62, gap: 16, radius: 22, captureWheel: false, lensWidth: .86, ...(innerWidth < 700 ? { bend: .015, dispersion: .02 } : { bend: .16, dispersion: .2 }) }); // en celular el vidrio casi no se nota (deformaba todo)
   if (!fx) { fc.hidden = true; return; }
   dcs.parentNode.classList.add("fc-on");
   // textos, idioma, tema o pasos ocultos cambian → se redibujan las tarjetas
