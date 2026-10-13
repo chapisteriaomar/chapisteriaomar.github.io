@@ -205,7 +205,7 @@ export function flexCarousel(container, items, opts = {}) {
   const itemsRef = { current: items }, callbacksRef = { current: {} };
   const setActive = () => {}, setRevealed = () => {}, setFocusOpen = () => {};
     const renderer = new Renderer({
-      dpr: Math.min(window.devicePixelRatio || 1, 2),
+      dpr: Math.min(window.devicePixelRatio || 1, 3),
       alpha: true,
       premultipliedAlpha: true,
       antialias: false,
@@ -562,7 +562,7 @@ export function flexCarousel(container, items, opts = {}) {
     const resize = () => {
       width = Math.max(1, container.clientWidth);
       height = Math.max(1, container.clientHeight);
-      renderer.dpr = Math.min(window.devicePixelRatio || 1, 2, Math.sqrt(PIXEL_BUDGET / (width * height)));
+      renderer.dpr = Math.min(window.devicePixelRatio || 1, 3, Math.sqrt(PIXEL_BUDGET / (width * height))); // hasta 3x (antes 2x): en celulares 3x la tarjeta del centro se veía borrosa
       renderer.setSize(width, height);
       target.setSize(Math.max(2, Math.round(width * renderer.dpr)), Math.max(2, Math.round(height * renderer.dpr)));
       lensUniforms.tScene.value = target.texture;
