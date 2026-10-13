@@ -396,6 +396,7 @@ function renderLib() {
         <input class="t" value="${e(w.title || "")}" placeholder="Sin título">
         <select class="c">${catOpts(w.cat)}</select>
         ${cache.ops.length ? `<select class="o">${opOpts(w.opId || "")}</select>` : ""}
+        <select class="sh" title="Dónde se ve en el carrusel">${[["both", "Compu y celular"], ["desktop", "Solo compu"], ["mobile", "Solo celular"]].map(([v, l]) => `<option value="${v}"${(w.show || "both") === v ? " selected" : ""}>${l}</option>`).join("")}</select>
         <div class="acts"><small>${fmtDate(w.createdAt)}</small><button class="b danger sm d">Borrar</button></div>
       </div></div>`).join("");
   $$(".it", lib).forEach(el => {
@@ -404,6 +405,7 @@ function renderLib() {
     $(".t", el).onchange = ev => save({ title: ev.target.value.trim() });
     $(".c", el).onchange = ev => save({ cat: ev.target.value });
     if ($(".o", el)) $(".o", el).onchange = ev => save({ opId: ev.target.value });
+    $(".sh", el).onchange = ev => save({ show: ev.target.value });
     $(".st", el).onclick = ev => { ev.stopPropagation(); const v = !w.featured; save({ featured: v }, v ? "Destacado ★" : "Ya no está destacado"); ev.currentTarget.classList.toggle("on", v); };
     $(".th", el).onclick = () => window.open($(".th", el).dataset.open, "_blank");
     $(".d", el).onclick = async () => { if (!confirm("¿Borrar este trabajo de la web?")) return; await del("works", id); el.remove(); cache.works = cache.works.filter(x => x.id !== id); toast("Borrado"); };

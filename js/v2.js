@@ -165,6 +165,10 @@ if (!calm && matchMedia("(pointer:fine)").matches) $$(".mag").forEach(el => {
 const pic = (w, size, auto) => w.type === "video"
   ? `<video src="${esc(w.url)}${auto ? "" : "#t=0.5"}" muted playsinline preload="metadata"${auto ? " loop autoplay" : ""}></video>`
   : `<img src="${esc(cld(w.type === "ba" ? w.url2 : w.url, size))}" alt="${esc(w.title || "")}" loading="lazy">`;
+// en el carrusel los videos van como foto fija de Cloudinary (decenas de <video> repetidos traban la página); se reproducen al tocarlos
+const wallPic = w => w.type === "video" && /\/video\/upload\//.test(w.url)
+  ? `<img src="${esc(w.url.replace("/video/upload/", "/video/upload/so_1,q_auto,w_600,c_fill,ar_4:3/").replace(/\.\w+$/, ".jpg"))}" alt="${esc(w.title || "")}" loading="lazy">`
+  : pic(w, 600);
 function render() {
   const { cfg, works, clients, reviews } = state, media = works.filter(w => w.url), photos = media.filter(w => w.type !== "video");
   // video del inicio: el de celular o compu cargado en el panel; si no hay, el primer video de los trabajos
@@ -172,13 +176,14 @@ function render() {
   const hero = hv ? { type: "video", url: hv } : media.find(w => w.type === "video") || media.find(w => w.featured) || media[0];
   $("#heroBg").innerHTML = hero ? pic(hero, 1800, true) : "";
   renderStats();
-  // drift wall: tres filas de fotos repetidas para que el loop no corte (sin videos: decenas repetidos traban la página)
-  $("#trabajos").hidden = !photos.length;
-  if (photos.length) {
-    const rows = [0, 1, 2].map(r => photos.filter((_, i) => i % 3 === r)).map(r => r.length ? r : photos);
+  // drift wall: tres filas repetidas para que el loop no corte; cada trabajo se muestra en compu, celular o ambos (panel)
+  const mob = matchMedia("(max-width: 700px)").matches, wall = media.filter(w => !w.show || w.show === "both" || w.show === (mob ? "mobile" : "desktop"));
+  $("#trabajos").hidden = !wall.length;
+  if (wall.length) {
+    const rows = [0, 1, 2].map(r => wall.filter((_, i) => i % 3 === r)).map(r => r.length ? r : wall);
     $("#dw").innerHTML = `<div class="dw-in">${rows.map((r, i) => { const fill = Array.from({ length: Math.max(2, Math.ceil(8 / r.length)) }, () => r).flat();
-      return `<div class="dw-row${i % 2 ? " rev" : ""}" style="--d:${60 + i * 15}s">${[...fill, ...fill].map(w => `<div class="media" data-i="${photos.indexOf(w)}">${pic(w, 600)}</div>`).join("")}</div>`; }).join("")}</div>`;
-    $$("#dw .media").forEach(el => el.onclick = () => openLB(photos[+el.dataset.i]));
+      return `<div class="dw-row${i % 2 ? " rev" : ""}" style="--d:${60 + i * 15}s">${[...fill, ...fill].map(w => `<div class="media${w.type === "video" ? " vid" : ""}" data-i="${wall.indexOf(w)}">${wallPic(w)}</div>`).join("")}</div>`; }).join("")}</div>`;
+    $$("#dw .media").forEach(el => el.onclick = () => openLB(wall[+el.dataset.i]));
   }
   $("#companias").hidden = !clients.length;
   $("#logos").innerHTML = clients.map(c => `<div class="glass">${c.logo ? `<img src="${esc(cld(c.logo, 300))}" alt="${esc(c.name)}" loading="lazy">` : esc(c.name)}</div>`).join("");
