@@ -87,8 +87,8 @@ function renderStats() {
 const xp = $("#top"), frame = $("#xpFrame"), txt = $("#xpText"), hdr = $("#hdr"), gb = $(".gblur");
 const prog = el => Math.min(Math.max(-el.getBoundingClientRect().top / (el.offsetHeight - innerHeight), 0), 1);
 function onScroll() {
-  // en celular el video queda enmarcado (no se expande); en compu crece hasta ocupar la pantalla
-  const mob = innerWidth < 700, e = mob ? 0 : Math.min(prog(xp) / .7, 1), k = 1 - e, side = Math.max(16, innerWidth * .025);
+  // en celular el video queda enmarcado (no se expande); en compu crece pero conserva un borde
+  const mob = innerWidth < 700, e = mob ? 0 : Math.min(prog(xp) / .7, 1), k = 1 - e * .6, side = Math.max(16, innerWidth * .025);
   frame.style.setProperty("--t", 96 * k + "px"); frame.style.setProperty("--b", side * k + "px");
   frame.style.setProperty("--s", side * k + "px"); frame.style.setProperty("--r", 28 * k + "px");
   txt.style.opacity = Math.max(1 - e * 1.6, 0); txt.style.transform = `translateY(${-e * 70}px)`;
