@@ -127,8 +127,9 @@ addEventListener("pointerup", () => { if (dcX == null) return; dcX = null; dcs.c
 function cardTex(li) {
   const c = document.createElement("canvas"), x = c.getContext("2d"), cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
   const font = getComputedStyle($("h3", li)).fontFamily, P = 54, W = 900, H = 600, n = $(".step-n", li).textContent.trim();
-  // se dibuja al triple de resolución para que el texto se vea nítido en pantallas 3x
-  c.width = W * 3; c.height = H * 3; x.scale(3, 3);
+  // resolución justa para el tamaño en pantalla (más, en celular, se quedaba sin memoria gráfica y se trababa)
+  const k = Math.min(2, Math.max(1, $("#fc").clientHeight * .62 * 1.5 * devicePixelRatio / W));
+  c.width = W * k; c.height = H * k; x.scale(k, k);
   x.fillStyle = v("--card"); x.fillRect(0, 0, W, H);
   const wrapTxt = (s, max) => s.split(/\s+/).reduce((ls, w) => { const t = ls.length ? ls[ls.length - 1] + " " + w : w; if (ls.length && x.measureText(t).width > max) ls.push(w); else ls[ls.length ? ls.length - 1 : 0] = t; return ls; }, []);
   x.font = `400 44px ${font}`; const d = wrapTxt($("p", li).textContent.trim(), W - P * 2);
@@ -142,11 +143,13 @@ function cardTex(li) {
 }
 if (!editMode) new IntersectionObserver(async ([e], io) => {
   if (!e.isIntersecting) return; io.disconnect();
-  const [{ flexCarousel }] = await Promise.all([import("./flexcarousel.js?v=3"), document.fonts.ready]);
+  const [{ flexCarousel }] = await Promise.all([import("./flexcarousel.js?v=4"), document.fonts.ready]);
   const fc = $("#fc"), items = () => $$("li:not([hidden])", dcs).map(cardTex);
   fc.hidden = false;
   const fx = flexCarousel(fc, items(), { cardHeight: .62, gap: 16, radius: 22, captureWheel: false, lensWidth: innerWidth < 700 ? 1.25 : .86, bend: .16, dispersion: .2 }); // en celular la zona plana cubre toda la tarjeta del centro
   if (!fx) { fc.hidden = true; return; }
+  // si el celular igual pierde el WebGL, vuelve la fila normal en vez de quedar trabado
+  fc.querySelector("canvas")?.addEventListener("webglcontextlost", () => { fc.hidden = true; dcs.parentNode.classList.remove("fc-on"); dcFlow(); });
   dcs.parentNode.classList.add("fc-on");
   // textos, idioma, tema o pasos ocultos cambian → se redibujan las tarjetas
   let t; const redo = () => { clearTimeout(t); t = setTimeout(() => fx.setItems(items()), 120); };
