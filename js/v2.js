@@ -102,18 +102,35 @@ function onScroll() {
 addEventListener("scroll", () => requestAnimationFrame(onScroll), { passive: true });
 addEventListener("resize", onScroll);
 
-/* ================= "Lo que resolvemos": scroll stack (cada tarjeta se frena arriba y la siguiente la tapa) ================= */
+/* ================= "Lo que resolvemos": flex carousel ================= */
 const dcs = $("#dcStage");
 function dcFlow() {
-  const cards = $$("li:not([hidden])", dcs), tops = cards.map(li => li.getBoundingClientRect().top);
-  // cada tarjeta que se le apila encima la achica un poco (la siguiente cuenta de a poco mientras sube)
-  cards.forEach((li, i) => {
-    const under = tops.slice(i + 1).reduce((s, t) => s + Math.min(Math.max(1 - (t - tops[i]) / (innerHeight * .5), 0), 1), 0);
-    li.style.transform = `scale(${1 - under * .05})`;
+  const mid = dcs.scrollLeft + dcs.clientWidth / 2, h = dcs.clientWidth / 2;
+  // flex carousel: en el centro quedan planas; cerca de los bordes se doblan hacia adentro, se achican y se desenfocan (vidrio invisible)
+  $$("li:not([hidden])", dcs).forEach(li => {
+    const r = (li.offsetLeft + li.offsetWidth / 2 - mid) / h, e = Math.min(Math.max((Math.abs(r) - .4) / .6, 0), 1);
+    li.style.transformOrigin = r > 0 ? "0 50%" : "100% 50%";
+    li.style.transform = `perspective(900px) rotateY(${-Math.sign(r) * e * 55}deg) scale(${1 - e * .2})`;
+    li.style.filter = e ? `blur(${e * 2.5}px)` : "";
   });
 }
-addEventListener("scroll", () => requestAnimationFrame(dcFlow), { passive: true });
+dcs.addEventListener("scroll", () => requestAnimationFrame(dcFlow), { passive: true });
 addEventListener("resize", dcFlow);
+// con mouse se arrastra (en celular se desliza con el dedo)
+let dcX = null, dcL = 0;
+dcs.addEventListener("pointerdown", e => { if (e.pointerType !== "mouse") return; dcX = e.clientX; dcL = dcs.scrollLeft; dcs.classList.add("drag"); });
+addEventListener("pointermove", e => { if (dcX != null) dcs.scrollLeft = dcL - (e.clientX - dcX); });
+addEventListener("pointerup", () => { if (dcX == null) return; dcX = null; dcs.classList.remove("drag"); });
+
+/* ================= foto de ambiente: se inclina hacia el mouse con un brillo que lo sigue (no se toca) ================= */
+const si = $("#sustImg");
+si.addEventListener("pointermove", e => {
+  if (e.pointerType !== "mouse") return;
+  const r = si.getBoundingClientRect(), px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height;
+  si.classList.add("tilt");
+  Object.entries({ "--rx": (.5 - py) * 24 + "deg", "--ry": (px - .5) * 24 + "deg", "--sc": 1.03, "--gx": px * 100 + "%", "--gy": py * 100 + "%", "--gl": 1 }).forEach(([k, v]) => si.style.setProperty(k, v));
+});
+si.addEventListener("pointerleave", () => { si.classList.remove("tilt"); ["--rx", "--ry", "--sc", "--gl"].forEach(k => si.style.removeProperty(k)); });
 
 /* ================= sonidos suaves (sintetizados, sin archivos); se apagan desde el panel ================= */
 let ac;
@@ -184,8 +201,7 @@ function render() {
   // foto de "Empresa" del panel, o una de los trabajos
   const sw = photos[3], sImg = cfg.aboutImg || (sw && (sw.type === "ba" ? sw.url2 : sw.url));
   $("#sustImg").hidden = !sImg; $("#sust").classList.toggle("solo", !sImg);
-  if (sImg) $("#sustImg").innerHTML = `<div class="flip-in"><div><img src="${esc(cld(sImg, 1000))}" alt="" loading="lazy"></div><div class="flip-b"><img class="logo-d" src="assets/logo-grande.svg" alt=""><img class="logo-l" src="assets/logo-grande-dark.svg" alt=""></div></div>`;
-  $("#sustImg").onclick = e => e.currentTarget.classList.toggle("on");
+  if (sImg) $("#sustImg").innerHTML = `<img src="${esc(cld(sImg, 1000))}" alt="" loading="lazy">`;
   if (cfg.email) { $("#footMail").href = "mailto:" + cfg.email; $("#footMail").textContent = cfg.email; }
   $("#igFab").href = cfg.instagramUrl || `https://instagram.com/${cfg.instagram}`;
   renderLocs(); renderMap(); reveal(); onScroll(); dcFlow();
@@ -391,7 +407,8 @@ async function loadData() {
   const { showLang, showTheme, showKicker } = state.cfg;
   // pasos de "Lo que resolvemos": cada uno se puede ocultar entero desde el panel
   $$("#dcStage li").forEach((li, i) => li.hidden = state.cfg["showP" + (i + 1)] === false);
-  requestAnimationFrame(dcFlow);
+  // arranca en la tarjeta del medio para que la fila llene los dos lados
+  requestAnimationFrame(() => { const c = $$("li:not([hidden])", dcs), m = c[c.length >> 1]; if (m) dcs.scrollLeft = m.offsetLeft + m.offsetWidth / 2 - dcs.clientWidth / 2; dcFlow(); });
   $("#globeBtn").hidden = showLang === false; $("#themeBtn").hidden = showTheme === false;
   // se guardan para ocultar los botones desde el arranque en la próxima visita (sin que aparezcan medio segundo)
   try { localStorage.setItem("opts", JSON.stringify({ showLang, showTheme })); } catch {}
