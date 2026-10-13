@@ -107,8 +107,10 @@ const dcs = $("#dcStage");
 function dcFlow() {
   const mid = dcs.scrollLeft + dcs.clientWidth / 2, h = dcs.clientWidth / 2;
   // flex carousel: en el centro quedan planas; cerca de los bordes se doblan hacia adentro, se achican y se desenfocan (vidrio invisible)
+  // en celular la fila queda plana (la deformación de los costados se veía mal)
+  const flat = innerWidth < 700;
   $$("li:not([hidden])", dcs).forEach(li => {
-    const r = (li.offsetLeft + li.offsetWidth / 2 - mid) / h, e = Math.min(Math.max((Math.abs(r) - .4) / .6, 0), 1);
+    const r = (li.offsetLeft + li.offsetWidth / 2 - mid) / h, e = flat ? 0 : Math.min(Math.max((Math.abs(r) - .4) / .6, 0), 1);
     li.style.transformOrigin = r > 0 ? "0 50%" : "100% 50%";
     li.style.transform = `perspective(900px) rotateY(${-Math.sign(r) * e * 55}deg) scale(${1 - e * .2})`;
     li.style.filter = e ? `blur(${e * 2.5}px)` : "";
@@ -136,7 +138,8 @@ function cardTex(li) {
   if (n) { x.fillStyle = v("--red"); x.font = `700 84px ${font}`; x.fillText(n, P, y - 80 - 16); }
   return { src: c.toDataURL() };
 }
-if (!editMode) new IntersectionObserver(async ([e], io) => {
+// en celular no se usa (deformaba todo): queda la fila plana
+if (!editMode && innerWidth >= 700) new IntersectionObserver(async ([e], io) => {
   if (!e.isIntersecting) return; io.disconnect();
   const [{ flexCarousel }] = await Promise.all([import("./flexcarousel.js?v=1"), document.fonts.ready]);
   const fc = $("#fc"), items = () => $$("li:not([hidden])", dcs).map(cardTex);
@@ -270,7 +273,7 @@ function coverflow() {
   });
 }
 cf.addEventListener("scroll", () => requestAnimationFrame(coverflow), { passive: true });
-addEventListener("resize", coverflow);
+addEventListener("resize", () => { coverflow(); cfGo(0); });
 // deslizar en cualquier parte del mapa (no solo sobre las tarjetas) mueve el carrusel
 const pres = cf.parentNode;
 let sx = null, dragged = false;

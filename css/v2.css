@@ -98,6 +98,8 @@ button{background:none;border:0;cursor:pointer}
 
 #map{position:relative;z-index:0;isolation:isolate;height:min(520px,60vh);border-radius:20px;overflow:hidden;border:1px solid var(--edge);background:var(--card)}
 .pin{width:14px;height:14px;background:#f0a04b;border:2.5px solid #fff;border-radius:50%;cursor:pointer;animation:ping 2s infinite}
+/* zona de toque invisible ~15 veces el área del punto (56px), el punto se ve igual */
+.pin::before{content:"";position:absolute;inset:-21px;border-radius:50%}
 .pin.live{background:#3ddc84}
 .pin.main{background:#ff6b5f}
 @keyframes ping{0%{box-shadow:0 0 0 0 rgba(240,160,75,.6)}100%{box-shadow:0 0 0 16px rgba(240,160,75,0)}}
@@ -277,7 +279,8 @@ html.intro .xp-text .kicker{opacity:0}
 .loc p{color:var(--muted);font-size:14.5px;flex:1}
 @media(min-width:1024px){.pres{min-height:100svh;display:flex;flex-direction:column;justify-content:center;padding:clamp(90px,12vh,120px) 0 clamp(28px,4vh,48px)}.pres-box #map{height:clamp(360px,calc(100svh - 390px),700px)}}
 /* celular: la tarjeta flota sobre el mapa como en compu, una sola a la vez y siempre centrada */
-@media(max-width:700px){.cf{padding:24px calc(50% - min(150px,39vw)) 18px;gap:12px}.loc{flex-basis:min(300px,78vw);scroll-snap-stop:always}}
+/* celular: sin snap (en iOS peleaba con el centrado) y el dedo no lo arrastra (touch-action); solo se mueve por cfGo, una tarjeta por deslizada */
+@media(max-width:700px){.cf{padding:24px calc(50% - min(150px,39vw)) 18px;gap:12px;scroll-snap-type:none}.loc{flex-basis:min(300px,78vw)}}
 
 /* ---------- celular: compacto, sin desbordes, todo centrado al ancho real ---------- */
 html{scroll-padding-top:90px}
