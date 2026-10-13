@@ -323,7 +323,7 @@ cf.addEventListener("scroll", () => follow(), { passive: true });
 /* ================= formulario ================= */
 // slide commit: se arrastra la manija hasta el final para enviar; con teclado, Enter envía directo
 const sc = $("#sc"), scH = $("#scH");
-const scMax = () => sc.clientWidth - scH.offsetWidth - 10;
+const scMax = () => sc.clientWidth - scH.offsetWidth - 2 * scH.offsetLeft;
 const scSet = r => { sc.style.setProperty("--x", r); sc.style.setProperty("--hx", r * scMax() + "px"); };
 let dragX = null;
 scH.addEventListener("pointerdown", e => { if (sc.matches(".busy,.done")) return; dragX = e.clientX; sc.classList.add("drag"); scH.setPointerCapture(e.pointerId); scH.style.transform = ""; });
@@ -332,6 +332,8 @@ scH.addEventListener("pointerup", () => {
   if (dragX == null) return; dragX = null; sc.classList.remove("drag");
   if (+sc.style.getPropertyValue("--x") > .85) { scSet(1); sfx("tick"); $("#leadForm").requestSubmit(); } else scSet(0);
 });
+// si el celular toma el gesto (scroll) la manija vuelve al inicio en vez de quedar trabada a mitad de camino
+scH.addEventListener("pointercancel", () => { if (dragX == null) return; dragX = null; sc.classList.remove("drag"); scSet(0); });
 // un clic de mouse o dedo sin arrastrar no envía; Enter (detail 0) sí
 scH.addEventListener("click", e => { if (e.detail > 0) e.preventDefault(); });
 
