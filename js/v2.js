@@ -252,11 +252,20 @@ pres.addEventListener("pointercancel", () => sx = null);
 pres.addEventListener("pointerup", e => {
   if (sx == null) return;
   const dx = e.clientX - sx; sx = null;
-  if (Math.abs(dx) > 40) cf.scrollBy({ left: -Math.sign(dx) * (($(".loc", cf)?.offsetWidth || 300) + 16), behavior: "smooth" });
+  if (Math.abs(dx) > 40) cfGo(-Math.sign(dx));
 });
+// centra la tarjeta vecina (o la más cercana con step 0) en vez de correr un ancho fijo que en celular quedaba corrido
+function cfGo(step) {
+  const locs = $$(".loc", cf), mid = cf.scrollLeft + cf.clientWidth / 2;
+  if (!locs.length) return;
+  const near = locs.reduce((b, el, i) => Math.abs(el.offsetLeft + el.offsetWidth / 2 - mid) < Math.abs(locs[b].offsetLeft + locs[b].offsetWidth / 2 - mid) ? i : b, 0);
+  const el = locs[Math.max(0, Math.min(locs.length - 1, near + step))];
+  cf.scrollTo({ left: el.offsetLeft + el.offsetWidth / 2 - cf.clientWidth / 2, behavior: "smooth" });
+}
 // un arrastre no cuenta como toque sobre un punto del mapa
 pres.addEventListener("click", e => { if (dragged) { e.stopPropagation(); e.preventDefault(); dragged = false; } }, true);
-pres.addEventListener("wheel", e => { if (Math.abs(e.deltaX) > Math.abs(e.deltaY) && !e.target.closest(".cf")) cf.scrollLeft += e.deltaX; }, { passive: true });
+let wheelT;
+pres.addEventListener("wheel", e => { if (Math.abs(e.deltaX) > Math.abs(e.deltaY) && !e.target.closest(".cf")) { cf.scrollLeft += e.deltaX; clearTimeout(wheelT); wheelT = setTimeout(() => cfGo(0), 150); } }, { passive: true });
 
 /* ================= visor ================= */
 function openLB(w) {

@@ -151,6 +151,7 @@ button{background:none;border:0;cursor:pointer}
 /* gradual blur: el borde de abajo de la pantalla se desenfoca de a poco */
 .gblur{position:fixed;left:0;right:0;bottom:0;height:90px;z-index:40;pointer-events:none}
 .gblur i{position:absolute;inset:0}
+@media(max-width:700px){.gblur{height:36px}}
 .gblur i:nth-child(1){backdrop-filter:blur(1px);-webkit-backdrop-filter:blur(1px);-webkit-mask-image:linear-gradient(transparent,#000 25%);mask-image:linear-gradient(transparent,#000 25%)}
 .gblur i:nth-child(2){backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);-webkit-mask-image:linear-gradient(transparent 25%,#000 50%);mask-image:linear-gradient(transparent 25%,#000 50%)}
 .gblur i:nth-child(3){backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);-webkit-mask-image:linear-gradient(transparent 50%,#000 75%);mask-image:linear-gradient(transparent 50%,#000 75%)}
