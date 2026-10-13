@@ -102,17 +102,17 @@ function onScroll() {
 addEventListener("scroll", () => requestAnimationFrame(onScroll), { passive: true });
 addEventListener("resize", onScroll);
 
-/* ================= "Lo que resolvemos": tarjetas verticales en carrusel con profundidad ================= */
+/* ================= "Lo que resolvemos": tarjetas en arco (circular gallery) ================= */
 const dcs = $("#dcStage");
 function dcFlow() {
   const mid = dcs.scrollLeft + dcs.clientWidth / 2;
   dcs.parentNode.classList.toggle("at-start", dcs.scrollLeft < 20);
   dcs.parentNode.classList.toggle("at-end", dcs.scrollLeft > dcs.scrollWidth - dcs.clientWidth - 20);
-  // la tarjeta del centro adelante; las de los costados giran y se alejan
+  // circular gallery: las tarjetas siguen un arco; R sale para que en el borde bajen ~90px (cabe en el padding de abajo)
+  const W = dcs.clientWidth, R = Math.max(W, W * W / 720);
   $$("li:not([hidden])", dcs).forEach(li => {
-    const d = Math.max(-2, Math.min(2, (li.offsetLeft + li.offsetWidth / 2 - mid) / (li.offsetWidth + 18))), a = Math.abs(d);
-    li.style.transform = `rotateY(${-d * 30}deg) translateZ(${-a * 120}px) scale(${1 - a * .08})`;
-    li.style.opacity = 1 - a * .3;
+    const x = Math.max(-R * .95, Math.min(R * .95, li.offsetLeft + li.offsetWidth / 2 - mid));
+    li.style.transform = `translateY(${R - Math.sqrt(R * R - x * x)}px) rotate(${Math.asin(x / R)}rad)`;
   });
 }
 dcs.addEventListener("scroll", () => requestAnimationFrame(dcFlow), { passive: true });
