@@ -126,7 +126,9 @@ addEventListener("pointerup", () => { if (dcX == null) return; dcX = null; dcs.c
 // Flex Carousel de React Bits (WebGL): cada tarjeta se dibuja como imagen; sin WebGL2 queda la fila de arriba
 function cardTex(li) {
   const c = document.createElement("canvas"), x = c.getContext("2d"), cs = getComputedStyle(document.documentElement), v = k => cs.getPropertyValue(k).trim();
-  const font = getComputedStyle($("h3", li)).fontFamily, P = 54, W = c.width = 900, H = c.height = 600, n = $(".step-n", li).textContent.trim();
+  const font = getComputedStyle($("h3", li)).fontFamily, P = 54, W = 900, H = 600, n = $(".step-n", li).textContent.trim();
+  // se dibuja al doble de resolución para que el texto se vea nítido al achicarse
+  c.width = W * 2; c.height = H * 2; x.scale(2, 2);
   x.fillStyle = v("--card"); x.fillRect(0, 0, W, H);
   const wrapTxt = (s, max) => s.split(/\s+/).reduce((ls, w) => { const t = ls.length ? ls[ls.length - 1] + " " + w : w; if (ls.length && x.measureText(t).width > max) ls.push(w); else ls[ls.length ? ls.length - 1 : 0] = t; return ls; }, []);
   x.font = `400 44px ${font}`; const d = wrapTxt($("p", li).textContent.trim(), W - P * 2);
