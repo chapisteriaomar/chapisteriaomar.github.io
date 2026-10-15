@@ -484,7 +484,6 @@ if (html.classList.contains("intro")) {
   const openIntro = () => {
     if (!html.classList.contains("intro")) return;
     evs.forEach(ev => removeEventListener(ev, openIntro));
-    try { sessionStorage.setItem("intro", "1"); } catch {}
     // la página queda quieta hasta que termina de abrirse, así el mismo scroll no se saltea los textos del video
     // sin un toque/clic/tecla previo el navegador no deja sonar: el soplido espera al primer toque (hasta 5s)
     if (navigator.userActivation && !navigator.userActivation.hasBeenActive) {
