@@ -3,6 +3,8 @@ import { I18N } from "./i18n.js?v=49";
 // Textos originales (los editados desde el panel se guardan en Firestore: site/texts)
 const BASE = JSON.parse(JSON.stringify(I18N));
 function applyTexts(over) { for (const l of Object.keys(BASE)) I18N[l] = { ...BASE[l], ...(over?.[l] || {}) }; }
+// los editados de la visita anterior se muestran de entrada, sin esperar a Firestore
+try { applyTexts(JSON.parse(localStorage.getItem("tx"))); } catch {}
 
 const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`);
@@ -462,7 +464,7 @@ async function loadData() {
   if (showLang === false) state.lang = "es";
   if (showTheme === false) delete document.documentElement.dataset.theme;
   Object.assign(state, { works, ops, clients, reviews });
-  if (txSnap?.exists()) applyTexts(txSnap.data());
+  if (txSnap) { const tx = txSnap.exists() ? txSnap.data() : {}; applyTexts(tx); try { localStorage.setItem("tx", JSON.stringify(tx)); } catch {} }
   applyLang(state.lang); render();
 }
 
@@ -503,6 +505,6 @@ if (html.classList.contains("intro")) {
 $("#yr").textContent = new Date().getFullYear();
 let saved = "es"; try { saved = localStorage.getItem("lang") || (navigator.language?.startsWith("es") ? "es" : "en"); } catch {}
 applyLang(saved); render();
-loadData().catch(er => console.error("Carga de datos:", er)).then(() => editMode
+loadData().catch(er => console.error("Carga de datos:", er)).finally(() => html.classList.remove("tx-wait")).then(() => editMode
   ? import("./editor.js?v=38").then(m => m.initEditor({ state, t, I18N, BASE, applyLang }))
   : checkAdmin());

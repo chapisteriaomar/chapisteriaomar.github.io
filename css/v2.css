@@ -366,6 +366,7 @@ html{scroll-padding-top:90px}
 @media(max-width:600px){.globe{width:36px;height:36px}}
 /* ocultos desde el arranque según las opciones del panel (sin parpadeo) */
 .no-theme #themeBtn,.no-lang #globeBtn{display:none!important}
+html.tx-wait body>:not(.intro-ov){visibility:hidden}
 
 /* "Lo que resolvemos": flex carousel (fila que se dobla en los bordes) */
 .dcards{position:relative;list-style:none;display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;margin-top:28px;padding:20px calc(50% - min(150px,36vw));scrollbar-width:none;cursor:grab;user-select:none}

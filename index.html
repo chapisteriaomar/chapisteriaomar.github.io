@@ -48,11 +48,13 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lenis@1.3.25/dist/lenis.css">
-<link rel="stylesheet" href="css/v2.css?v=72">
+<link rel="stylesheet" href="css/v2.css?v=73">
 <script>if(location.hash==="#admin")location.replace("/admin/");
 try{var d=document.documentElement,th=localStorage.getItem("theme");if(th)d.dataset.theme=th;
 // botones de idioma y tema según el panel (guardado de la visita anterior); sin dato, el de tema espera a la config
 var o=localStorage.getItem("opts");o=o?JSON.parse(o):{showTheme:false};if(o.showTheme===false)d.classList.add("no-theme");if(o.showLang===false)d.classList.add("no-lang");
+// primera visita: sin textos editados guardados, la web espera a bajarlos (máx. 3s) para no mostrar los viejos
+if(!localStorage.getItem("tx")){d.classList.add("tx-wait");setTimeout(function(){d.classList.remove("tx-wait")},3000)}
 // intro con aurora: una vez por visita, nunca en el panel ni en el editor
 if(!sessionStorage.getItem("intro")&&!/edit|admin/.test(location.search+location.hash)&&!matchMedia("(prefers-reduced-motion: reduce)").matches)d.classList.add("intro")}catch(e){}</script>
 </head>
@@ -183,6 +185,6 @@ if(!sessionStorage.getItem("intro")&&!/edit|admin/.test(location.search+location
 <div class="focus-ov" aria-hidden="true"></div>
 <div class="gblur" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
 
-<script type="module" src="js/v2.js?v=73"></script>
+<script type="module" src="js/v2.js?v=74"></script>
 </body>
 </html>
