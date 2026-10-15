@@ -130,6 +130,7 @@ html:not(.intro) .bw{animation:blurIn .9s cubic-bezier(.2,.7,.2,1) both;animatio
 
 /* contacto */
 .contact{display:grid;grid-template-columns:1fr 1.15fr;gap:clamp(32px,5vw,72px);align-items:start}
+.contact.nosub{align-items:center}.contact.nosub .lead{display:none}
 .direct{display:grid;gap:10px;margin-top:32px}
 .direct a{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:18px 22px;border-radius:16px}
 .direct small{color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:.08em}

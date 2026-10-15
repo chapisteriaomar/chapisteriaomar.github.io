@@ -463,6 +463,8 @@ async function loadData() {
   try { localStorage.setItem("opts", JSON.stringify({ showLang, showTheme })); } catch {}
   document.documentElement.classList.toggle("no-lang", showLang === false); document.documentElement.classList.toggle("no-theme", showTheme === false);
   $("#xpText .kicker").hidden = showKicker === false;
+  // sin el texto de contacto, el título queda centrado al lado del formulario
+  $(".contact").classList.toggle("nosub", state.cfg.showCSub === false);
   if (showLang === false) state.lang = "es";
   if (showTheme === false) delete document.documentElement.dataset.theme;
   Object.assign(state, { works, ops, clients, reviews });
