@@ -659,7 +659,7 @@ async function config() {
 /* ================= TEXTOS DE LA WEB ================= */
 // Los originales están en js/i18n.js (BASE, sin modificar); lo editado se guarda en site/texts { es: {clave: texto}, en: {...} }
 let BASE_TX = null;
-async function loadBase() { if (!BASE_TX) BASE_TX = (await import("./i18n.js?v=49&base=1")).I18N; return BASE_TX; }
+async function loadBase() { if (!BASE_TX) BASE_TX = (await import("./i18n.js?v=50&base=1")).I18N; return BASE_TX; }
 async function saveText(lang, key, value) {
   await fs.setDoc(fs.doc(db, "site", "texts"), { [lang]: { [key]: value == null ? fs.deleteField() : value } }, { merge: true });
 }
@@ -678,17 +678,29 @@ const GROUPS = { nav: "Menú", cta: "Botones", hero: "Portada", stat: "Cifras", 
 function texts() {
   $("#vc").innerHTML = `<div class="bar" style="justify-content:space-between;margin-bottom:14px">
       <div class="seg" id="tm"><button data-m="v">Vista de la web</button><button data-m="l">Lista de textos (ES / EN)</button></div>
-      <div class="seg" id="tw"${txMode === "l" ? " hidden" : ""}><button data-w="100%">Compu</button><button data-w="390px">Celular</button></div></div>
+      <div class="seg" id="tw"${txMode === "l" ? " hidden" : ""}><button data-w="100%">Compu</button><button data-w="390px">Celular</button></div>
+      <button class="b sm ghost" id="txPrev">Volver a los textos anteriores</button></div>
     <p style="color:var(--muted);font-size:14px;margin-bottom:12px">${txMode === "v"
       ? "Tocá cualquier texto (o el lápiz rojo) para cambiarlo. Usá ES / EN arriba de la web para editar cada idioma."
       : "Los cambios se guardan solos al salir de cada campo. Vacío = vuelve al texto original."}</p>
     <div id="tb"></div>`;
   $$("#tm button").forEach(b => { b.classList.toggle("on", b.dataset.m === txMode); b.onclick = () => { txMode = b.dataset.m; texts(); }; });
   $$("#tw button").forEach(b => { b.classList.toggle("on", b.dataset.w === txW); b.onclick = () => { txW = b.dataset.w; $$("#tw button").forEach(x => x.classList.toggle("on", x === b)); $("#cmsFrame").style.width = txW; }; });
+  $("#txPrev").onclick = () => txRollback().catch(er => toast(er.message, true));
   if (txMode === "v") {
     $("#tb").innerHTML = `<div style="display:flex;justify-content:center;background:var(--bg2);border:1px solid var(--line);border-radius:10px;overflow:hidden">
       <iframe id="cmsFrame" src="/index.html?edit=1" style="width:${txW};max-width:100%;height:calc(100vh - 230px);min-height:480px;border:0;background:var(--bg)"></iframe></div>`;
   } else txList();
+}
+// Guarda como "editados" los textos de js/i18n-prev.js que cambiaron; los que editaste vos no se tocan
+async function txRollback() {
+  if (!confirm("¿Volver a los textos que tenía la web antes del 15/10? Los que editaste vos quedan igual.")) return;
+  const [base, prev, snap] = await Promise.all([loadBase(), import("./i18n-prev.js?v=1").then(m => m.I18N), fs.getDoc(fs.doc(db, "site", "texts"))]);
+  const over = snap.exists() ? snap.data() : {}, data = {};
+  for (const l of ["es", "en"]) for (const k in prev[l]) if (over[l]?.[k] == null && prev[l][k] !== base[l][k]) (data[l] ||= {})[k] = prev[l][k];
+  if (!Object.keys(data).length) return toast("Ya están los textos anteriores");
+  await fs.setDoc(fs.doc(db, "site", "texts"), data, { merge: true });
+  toast("Textos anteriores restaurados ✓"); texts();
 }
 async function txList() {
   const base = await loadBase();
