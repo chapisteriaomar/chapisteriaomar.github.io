@@ -377,7 +377,7 @@ html.tx-wait body>:not(.intro-ov){visibility:hidden}
 .fc{position:relative;height:clamp(300px,40vw,440px);margin-top:20px;overflow:hidden;cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;overscroll-behavior:contain;outline:none}
 .fc[data-hover=open]{cursor:zoom-in}.fc[data-hover=close]{cursor:zoom-out}.fc[data-dragging]{cursor:grabbing}
 .dcards.drag{cursor:grabbing;scroll-snap-type:none}
-.dcard{flex:0 0 min(300px,72vw);min-height:200px;scroll-snap-align:center;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:24px 26px;display:flex;flex-direction:column;justify-content:flex-end;gap:10px;will-change:transform}
+.dcard{flex:0 0 min(300px,72vw);min-height:200px;scroll-snap-align:center;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:24px 26px;display:flex;flex-direction:column;justify-content:center;gap:10px;will-change:transform}
 .step-n{font:700 40px/.85 var(--body);letter-spacing:-.06em;color:var(--red)}
 .step-n:empty{display:none}
 .dcard h3{font:700 clamp(26px,2.4vw,32px)/1.05 var(--body);letter-spacing:-.03em}

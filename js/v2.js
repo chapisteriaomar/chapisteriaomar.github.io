@@ -136,7 +136,9 @@ function cardTex(li) {
   const wrapTxt = (s, max) => s.split(/\s+/).reduce((ls, w) => { const t = ls.length ? ls[ls.length - 1] + " " + w : w; if (ls.length && x.measureText(t).width > max) ls.push(w); else ls[ls.length ? ls.length - 1 : 0] = t; return ls; }, []);
   x.font = `400 44px ${font}`; const d = wrapTxt($("p", li).textContent.trim(), W - P * 2);
   x.font = `700 76px ${font}`; const t = wrapTxt($("h3", li).textContent.trim(), W - P * 2);
-  let y = H - P - (d.length - 1) * 58;
+  // bloque (número + título + texto) centrado en la altura de la tarjeta
+  const tH = (n ? 96 : 0) + t.length * 80 + (d.length - 1) * 58 + 50; // de línea base a línea base + altura de letras arriba/abajo
+  let y = (H + tH) / 2 - (d.length - 1) * 58;
   x.fillStyle = v("--muted"); x.font = `400 44px ${font}`; d.forEach((l, i) => x.fillText(l, P, y + i * 58));
   y -= 58 + 22 + (t.length - 1) * 80;
   x.fillStyle = v("--text"); x.font = `700 76px ${font}`; t.forEach((l, i) => x.fillText(l, P, y + i * 80));
