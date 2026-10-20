@@ -498,10 +498,21 @@ if (html.classList.contains("intro")) {
     ov.addEventListener("animationend", e => { if (e.target !== ov) return; ov.remove(); html.classList.remove("opening"); lenis?.start(); });
   };
   evs.forEach(ev => addEventListener(ev, openIntro, { passive: true }));
-  // se abre sola apenas termina de cargar la página (o antes si el visitante scrollea / toca)
-  const auto = () => setTimeout(openIntro, 600);
-  document.readyState === "complete" ? auto() : addEventListener("load", auto, { once: true });
-  setTimeout(openIntro, 6000); // por si algo tarda demasiado en cargar
+  // logo trazo por trazo: cada parte por separado (si no, el guion se reparte en todo el path), de izquierda a derecha
+  const logo = $(".intro-logo", ov), g = document.createElementNS(logo.namespaceURI, "g");
+  g.setAttribute("class", "trs");
+  for (const p of $$("path", logo)) for (const d of p.getAttribute("d").split(/(?=M)/)) {
+    const tr = document.createElementNS(logo.namespaceURI, "path");
+    tr.setAttribute("d", d); tr.setAttribute("pathLength", 1); tr.setAttribute("class", "tr " + p.getAttribute("class"));
+    tr.style.setProperty("--d", (parseFloat(d.slice(1)) / 2100 * 900 | 0) + "ms");
+    g.append(tr);
+  }
+  logo.append(g);
+  // se abre sola cuando el logo termina de armarse y la página cargó (o antes si el visitante scrollea / toca)
+  const drawn = calm ? Promise.resolve() : new Promise(r => setTimeout(r, 2500));
+  const loaded = document.readyState === "complete" ? Promise.resolve() : new Promise(r => addEventListener("load", r, { once: true }));
+  Promise.all([drawn, loaded]).then(() => setTimeout(openIntro, calm ? 600 : 0));
+  setTimeout(openIntro, 8000); // por si algo tarda demasiado en cargar
 }
 
 /* ================= init ================= */
