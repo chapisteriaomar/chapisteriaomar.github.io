@@ -1,0 +1,348 @@
+/* Tester de diseño (copia de css/v2.css). Las variables --bg/--text/... también las usa el panel (admin.css) y el editor */
+:root{--bg:#0b0a09;--bg2:#141210;--card:#1c1a17;--line:#2c2925;--line2:#4a463f;--text:#F7F6F3;--ink:#F7F6F3;--muted:#c9c5bd;--dim:#a8a39b;--red:#DD3C33;--red2:#ff5a4f;
+  --disp:"Bricolage Grotesque","Arial Narrow",Arial,sans-serif;--body:"Hanken Grotesk","Helvetica Neue",Arial,sans-serif;--rad:6px;
+  --glass:rgba(255,255,255,.06);--glass2:rgba(255,255,255,.1);--edge:rgba(255,255,255,.12);--blur:blur(18px) saturate(140%);
+  --gut:clamp(20px,4vw,64px);--sy:clamp(72px,9vw,140px);
+  --field:rgba(0,0,0,.25);--foot:rgba(0,0,0,.35);--soft:#d9d5ce;--blob:.22;--logos:grayscale(1) brightness(1.8);--aur:#0b0a09}
+/* modo claro */
+:root[data-theme="light"]{--bg:#F7F6F3;--bg2:#ffffff;--card:#ffffff;--line:#DEDAD5;--line2:#c9c4bd;--text:#23201B;--ink:#23201B;--muted:#716D67;--dim:#9a958e;
+  --glass:rgba(255,255,255,.55);--glass2:rgba(255,255,255,.85);--edge:rgba(35,32,27,.12);--field:rgba(255,255,255,.7);--foot:rgba(255,255,255,.5);--soft:#3d3a35;--blob:.12;--logos:grayscale(1);--aur:#F7F6F3}
+.logo-l{display:none}
+:root[data-theme="light"] .logo-d{display:none}
+:root[data-theme="light"] .logo-l{display:block}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+html.lenis{scroll-behavior:auto}
+/* sin barra de scroll a la derecha (compu y celular); se sigue pudiendo scrollear */
+html{scrollbar-width:none}html::-webkit-scrollbar{display:none}
+body{background:var(--bg);color:var(--ink);font:400 17px/1.6 var(--body);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+/* manchas de luz difusas detrás del vidrio */
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(40% 35% at 15% 30%,rgba(221,60,51,var(--blob)),transparent 70%),radial-gradient(35% 40% at 85% 70%,rgba(221,60,51,calc(var(--blob) * .65)),transparent 70%),radial-gradient(30% 30% at 60% 10%,rgba(255,255,255,.05),transparent 70%)}
+img,video{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+button,input,select,textarea{font:inherit;color:inherit}
+button{background:none;border:0;cursor:pointer}
+[hidden]{display:none!important}
+.wrap{width:100%;max-width:1280px;margin:0 auto;padding:0 var(--gut)}
+.sec{padding:var(--sy) 0}
+.glass{background:var(--glass);border:1px solid var(--edge);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur)}
+.h2{font:700 clamp(36px,4.6vw,68px)/1.02 var(--disp);letter-spacing:-.005em;margin-bottom:24px}
+.lead{font-size:clamp(18px,1.6vw,21px);color:var(--muted);max-width:62ch}
+.link{display:inline-flex;align-items:center;gap:10px;font-weight:600;border-bottom:1.5px solid currentColor;padding-bottom:4px}
+.link::after{content:"→";color:var(--red);transition:transform .2s}
+.link:hover::after{transform:translateX(4px)}
+.btn{display:inline-flex;align-items:center;gap:10px;background:var(--red);color:#fff;font-weight:600;padding:16px 26px;border-radius:999px;transition:background .2s}
+.btn:hover{background:var(--red2)}
+.btn::after{content:"→"}
+.btn:disabled{opacity:.6;pointer-events:none}
+.mag{transition:transform .35s cubic-bezier(.2,.7,.2,1),background .2s}
+:focus-visible{outline:2px solid var(--red);outline-offset:3px}
+.media{position:relative;overflow:hidden;border-radius:var(--rad);background:var(--card)}
+.media>img,.media>video{width:100%;height:100%;object-fit:cover}
+
+/* header de vidrio: logo grande arriba, se achica al entrar al video */
+.hdr{position:fixed;top:14px;left:var(--gut);right:var(--gut);z-index:50;display:flex;justify-content:space-between;align-items:center;padding:10px 10px 10px 20px;border-radius:var(--rad)}
+.logo img{height:calc(34px + 22px * var(--lg,1));width:auto;transition:height .1s linear}
+.hdr-r{display:flex;align-items:center;gap:10px}
+@media(max-width:560px){.logo img{height:calc(28px + 12px * var(--lg,1))}.hdr{padding-left:14px}}
+
+/* hero con scroll expand: el video arranca enmarcado y se agranda pero sigue enmarcado */
+.xp{position:relative;height:230vh}
+.xp-stick{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden}
+.xp-frame{position:absolute;top:var(--t,96px);left:var(--s,20px);right:var(--s,20px);bottom:var(--b,20px);border-radius:var(--rad);overflow:hidden;background:#141210}
+.xp-frame .bg{position:absolute;inset:0}
+.xp-frame .bg>img,.xp-frame .bg>video{width:100%;height:100%;object-fit:cover}
+.xp-frame::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.72),rgba(0,0,0,.2) 65%),linear-gradient(to top,rgba(0,0,0,.55),transparent 45%)}
+.xp-text{position:absolute;left:calc(var(--gut) + 20px);right:var(--gut);bottom:clamp(48px,10vh,110px);z-index:2;max-width:780px}
+.hero-title{font:700 clamp(46px,7vw,104px)/.98 var(--disp);letter-spacing:-.01em}
+.hero-title .l{display:block}
+.hero-title .l2{color:var(--red)}
+.hero-title .l3{font-size:.36em;font-weight:500;letter-spacing:-.01em;color:rgba(255,255,255,.88);margin-top:14px}
+/* blur text: cada palabra entra desenfocada (arranca cuando se abre la intro) */
+.bw{display:inline-block;white-space:pre}
+html:not(.intro) .bw{animation:blurIn .9s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--i) * 70ms + .15s)}html.intro .bw{opacity:0}
+@keyframes blurIn{from{opacity:0;filter:blur(12px);transform:translateY(-.2em)}}
+
+/* método */
+.method{display:grid;grid-template-columns:1fr 1fr;gap:clamp(32px,6vw,96px);align-items:end}
+
+
+
+
+/* trabajos: fotos quietas */
+.dw{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:12px;margin-top:40px}
+.dw .media{aspect-ratio:4/3;cursor:pointer}
+.dw .media img,.dw .media video{transition:transform .6s cubic-bezier(.2,.7,.2,1)}
+.dw .media:hover img{transform:scale(1.06)}
+
+/* logos */
+.logos{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;margin-top:56px}
+.logos>div{height:110px;display:grid;place-items:center;padding:22px;font:600 16px var(--body);color:var(--muted);text-align:center}
+.logos img{max-height:50px;width:auto;filter:var(--logos);opacity:.8;transition:.3s}
+.logos>div:hover img{filter:none;opacity:1}
+
+#map{position:relative;z-index:0;isolation:isolate;height:min(520px,60vh);border-radius:var(--rad);overflow:hidden;border:1px solid var(--edge);background:var(--card)}
+.pin{width:14px;height:14px;background:#f0a04b;border:2.5px solid #fff;border-radius:50%;cursor:pointer}
+/* zona de toque invisible ~15 veces el área del punto (56px), el punto se ve igual */
+.pin::before{content:"";position:absolute;inset:-21px;border-radius:50%}
+.pin.live{background:#3ddc84}
+.pin.main{background:#ff6b5f}
+.maplibregl-popup-content{background:var(--bg2)!important;color:var(--ink);border-radius:var(--rad)!important;font:14px/1.4 var(--body);padding:12px 14px!important;box-shadow:0 10px 30px rgba(0,0,0,.3)!important}
+.form,.loc-f{background:var(--card);border:1px solid var(--edge)}
+.maplibregl-popup-content b{display:block;font-size:16px}
+.maplibregl-popup-tip{border-top-color:var(--bg2)!important;border-bottom-color:var(--bg2)!important}
+.maplibregl-ctrl-attrib{font-size:10px}
+
+/* reseñas */
+.revs{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-top:56px}
+.rev{padding:24px 0 0;border-top:1px solid var(--edge)}
+.rev p{margin-bottom:18px}
+.rev small{color:var(--muted);display:block}
+
+/* ambiente */
+.sust{display:grid;grid-template-columns:1fr 1fr;gap:clamp(32px,6vw,96px);align-items:center}
+.sust.solo{grid-template-columns:1fr;max-width:860px}
+/* como el flip card de React Bits pero sin girar: se inclina hacia el mouse, crece un poco y un brillo sigue al cursor */
+.sust .media{aspect-ratio:1;transform:perspective(1100px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) scale(var(--sc,1));transition:transform .5s cubic-bezier(.2,.7,.2,1);box-shadow:0 20px 50px rgba(0,0,0,.35)}
+.sust .media.tilt{transition:transform .12s linear}
+.sust .media::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at var(--gx,50%) var(--gy,50%),rgba(255,255,255,.24),transparent 55%);opacity:var(--gl,0);transition:opacity .3s;pointer-events:none}
+
+/* contacto */
+.contact{display:grid;grid-template-columns:1fr 1.15fr;gap:clamp(32px,5vw,72px);align-items:start}
+.contact.nosub{align-items:center}.contact.nosub .lead{display:none}
+.direct{display:grid;gap:10px;margin-top:32px}
+.direct a{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:18px 22px;border-radius:16px}
+.direct small{color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:.08em}
+.direct b{overflow-wrap:anywhere;text-align:right}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:30px;border-radius:var(--rad)}
+.form .full{grid-column:1/-1}
+.form input,.form select,.form textarea{width:100%;background:var(--field);border:1px solid var(--edge);border-radius:3px;padding:13px 14px;outline:none;transition:border-color .2s}
+.form input:focus,.form select:focus,.form textarea:focus{border-color:var(--red)}
+
+.form-msg{font-size:14px;min-height:20px}
+.form-msg.ok{color:#3ddc84}.form-msg.err{color:var(--red2)}
+:root:not([data-theme="light"]) .form-msg.err{color:#ff8a80}
+.hp{position:absolute;left:-9999px}
+
+/* footer */
+.foot{padding:72px 0 110px;font-size:15px;color:var(--soft);border-top:1px solid var(--edge);background:var(--foot)}
+.foot-g{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:40px;padding-bottom:48px;border-bottom:1px solid var(--edge)}
+.foot h4{color:var(--ink);font:600 13px var(--body);letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px}
+.foot ul{list-style:none;display:grid;gap:10px}
+.foot img{height:52px;width:auto;margin-bottom:16px}
+.foot-b{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding-top:22px;color:var(--dim);font-size:13px}
+
+/* visor de fotos */
+.lb{position:fixed;inset:0;z-index:70;background:rgba(5,5,5,.94);display:grid;place-items:center;padding:60px 20px}
+.lb img,.lb video{max-width:100%;max-height:84vh;border-radius:var(--rad)}
+.lb-x{position:absolute;top:16px;right:22px;font-size:40px;line-height:1;color:#fff}
+
+
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+@media(max-width:900px){.method,.sust,.contact,.foot-g{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.form{grid-template-columns:1fr}}
+
+/* dentro del editor de textos del panel */
+.cms .hdr{position:absolute}
+
+/* texto del video: siempre claro, también en modo claro */
+.xp-text{color:#fff}
+
+/* botón de tema */
+.theme{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:var(--muted)}
+.theme:hover{color:var(--ink)}
+.theme svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.theme .i-sun,:root[data-theme="light"] .theme .i-moon{display:none}
+:root[data-theme="light"] .theme .i-sun{display:block}
+
+/* barra de arriba: se va llenando al bajar; 100% al llegar a Contacto */
+.hdr::before{content:"";position:absolute;inset:-10px 0;z-index:-1;pointer-events:none;transform:scaleX(var(--pg,0));transform-origin:left;background:linear-gradient(90deg,transparent,rgba(221,60,51,.07) 70%,rgba(221,60,51,.2));filter:blur(8px);transition:transform .2s linear}
+
+/* intro: aurora suave; al scrollear se abre la web desde el medio */
+@property --hole{syntax:"<length-percentage>";inherits:false;initial-value:0%}
+.intro-ov{display:none}
+html.intro,html.intro body,html.opening,html.opening body{overflow:hidden}
+html.intro .intro-ov,.intro-ov.out{display:grid;position:fixed;inset:0;z-index:120;place-items:center;align-content:center;gap:28px;background:var(--aur);overflow:hidden}
+.intro-ov.out{pointer-events:none;-webkit-mask:radial-gradient(circle at 50% 50%,transparent var(--hole),#000 calc(var(--hole) + 22%));mask:radial-gradient(circle at 50% 50%,transparent var(--hole),#000 calc(var(--hole) + 22%));animation:open 1.1s cubic-bezier(.7,0,.2,1) forwards}
+@keyframes open{to{--hole:150%;filter:blur(14px)}}
+/* logo: se dibuja trazo por trazo (izq. a der.), se rellena, y al abrirse la web crece y se disuelve */
+.intro-logo{position:relative;width:min(340px,64vw);overflow:visible;transition:transform 1.1s cubic-bezier(.7,0,.2,1),opacity .9s ease}
+.intro-logo .lr{fill:#DD3C33;stroke:#DD3C33}.intro-logo .lw{fill:#fff;stroke:#fff}
+:root[data-theme="light"] .intro-logo .lw{fill:#111113;stroke:#111113}
+.intro-logo .tr{fill:none;stroke-width:1.4;vector-effect:non-scaling-stroke;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;animation:draw .9s var(--d) cubic-bezier(.65,0,.35,1) forwards,fadeOut .5s 2.2s forwards}
+.intro-logo>.lr,.intro-logo>.lw{fill-opacity:0;stroke:none}.intro-logo:has(.trs)>.lr,.intro-logo:has(.trs)>.lw{animation:fillIn .7s 1.7s ease forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes fillIn{to{fill-opacity:1}}
+@keyframes fadeOut{to{opacity:0}}
+.intro-ov.out .intro-logo{transform:scale(2.2);opacity:0}
+@media(prefers-reduced-motion:reduce){.intro-logo .tr{display:none}.intro-logo>.lr,.intro-logo>.lw{animation:none;fill-opacity:1}.intro-ov.out .intro-logo{transform:none}}
+.aur{position:absolute;inset:-20%;filter:blur(70px) saturate(130%)}
+.aur i{position:absolute;border-radius:50%;opacity:.55;animation:drift 14s ease-in-out infinite alternate}
+.aur i:nth-child(1){width:55vmax;height:30vmax;left:5%;top:20%;background:#DD3C33}
+.aur i:nth-child(2){width:45vmax;height:26vmax;right:0;top:40%;background:#ff8a5c;animation-duration:18s;animation-delay:-4s}
+.aur i:nth-child(3){width:40vmax;height:22vmax;left:30%;bottom:5%;background:#7a1f1a;animation-duration:16s;animation-delay:-8s}
+.aur i:nth-child(4){width:30vmax;height:18vmax;left:40%;top:5%;background:#f3e6dc;opacity:.25;animation-duration:20s}
+@keyframes drift{to{transform:translate(8vw,-6vh) rotate(25deg) scale(1.15)}}
+/* la web llega desenfocada y se aclara mientras se abre la intro */
+html.intro .xp-stick,html.intro .hdr{filter:blur(18px);transform:scale(1.03)}
+.xp-stick,.hdr{transition:filter 1.1s ease,transform 1.1s ease}
+
+/* formulario: etiquetas flotantes */
+.fl{position:relative;display:block}
+.fl input,.fl textarea{padding:22px 14px 8px}
+.fl>span{position:absolute;left:15px;top:16px;font-size:15px;color:var(--muted);pointer-events:none;transition:.2s;margin:0}
+.fl>span i{font-style:normal}
+.fl :is(input,textarea):focus+span,.fl :is(input,textarea):not(:placeholder-shown)+span{top:7px;font-size:11.5px;letter-spacing:.04em}
+.fl :is(input,textarea):user-invalid{border-color:var(--red2)}
+.fl:has(:is(input,textarea):valid:not(:placeholder-shown))::after{content:"✓";position:absolute;right:14px;top:15px;color:#3ddc84;font-weight:700}
+
+/* slide commit: deslizar para enviar → gira mientras envía → se convierte en "enviada" */
+.sc{position:relative;height:60px;border-radius:999px;background:var(--field);border:1px solid var(--edge);overflow:hidden;user-select:none;touch-action:pan-y;transition:background .4s,border-color .4s}
+.sc-fill{position:absolute;inset:0;border-radius:inherit;background:linear-gradient(90deg,rgba(221,60,51,.15),rgba(221,60,51,.35));transform:scaleX(var(--x,0));transform-origin:left}
+.sc-txt{position:absolute;inset:0;display:grid;place-items:center;font-weight:600;color:var(--muted);opacity:calc(1 - var(--x,0) * 3)}
+.sc-h{position:absolute;top:5px;left:5px;width:50px;height:50px;border-radius:50%;background:var(--red);color:#fff;display:grid;place-items:center;transform:translateX(var(--hx,0px));cursor:grab;touch-action:none;-webkit-tap-highlight-color:transparent;transition:transform .35s cubic-bezier(.2,.7,.2,1)}
+.sc.drag .sc-h{transition:none;cursor:grabbing}
+.sc-h svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.sc-spin{display:none;width:20px;height:20px;border-radius:50%;border:2.4px solid rgba(255,255,255,.35);border-top-color:#fff;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.sc.busy .sc-arr{display:none}.sc.busy .sc-spin{display:block}
+.sc-done{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:10px;color:#fff;opacity:0;transform:scale(.9);transition:opacity .4s .15s,transform .5s .15s cubic-bezier(.2,.7,.2,1)}
+.sc-done svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:24;stroke-dashoffset:24;transition:stroke-dashoffset .5s .45s}
+.sc.done{background:#2e9d5b;border-color:#2e9d5b}
+.sc.done .sc-h,.sc.done .sc-txt,.sc.done .sc-fill{opacity:0;transition:opacity .2s}
+.sc.done .sc-done{opacity:1;transform:none}
+.sc.done .sc-done svg{stroke-dashoffset:0}
+
+
+/* botón de arriba: quieto, con brillo y marco de foco; el resto de la web se desenfoca */
+.cta-top{position:relative;box-shadow:0 0 0 rgba(221,60,51,0);transition:box-shadow .35s,background .2s}
+.cta-top::before{content:"";position:absolute;inset:-6px;border-radius:inherit;pointer-events:none;opacity:0;transform:scale(1.08);transition:opacity .3s,transform .35s cubic-bezier(.2,.7,.2,1);
+  background:linear-gradient(var(--red),var(--red)) 0 0/12px 2px,linear-gradient(var(--red),var(--red)) 0 0/2px 12px,linear-gradient(var(--red),var(--red)) 100% 0/12px 2px,linear-gradient(var(--red),var(--red)) 100% 0/2px 12px,
+    linear-gradient(var(--red),var(--red)) 0 100%/12px 2px,linear-gradient(var(--red),var(--red)) 0 100%/2px 12px,linear-gradient(var(--red),var(--red)) 100% 100%/12px 2px,linear-gradient(var(--red),var(--red)) 100% 100%/2px 12px;background-repeat:no-repeat}
+.cta-top:hover,.cta-top:focus-visible{box-shadow:0 0 28px rgba(221,60,51,.55)}
+.cta-top:hover::before,.cta-top:focus-visible::before{opacity:1;transform:none}
+.hdr{overflow:visible}
+.hdr::before{clip-path:inset(10px 0 round var(--rad))}
+
+
+
+
+/* presencia: mapa + tarjetas en una sola pantalla; las tarjetas flotan sobre el mapa en carrusel con profundidad */
+.pres-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px 48px;flex-wrap:wrap;margin-bottom:28px}
+.pres-head .h2{margin:0}
+.pres-head .lead{max-width:42ch;font-size:17px}
+.pres-box{position:relative;border-radius:var(--rad);overflow:hidden;border:1px solid var(--edge)}
+.pres-box #map{height:clamp(420px,62vh,640px);border:0;border-radius:0}
+.pres-box::after{content:"";position:absolute;left:0;right:0;bottom:0;height:46%;pointer-events:none;background:linear-gradient(transparent,color-mix(in srgb,var(--bg) 85%,transparent))}
+.cf{position:absolute;left:0;right:0;bottom:0;z-index:2;display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;padding:30px calc(50% - 150px) 22px;perspective:1100px;scrollbar-width:none}
+.cf::-webkit-scrollbar{display:none}
+.loc{flex:0 0 300px;scroll-snap-align:center;color:inherit;font:inherit;text-align:left;background:none;border:0;padding:0;will-change:transform}
+.loc-in{height:100%}
+.loc-f{display:flex;flex-direction:column;gap:6px;height:100%;padding:20px 22px;border-radius:var(--rad);backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.loc-tag{display:inline-flex;align-items:center;gap:8px;font:600 11.5px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--c,var(--red))}
+.loc-tag i{width:8px;height:8px;border-radius:50%;background:currentColor}
+.loc.main{--c:#ff6b5f}
+.loc.live{--c:#3ddc84}
+.loc.past{--c:#f0a04b}
+:root:not([data-theme="light"]) .loc.main{--c:#ff8a80}
+.loc h3{font:700 22px/1.1 var(--disp);letter-spacing:-.015em}
+.loc p{color:var(--muted);font-size:14.5px;flex:1}
+@media(min-width:1024px){.pres{min-height:100svh;display:flex;flex-direction:column;justify-content:center;padding:clamp(90px,12vh,120px) 0 clamp(28px,4vh,48px)}.pres-box #map{height:clamp(360px,calc(100svh - 390px),700px)}}
+/* celular: la tarjeta flota sobre el mapa como en compu, una sola a la vez y siempre centrada */
+/* celular: sin snap (en iOS peleaba con el centrado) y el dedo no lo arrastra (touch-action); solo se mueve por cfGo, una tarjeta por deslizada */
+@media(max-width:700px){.cf{padding:24px calc(50% - min(150px,39vw)) 18px;gap:12px;scroll-snap-type:none}.loc{flex-basis:min(300px,78vw)}}
+
+/* ---------- celular: compacto, sin desbordes, todo centrado al ancho real ---------- */
+html{scroll-padding-top:90px}
+@media(max-width:600px){
+  :root{--gut:18px;--sy:64px}
+  .hdr{top:10px;padding:7px 7px 7px 14px}
+  .theme{width:36px;height:36px}
+  .xp-text{left:calc(var(--gut) + 14px);right:calc(var(--gut) + 14px);bottom:clamp(36px,8svh,72px)}
+  .hero-title{font-size:clamp(40px,12.5vw,60px)}
+  .h2{font-size:clamp(30px,8.6vw,40px);margin-bottom:16px}
+  .lead{font-size:16.5px}
+  .direct a{flex-direction:column;align-items:flex-start;gap:4px;padding:14px 18px}
+  .direct b{text-align:left;font-size:15.5px}
+  .form{padding:18px;gap:10px}
+  
+  .sc{height:54px}.sc-h{top:4px;left:4px;width:44px;height:44px}
+  .foot{padding-top:48px}.foot-g{gap:24px}
+  .pres-head{margin-bottom:18px}
+}
+@media(max-height:560px) and (orientation:landscape){.xp{height:200vh}.hero-title{font-size:clamp(34px,7vh,56px)}}
+
+/* botón flotante de Instagram, siempre abajo a la derecha */
+
+/* flechas del carrusel de ubicaciones: solo indican que se puede deslizar (no se tocan) */
+.cf-hint svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.cf-hint.l{left:4px}.cf-hint.r{right:4px}
+.at-start .cf-hint.l,.at-end .cf-hint.r{opacity:0}
+@media(prefers-reduced-motion:no-preference){.cf-hint.l svg{animation:nudgeL 1.6s ease-in-out infinite}.cf-hint.r svg{animation:nudgeR 1.6s ease-in-out infinite}}
+@keyframes nudgeL{50%{transform:translateX(-4px)}}
+@keyframes nudgeR{50%{transform:translateX(4px)}}
+.cf-hint{position:absolute;top:var(--cfy,70%);transform:translateY(-50%);z-index:3;width:30px;height:44px;display:grid;place-items:center;pointer-events:none;color:rgba(255,255,255,.55);transition:opacity .3s}
+.cf-hint svg{filter:drop-shadow(0 1px 3px rgba(0,0,0,.6))}
+
+/* créditos del mapa (obligatorios por la licencia de OpenStreetMap): chicos y oscuros en vez del recuadro blanco */
+.maplibregl-ctrl-attrib,.maplibregl-ctrl-attrib.maplibregl-compact{background:transparent!important;color:rgba(255,255,255,.3)!important;font-size:9px!important}
+.maplibregl-ctrl-attrib a{color:inherit!important}
+.maplibregl-ctrl-attrib-button{filter:invert(1);opacity:.25}
+:root[data-theme="light"] .maplibregl-ctrl-attrib{color:rgba(0,0,0,.35)!important}
+:root[data-theme="light"] .maplibregl-ctrl-attrib-button{filter:none}
+
+/* pie: solo logo, frase y derechos */
+.foot-g{grid-template-columns:1fr}
+/* WhatsApp y email al final del formulario */
+.form .direct{margin-top:4px}
+
+@media(max-width:700px){
+  .xp{height:100svh}
+}
+.foot-mail{display:inline-block;margin-top:6px;color:var(--muted);font-size:14px}.foot-mail:hover{color:var(--ink)}
+
+/* Instagram en la barra de arriba (mismo efecto que "Solicitar cotización") */
+.ig-top{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:var(--ink)}
+.ig-top svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.9}
+/* idioma ES / EN flotando abajo a la derecha */
+@media(max-width:600px){.ig-top{width:36px;height:36px}}
+
+/* botón de deslizar: el texto se centra en el espacio libre a la derecha de la manija */
+.sc-txt{padding-left:56px}
+
+/* con el dedo el carrusel no se arrastra libre: cada deslizada (en mapa o tarjetas) pasa exactamente una tarjeta */
+.pres-box #map,.pres-box .cf{touch-action:pan-y}
+.form textarea{resize:none}
+
+/* los textos editados respetan los saltos de línea que se escriben en el editor */
+[data-i18n]{white-space:pre-line}
+
+/* globo de idioma: solo en celular, al lado de Instagram (ahí no va "Cotizar" ni el ES/EN de abajo) */
+
+/* botón de idioma (ícono de traducción), alterna ES / EN */
+.globe{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:var(--ink)}
+.globe svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+@media(max-width:600px){.globe{width:36px;height:36px}}
+/* ocultos desde el arranque según las opciones del panel (sin parpadeo) */
+.no-theme #themeBtn,.no-lang #globeBtn{display:none!important}
+html.tx-wait body>:not(.intro-ov){visibility:hidden}
+
+/* "Lo que resolvemos": flex carousel (fila que se dobla en los bordes) */
+.dcards{position:relative;list-style:none;display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;margin-top:28px;padding:20px calc(50% - min(150px,36vw));scrollbar-width:none;cursor:grab;user-select:none}
+.dcards::-webkit-scrollbar{display:none}
+/* con WebGL las tarjetas se dibujan en el Flex Carousel; la lista queda solo para lectores de pantalla */
+.fc-on .dcards{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);padding:0;margin:0}
+#operativo{padding-bottom:0}
+.fc{position:relative;height:clamp(300px,40vw,440px);margin-top:20px;overflow:hidden;cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;overscroll-behavior:contain;outline:none}
+.fc[data-hover=open]{cursor:zoom-in}.fc[data-hover=close]{cursor:zoom-out}.fc[data-dragging]{cursor:grabbing}
+.dcards.drag{cursor:grabbing;scroll-snap-type:none}
+.dcard{flex:0 0 min(300px,72vw);min-height:200px;scroll-snap-align:center;background:var(--card);border:1px solid var(--line);border-radius:var(--rad);padding:24px 26px;display:flex;flex-direction:column;justify-content:center;gap:10px;will-change:transform}
+.step-n{font:700 40px/.85 var(--disp);letter-spacing:-.06em;color:var(--red)}
+.step-n:empty{display:none}
+.dcard h3{font:700 clamp(26px,2.4vw,32px)/1.05 var(--disp);letter-spacing:-.02em}
+.dcard p{color:var(--muted);font-size:15.5px}
+/* idioma e Instagram del mismo alto que el logo (y se achican con él al bajar) */
+.hdr .globe,.hdr .ig-top{width:calc(34px + 22px * var(--lg,1));height:calc(34px + 22px * var(--lg,1));transition:width .1s linear,height .1s linear}
+.hdr .ig-top svg{width:46%;height:46%}
+.hdr .globe svg{width:70%;height:70%}
+@media(max-width:560px){.hdr .globe,.hdr .ig-top{width:calc(28px + 12px * var(--lg,1));height:calc(28px + 12px * var(--lg,1))}}
