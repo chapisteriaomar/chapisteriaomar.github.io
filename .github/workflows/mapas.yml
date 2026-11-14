@@ -1,0 +1,23 @@
+name: Links del taller (mapN) con la dirección
+# Se corre desde Desabollito (Operativo → Mensajes al cliente → «Actualizar vista previa») o al cambiar la plantilla
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [".github/workflows/mapas.yml", ".github/scripts/mapas.mjs", "map-plantilla.html"]
+permissions:
+  contents: write
+concurrency: { group: mapas, cancel-in-progress: false }
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: node .github/scripts/mapas.mjs
+      - run: |
+          git add -A map*
+          git diff --cached --quiet && exit 0
+          git -c user.name="desabollito-bot" -c user.email="bot@desabollito.com" commit -qm "Links del taller"
+          git pull -q --rebase origin main && git push -q origin main
